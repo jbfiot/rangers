@@ -4,7 +4,9 @@ Je crée cette page afin de ne pas trop interférer avec l'organisation du group
 N'oubliez pas de vous inscrire au flux Atom du projet ! Rajoutez http://code.google.com/feeds/p/rangers/updates/basic dans un lecteur de flux, comme Google Reader, Outlook, Thunderbird, ou un "live bookmark" de Firefox.
 
 ===Liens===
-http://nopaste.com/ : bien pratique pour partager des bouts de code
+ * http://nopaste.com/ : bien pratique pour partager des bouts de code
+ * vlfeat: http://vlfeat.org/ Contient entre autres une implémentations de SIFT, MSER (Maximally Stable Extremal Regions) et k-means.
+ * color SIFT http://staff.science.uva.nl/~mark/downloads.html#colorsift : SIFT avec invariance à la couleur, ce qui est bon.
 
 ===Bibliographie===
 J'ai uploadé dans l'onglet _Downloads_ quelques articles :
