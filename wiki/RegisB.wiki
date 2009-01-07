@@ -1,5 +1,8 @@
 Je crée cette page afin de ne pas trop interférer avec l'organisation du groupe. N'hésitez pas à en recopier le contenu pour le mettre à un endroit plus judicieux.
 
+===Mises à jour===
+N'oubliez pas de vous inscrire au flux Atom du projet ! Rajoutez http://code.google.com/feeds/p/rangers/updates/basic dans un lecteur de flux, comme Google Reader, Outlook, Thunderbird, ou un "live bookmark" de Firefox.
+
 ===Bibliographie===
 J'ai uploadé dans l'onglet _Downloads_ quelques articles :
  * SIFT (Lowe 2004)
