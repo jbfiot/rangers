@@ -1,0 +1,22 @@
+#summary Organisation.
+
+= Organisation=
+
+== Constitution de la base d'images ==
+  * Youness
+  * Erica
+
+
+== Construction de l'arbre de régions ==
+  * Jean-Baptiste
+  * Rémi
+
+== GUI ==
+  * Nicolas
+  * Guillaume
+  * Gabriel
+
+== Serveur ==
+  * Blandine
+  * Louis
+  * Oussama
