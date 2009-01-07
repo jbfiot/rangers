@@ -1,0 +1,10 @@
+Je crée cette page afin de ne pas trop interférer avec l'organisation du groupe.
+
+===Bibliographie===
+J'ai uploadé dans l'onglet _Downloads_ quelques articles :
+ * SIFT (Lowe 2004)
+ * comparaisons de divers détecteurs (Mikolajczyk 2004)
+ * description des vp-tree (Yianilos 1993)
+
+===Subversion===
+Je suggère que les fichier source de chaque sous-projet soient contenu dans des sous-répertoires afin que chaque membre n'aient à mettre à jour (_checkout_) que les fichiers contenus dans un répertoire. Pas la peine que tout le monde télécharge les mises à jour de tous les sous-projets en même temps.
