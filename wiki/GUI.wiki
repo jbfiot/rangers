@@ -1,0 +1,25 @@
+#summary GUI.
+#labels GUI,idées
+
+= GUI =
+
+== Idées ==
+  * On donne à l'utilisateur la possibilité de faire une recherche avec un nombre quelconque de contraintes
+  * Une contrainte est : on veut qch qui ressemble à telle zone dans telle partie de l'image
+
+== Point de vue utilisateur final ==
+  # L'utilisateur selectionne une image dans la base ou en parcourant son disque par exemple.
+  # Il choisit une zone dans l'image ([http://arthur.robots.ox.ac.uk:8080/search/?id=oxc1_hertford_000011 exemple]).
+  # Il définit la zone où il veut cette selection.
+    * Toute l'image
+    * Zone prédéfinie (haut/bas/en haut à droite/ etc)
+    * Selection manuelle 
+  # Il ajoute la contrainte.
+  # Il rajoute autant de contrainte qu'il veut jusqu'a avoir sa query complete.
+  # Il lance la recherche et admire les resultats ;)
+
+
+
+== Visualisation des résultats =
+
+ ** On peut s'inspirer du [http://arthur.robots.ox.ac.uk:8080/dosearch/?id=oxc1_hertford_000011&x1=73&y1=23&x2=531&y2=361&width_on_page=600&height_on_page=800&use_qe=false moteur d'Oxford] 
