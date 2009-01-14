@@ -1,0 +1,18 @@
+#summary Conventions pour le preprocessing.
+#labels preprocessing,conventions,fichier,descripteurs
+
+= Preprocessing =
+
+L'étape de préprocessing consiste en un algo qui prend en entrée des images et stocke sur disque les descripteurs des points d'interet de ces images :
+
+Image -> Points d'interet (Harris) -> Descripteurs (SIFT p ex) de ces points d'interets -> Fichier sur disque.
+
+*1 image <=> 1 fichier de descripteurs*
+
+On peut garder le meme nom et changer l'extension en .features :
+*Nom_de_l'image.jpg <=> Nom_de_l'image.features*
+
+= Conventions pour le fichier de descripteurs =
+
+  * *Ligne 1 :* chemin et dimensions de l'image : *path/to/image,dim_x*dim_y* 
+  * *Liges suivantes :* coordonnées du point puis descripteur : si on utilise SIFT : *x,y,x1,...,x128*
