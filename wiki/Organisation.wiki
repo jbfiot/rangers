@@ -19,4 +19,3 @@
 == Serveur ==
   * Blandine
   * Louis
-  * Oussama
