@@ -16,7 +16,7 @@ Todos:
 == Construction de l'arbre de régions ==
   * Jean-Baptiste
   * Rémi
-  * Blandine (1/2)
+  * Blandine
 Todos:
   * Sélection aléatoire de régions
   * K-Means sur ces régions (choix du K?)
@@ -31,12 +31,9 @@ Todos:
 
 
 == Serveur ==
-  * Blandine (1/2)
   * Louis
   * Gabriel
 Todos:
   * Gestion de la communication dans les deux sens (réseau, sockets...)
   * Recherche dans l'arbre (ajouter des méthodes dans le code de l'arbre)
-
-
 
