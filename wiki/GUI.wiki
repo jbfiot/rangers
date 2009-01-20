@@ -27,3 +27,4 @@
 == Installation Qt 4.4 ==
 http://doc.trolltech.com/4.4/install-win.html
 http://doc.trolltech.com/4.4/requirements-win.html
+Problème fatal error truc machin résolue : http://lists.trolltech.com/qt-interest/2007-01/msg00560.html
