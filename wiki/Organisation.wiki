@@ -7,7 +7,7 @@
   * Youness
   * Erica
 Todos:
-  - Téléchargement d'images (APIs Flicker, ...)
+  * Téléchargement d'images (APIs Flicker, ...)
   * Détection points d'interet
   * Archivage dans fichiers ([Préprocessing http://code.google.com/p/rangers/wiki/Preprocessing] )
 
