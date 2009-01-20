@@ -1,5 +1,6 @@
-#summary Conventions pour le preprocessing.
 #labels preprocessing,conventions,fichier,descripteurs
+
+#summary Conventions pour le preprocessing.
 
 = Preprocessing =
 
@@ -14,7 +15,7 @@ On peut garder le meme nom et changer l'extension en .features :
 
 = Conventions pour les fichiers de descripteurs =
 
-  * *Ligne 1 :* chemin et dimensions de l'image : *path/to/image,dim_x*dim_y* 
+  * *Ligne 1 :* chemin et dimensions de l'image et tags : *path/to/image,dim_x,dim_y,tags*
   * *Liges suivantes :* coordonnées du point puis descripteur : si on utilise SIFT : *x,y,x1,...,x128*
 
 = Fichier bibliothèque de descripeurs = 
