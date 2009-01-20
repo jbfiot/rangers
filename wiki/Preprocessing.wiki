@@ -20,4 +20,5 @@ On peut garder le meme nom et changer l'extension en .features :
 = Fichier bibliothèque de descripeurs = 
 
 ID d'un descripteur = Numero de ligne dans le fichier bibliothèque
+
 1 Ligne : /chemin/de/l/image, numero dans le fichier de descripteur correspondant.
