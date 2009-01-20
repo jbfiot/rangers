@@ -26,3 +26,4 @@
 
 == Installation Qt 4.4 ==
 http://doc.trolltech.com/4.4/install-win.html
+http://doc.trolltech.com/4.4/requirements-win.html
