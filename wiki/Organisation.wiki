@@ -14,8 +14,8 @@
 == GUI ==
   * Nicolas
   * Guillaume
-  * Gabriel
 
 == Serveur ==
   * Blandine
   * Louis
+  * Gabriel
