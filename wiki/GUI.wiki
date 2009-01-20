@@ -23,3 +23,6 @@
 == Visualisation des résultats =
 
  ** On peut s'inspirer du [http://arthur.robots.ox.ac.uk:8080/dosearch/?id=oxc1_hertford_000011&x1=73&y1=23&x2=531&y2=361&width_on_page=600&height_on_page=800&use_qe=false moteur d'Oxford] 
+
+== Installation Qt 4.4 ==
+http://doc.trolltech.com/4.4/install-win.html
