@@ -13,6 +13,30 @@ using namespace std;
 
 
 
+template <typename T>
+void display(T sift)
+{
+	for (int i=0; i<sift.size();++i)
+	{
+		cout << sift[i] << " ";
+	}
+	cout << endl;
+}
+
+//void display(std::vector<std::string> &sift)
+//{
+//	for (int i=0; i<sift.size(); ++i)
+//	{
+//		cout << sift[i] << endl;
+//	}
+//}
+
+
+
+
+
+
+
 Desc SiftSet::operator ()(double index)
 {
 	return (this)->get_descriptor(index);
@@ -36,58 +60,58 @@ SiftSet::SiftSet(char *name_base, char *name_sifts)
 	compte_lignes();
 }
 
-
-/**
-* Calcule la distance entre deux sifts
-**/
-double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift2)
-{
-	double dist = 0;;
-	for (int i=0; i<sift1.size(); ++i)
-	{
-		dist += (sift1[i] - sift2[i])*(sift1[i] - sift2[i]);
-	}
-	return dist;
-}
-
-/**
-* Ajoute un sift à un autre
-**/
-void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correction)
-{
-	for (int i=0; i<a_modif.size(); ++i)
-	{
-		a_modif[i] += correction[i];
-	}
-
-}
-
-
-/**
-* Divise un sift par un entier
-**/
-void SiftSet::divise(std::vector<double> &a_modif, double n)
-{
-	for (int i=0; i<a_modif.size(); ++i)
-	{
-		a_modif[i] /= n;
-	}
-
-}
-
-
-/**
-* Met à 0 tous les coeffs du SIFT
-**/
-template <typename T>
-void SiftSet::reset(std::vector<T> &a_modif)
-{
-	for (int i=0; i<a_modif.size(); ++i)
-	{
-		a_modif[i] = 0;
-	}
-
-}
+//
+///**
+//* Calcule la distance entre deux sifts
+//**/
+//double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift2)
+//{
+//	double dist = 0;;
+//	for (int i=0; i<sift1.size(); ++i)
+//	{
+//		dist += (sift1[i] - sift2[i])*(sift1[i] - sift2[i]);
+//	}
+//	return dist;
+//}
+//
+///**
+//* Ajoute un sift à un autre
+//**/
+//void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correction)
+//{
+//	for (int i=0; i<a_modif.size(); ++i)
+//	{
+//		a_modif[i] += correction[i];
+//	}
+//
+//}
+//
+//
+///**
+//* Divise un sift par un entier
+//**/
+//void SiftSet::divise(std::vector<double> &a_modif, double n)
+//{
+//	for (int i=0; i<a_modif.size(); ++i)
+//	{
+//		a_modif[i] /= n;
+//	}
+//
+//}
+//
+//
+///**
+//* Met à 0 tous les coeffs du SIFT
+//**/
+//template <typename T>
+//void SiftSet::reset(std::vector<T> &a_modif)
+//{
+//	for (int i=0; i<a_modif.size(); ++i)
+//	{
+//		a_modif[i] = 0;
+//	}
+//
+//}
 
 
 /**
@@ -167,10 +191,10 @@ Desc SiftSet::begin()
 	//Récupération ds coordonnées du SIFT
 	int center_x, center_y;
 
+	sift.position.resize(2);
+	sift.coeffs.resize(128);
+
 	fichier_sift >> sift.position[0] >> sift.position[1];
-
-	sift.resize(128);
-
 	for (int i=0; i<128; ++i)
 		fichier_sift >> sift.coeffs[i];
 
@@ -223,9 +247,10 @@ Desc SiftSet::next()
 	//Récupération ds coordonnées du SIFT
 	int center_x, center_y;
 
-	fichier_sift >> sift.position[0] >> sift.position[1];
+	sift.coeffs.resize(128);
+	sift.position.resize(2);
 
-	//sift.resize(128);
+	fichier_sift >> sift.position[0] >> sift.position[1];
 
 	for (int i=0; i<128; ++i)
 		fichier_sift >> sift.coeffs[i];
@@ -278,9 +303,9 @@ Desc SiftSet::get_descriptor(double index) const
 
 	int center_x, center_y;
 
+	sift.coeffs.resize(128);
+	sift.position.resize(2);
 	fichier_sift >> sift.position[0] >> sift.position[1];
-
-	//sift.resize(128);
 
 	for (int i=0; i<128; ++i)
 		fichier_sift >> sift.coeffs[i];
@@ -320,10 +345,11 @@ std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
 	{
 		Desc sift;
 
+		sift.coeffs.resize(128);
+		sift.position.resize(2);
+
 		//Récupération ds coordonnées du SIFT
 		fichier_sift >> sift.position[0] >> sift.position[1];
-
-		//sift.resize(128);
 
 		for (int i=0; i<128; ++i)
 			fichier_sift >> sift.coeffs[i];
@@ -350,7 +376,7 @@ void SiftSet::do_k_means(int k, Desc *centers)
 		for (int j=0; j<128; ++j)
 		{
 			//Coords des SIFTs entre 0 et 100?
-			centers[i].push_back( rand()*100./RAND_MAX );
+			centers[i].coeffs.push_back( rand()*100./RAND_MAX );
 		}
 	}
 
@@ -372,7 +398,7 @@ void SiftSet::do_k_means(int k, Desc *centers)
 	}
 
 	// On met les tous les SIFTs sélectionnés dans une liste
-	std::vector<double> sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
+	Desc sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
 		sifts_list[i] = get_descriptor(indexes[i]);
@@ -390,12 +416,12 @@ void SiftSet::do_k_means(int k, Desc *centers)
 		// Assigner chaque point à une classe
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
-			std::vector<double> sift = sifts_list[i];
+			Desc sift = sifts_list[i];
 			int index_classe=0;
 			double best_dist = INT_MAX;
 			for (int j=0; j<k; ++j)
 			{
-				double dist = get_distance(centers[j], sift);
+				double dist = centers[j] - sift;
 				if (dist<best_dist)
 				{
 					best_dist = dist;
@@ -412,17 +438,35 @@ void SiftSet::do_k_means(int k, Desc *centers)
 
 		// Calculer le barycentre de chaque classe
 		for (int j=0; j<k; ++j)
-			reset(centers[j]);
+			centers[j].reset();
+		//display(centers[0].coeffs);
 		for (int j=0; j<k; ++j)
 			numbers[j] = 0;
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
 			int classe = appartenances[i];
-			ajoute(centers[classe], sifts_list[i]);
+			//cout << "Classe: " << classe << endl;
+
+			display(centers[classe].coeffs);
+			centers[classe] += sifts_list[i];
+			//display(centers[classe].coeffs) ;
+			//cout << endl << endl;
+
 			numbers[classe]++;
 		}
+
+		cout << "CENTRE 1 " << endl;
+		display(centers[0].coeffs);
+
 		for (int j=0; j<k; ++j)
-			divise(centers[j], numbers[j]);
+		{
+			cout << numbers[j] << endl;
+
+			display(centers[j].coeffs);
+			centers[j] *= 1/numbers[j];
+			display(centers[j].coeffs);
+
+		}
 
 		nb_iters++;
 
