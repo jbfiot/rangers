@@ -122,6 +122,8 @@ void SiftSet::archive_files()
 {
 	ifstream fichier_database(name_sifts_files, ios::in);  // on ouvre le fichier en lecture
 
+	cout << name_sifts_files <<endl;
+
 	if(!fichier_database)  // si l'ouverture a réussi
 	{
 		cerr << "Impossible d'ouvrir le fichier database!" << endl;
@@ -177,7 +179,11 @@ Desc SiftSet::begin()
 	memcpy(current_file, sift_file_name.c_str(), sizeof(current_file));
 
 	//Ouverture du fichier sift
+	char current_file1[] = "../Samples/image0.sift";
+
 	fichier_sift.open(current_file, ios::in);
+
+	cout << "'" << current_file1 <<"'" <<endl;
 
 	if(!fichier_sift)  // si l'ouverture n'a pas réussi
 	{

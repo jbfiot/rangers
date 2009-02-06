@@ -15,7 +15,7 @@ public:
 
 	Desc(std::vector<double> position, std::vector<double> coeffs, int type);
 	Desc() {type = SIFT;};
-	
+
 	std::vector<double> get_position()
 	{ return position; }
 
@@ -35,6 +35,8 @@ public:
 
 	double operator-(Desc &other)
 	{ return this->get_distance_with(other);}
+
+	std::vector<double> get_kmeans_proba(std::vector<Desc> k_centers);
 
 
 //private:

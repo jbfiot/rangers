@@ -1,12 +1,12 @@
 #include <iostream>
-
-#include "siftset.h"
-
 #include <assert.h>
 
+
 //Visual Leak Detector
-#include "vld.h"
-#include "vldapi.h"
+//#include "vld.h"
+//#include "vldapi.h"
+
+#include "siftset.h"
 #include "desc.h"
 
 using namespace std;
