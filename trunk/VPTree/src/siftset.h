@@ -4,24 +4,15 @@
 #include <vector>
 #include <fstream>
 
+#include "desc.h"
+
 using namespace std;
 
 
-#define SAMPLE_LENGTH_FOR_K_MEANS 154
+#define SAMPLE_LENGTH_FOR_K_MEANS 100
 
 
-/**
- *	Classe pour manipuler facilement les points SIFT
- *  (pour ne plus avoir à gérer les accès disque)
 
- 	//Utilisation de la classe SiftSet
-	for (std::vector<double> sift = siftset.begin(); sift != 0; sift = siftset.next())
-	{
-		//Do stuff with sift
-		delete sift;
-	}
-
- **/
 class SiftSet
 {
 public:
@@ -42,6 +33,7 @@ public:
 	//Pour obtenir un SIFT à partir de son index
 	std::vector<double> get_descriptor(double index) const;
 	std::vector<double> operator()(double index);
+	std::vector<std::vector<double>> get_sifts_in_image(int img_index);
 
 	//Pour itérer sur tous les sifts
 	std::vector<double> begin();

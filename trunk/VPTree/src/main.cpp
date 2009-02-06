@@ -5,8 +5,8 @@
 #include <assert.h>
 
 //Visual Leak Detector
-//#include "vld.h"
-//#include "vldapi.h"
+#include "vld.h"
+#include "vldapi.h"
 
 
 using namespace std;
@@ -64,6 +64,9 @@ int main()
 	display(centers[1]);
 	cout << endl;
 
+	int index = 3;
+	std::vector<std::vector<double>> res = siftset.get_sifts_in_image(index);
+	cout << "Il y a " << res.size() << " sifts dans l'image " << index << endl;
 
 
 	delete [] centers;
