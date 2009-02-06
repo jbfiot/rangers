@@ -13,8 +13,9 @@ using namespace std;
 
 
 
-template <typename T>
-void display(T sift)
+//template <typename T>
+//void display(T sift)
+void display(std::vector<double> sift)
 {
 	for (int i=0; i<sift.size();++i)
 	{
@@ -439,34 +440,19 @@ void SiftSet::do_k_means(int k, Desc *centers)
 		// Calculer le barycentre de chaque classe
 		for (int j=0; j<k; ++j)
 			centers[j].reset();
-		//display(centers[0].coeffs);
+
 		for (int j=0; j<k; ++j)
 			numbers[j] = 0;
+
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
 			int classe = appartenances[i];
-			//cout << "Classe: " << classe << endl;
-
-			display(centers[classe].coeffs);
 			centers[classe] += sifts_list[i];
-			//display(centers[classe].coeffs) ;
-			//cout << endl << endl;
-
 			numbers[classe]++;
 		}
 
-		cout << "CENTRE 1 " << endl;
-		display(centers[0].coeffs);
-
 		for (int j=0; j<k; ++j)
-		{
-			cout << numbers[j] << endl;
-
-			display(centers[j].coeffs);
-			centers[j] *= 1/numbers[j];
-			display(centers[j].coeffs);
-
-		}
+			centers[j] *= 1./numbers[j];
 
 		nb_iters++;
 

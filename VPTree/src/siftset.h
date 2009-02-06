@@ -58,13 +58,12 @@ private:
 
 	int nb_sifts;							//Nombre de points SITFs total
 
-	
-
-
 };
 
+
 //template <typename T>
-//void display(T sift);
+void display(std::vector<double>);
+
 //void display(std::vector<std::string> &sift);
-//
+
 
