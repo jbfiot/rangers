@@ -1,13 +1,13 @@
-#include "desc.h"
+#include "Feature.h"
 
 /**
 *
 * Codes d'erreurs :
-* - 3 : erreur de type de descripteur
+* - 3 : erreur de type de feature
 **/
 
 
-Desc::Desc(std::vector<double> pos, std::vector<double> coef, int typ){
+Feature::Feature(std::vector<double> pos, std::vector<double> coef, int typ){
 	position = pos;
 	coeffs = coef;
 	type = typ;
@@ -15,9 +15,9 @@ Desc::Desc(std::vector<double> pos, std::vector<double> coef, int typ){
 
 
 /**
-* Met à 0 tous les coeffs du descripteur
+* Met à 0 tous les coeffs du feature
 **/
-void Desc::reset()
+void Feature::reset()
 {
 	for (unsigned int i=0; i<coeffs.size(); ++i)
 	{
@@ -27,9 +27,9 @@ void Desc::reset()
 
 
 /**
- * Calcule la distance entre deux descripteurs
+ * Calcule la distance entre deux features
  **/
-double Desc::get_distance_with(Desc &other)
+double Feature::get_distance_with(Feature &other)
 {
 	if (type == SIFT && other.type==SIFT)
 	{
@@ -47,9 +47,9 @@ double Desc::get_distance_with(Desc &other)
 
 
 /**
- * Ajoute un descripteur au descripteur courant
+ * Ajoute un feature au feature courant
  **/
-void Desc::get_sum_descs(Desc &other)
+void Feature::add_feature(Feature &other)
 {
     if (type==SIFT && other.type==SIFT){
         for (unsigned int i=0; i<coeffs.size(); ++i)
@@ -66,9 +66,9 @@ void Desc::get_sum_descs(Desc &other)
 
 
 /**
- * Divise un descripteur par un entier
+ * Divise un feature par un double
  **/
-void Desc::get_mul_cst(double factor)
+void Feature::get_mul_cst(double factor)
 {
 	for (unsigned int i=0; i<coeffs.size(); ++i)
 	{
@@ -80,12 +80,12 @@ void Desc::get_mul_cst(double factor)
 /**
  * Calcule les proba d'appartenance aux k-classes du k-means.
  **/
-std::vector<double> Desc::get_kmeans_proba(std::vector<Desc> k_centers){
+std::vector<double> Feature::get_kmeans_proba(std::vector<Feature> k_centers){
     // Formule : proba appartenance classe-k = distance au centre k divisee par la somme des distances aux centres.
     std::vector<double> proba;
     double sum=0;
     for (unsigned int i=0; i<k_centers.size(); i++){
-        proba[i] = *this - k_centers[i];
+        proba[i] = 1-(*this - k_centers[i]);
         sum+=proba[i];
     }
     for (unsigned int i=0; i<k_centers.size(); i++){

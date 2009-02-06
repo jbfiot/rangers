@@ -9,12 +9,12 @@ using namespace std;
 enum {SIFT};
 
 
-class Desc
+class Feature
 {
 public:
 
-	Desc(std::vector<double> position, std::vector<double> coeffs, int type);
-	Desc() {type = SIFT;};
+	Feature(std::vector<double> position, std::vector<double> coeffs, int type);
+	Feature() {type = SIFT;};
 
 	std::vector<double> get_position()
 	{ return position; }
@@ -22,28 +22,28 @@ public:
 	std::vector<double> get_coeffs()
 	{ return coeffs; }
 
-	double get_distance_with(Desc &other);
-	void get_sum_descs(Desc &other);
+	double get_distance_with(Feature &other);
+	void add_feature(Feature &other);
 	void get_mul_cst(double other);
 	void reset();
 
 	void operator*=(double index)
 	{this->get_mul_cst(index); }
 
-	void operator+=(Desc &other)
-	{this->get_sum_descs(other); }
+	void operator+=(Feature &other)
+	{this->add_feature(other); }
 
-	double operator-(Desc &other)
+	double operator-(Feature &other)
 	{ return this->get_distance_with(other);}
 
-	std::vector<double> get_kmeans_proba(std::vector<Desc> k_centers);
+	std::vector<double> get_kmeans_proba(std::vector<Feature> k_centers);
 
 
 //private:
 	//Position
 	std::vector<double> position;
 
-	//Coeffs du descripteur
+	//Coeffs du feature
 	std::vector<double> coeffs;
 
 	int type;
