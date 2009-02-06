@@ -157,7 +157,7 @@ std::vector<double> SiftSet::begin()
 	if(!fichier_sift)  // si l'ouverture n'a pas réussi
 	{
 		cerr << "Impossible d'ouvrir le fichier sift!" << endl;
-		return sift;
+		exit(2);
 	}
 
 	//On zappe la première ligne
@@ -209,7 +209,7 @@ std::vector<double> SiftSet::next()
 		if(!fichier_sift.is_open())  // si l'ouverture n'a pas réussi
 		{
 			cerr << endl << "Impossible d'ouvrir le fichier sift!" << endl;
-			return sift;
+			exit(2);
 		}
 
 		//On zappe la première ligne
@@ -250,7 +250,7 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 	if(!fichier_database)  // si l'ouverture a réussi
 	{
 		cerr << "Impossible d'ouvrir le fichier database!" << endl;
-		return sift;
+		exit(1);
 	}
 	std::string ligne;
 	int index_ligne;
@@ -269,7 +269,7 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 	if(!fichier_sift)  // si l'ouverture a réussi
 	{
 		cerr << "Impossible d'ouvrir le fichier sift!" << endl;
-		return sift;
+		exit(2);
 	}
 
 
