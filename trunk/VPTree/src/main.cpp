@@ -35,8 +35,6 @@ int main()
 	int index = 3;
 	std::vector<Desc> res = siftset.get_sifts_in_image(index);
 	cout << "Il y a " << res.size() << " sifts dans l'image " << index << endl;
-	//display(res[0].coeffs);
-
 
 
 	const int K = 5;		//Nombre de classes
@@ -48,10 +46,7 @@ int main()
 	Desc *centers = new Desc[K];
 	siftset.do_k_means(K, centers);
 
-	cout << endl;
-	//display(centers[0].coeffs);
-	cout << endl;
-	//display(centers[1].coeffs);
+	display(centers[0].coeffs);
 	cout << endl;
 
 
