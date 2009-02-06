@@ -32,7 +32,7 @@ for i in xrange(NB_IMAGES):
     
     
     f=open('image'+str(i)+'.SIFT', 'w')
-    f.write('Samples/image'+str(i)+'.jpg\t640\t480\ttags lol vacances\n')
+    f.write('../Samples/image'+str(i)+'.jpg\t640\t480\ttags lol vacances\n')
     
 
     for j in xrange(nb_sifts_in_image):
@@ -41,15 +41,15 @@ for i in xrange(NB_IMAGES):
         
         if START:
             f.write(('%s\t%s\t'%(x, y))+'\t'.join(random_vector(128)))
-            g.write('Samples/image'+str(i)+'.SIFT\t'+str(j+1))
+            g.write('../Samples/image'+str(i)+'.SIFT\t'+str(j+1))
             START = False
         else:
             f.write(('\n%s\t%s\t'%(x, y))+'\t'.join(random_vector(128)))
-            g.write('\nSamples/image'+str(i)+'.SIFT\t'+str(j+1))
+            g.write('\n../Samples/image'+str(i)+'.SIFT\t'+str(j+1))
 
     f.close()
     
-    h.write('Samples/image'+str(i)+'.SIFT\n')
+    h.write('../Samples/image'+str(i)+'.SIFT\n')
     
 
 g.close()
