@@ -13,7 +13,7 @@ using namespace std;
 
 
 
-std::vector<double> SiftSet::operator ()(double index)
+Desc SiftSet::operator ()(double index)
 {
 	return (this)->get_descriptor(index);
 }
@@ -38,8 +38,8 @@ SiftSet::SiftSet(char *name_base, char *name_sifts)
 
 
 /**
- * Calcule la distance entre deux sifts
- **/
+* Calcule la distance entre deux sifts
+**/
 double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift2)
 {
 	double dist = 0;;
@@ -51,8 +51,8 @@ double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift
 }
 
 /**
- * Ajoute un sift à un autre
- **/
+* Ajoute un sift à un autre
+**/
 void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correction)
 {
 	for (int i=0; i<a_modif.size(); ++i)
@@ -64,8 +64,8 @@ void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correcti
 
 
 /**
- * Divise un sift par un entier
- **/
+* Divise un sift par un entier
+**/
 void SiftSet::divise(std::vector<double> &a_modif, double n)
 {
 	for (int i=0; i<a_modif.size(); ++i)
@@ -77,8 +77,8 @@ void SiftSet::divise(std::vector<double> &a_modif, double n)
 
 
 /**
- * Met à 0 tous les coeffs du SIFT
- **/
+* Met à 0 tous les coeffs du SIFT
+**/
 template <typename T>
 void SiftSet::reset(std::vector<T> &a_modif)
 {
@@ -138,9 +138,9 @@ void SiftSet::compte_lignes()
 /**
 *	Initialise l'itérateur
 **/
-std::vector<double> SiftSet::begin()
+Desc SiftSet::begin()
 {
-	std::vector<double> sift;
+	Desc sift;
 
 	if (fichier_sift.is_open())
 	{
@@ -167,12 +167,12 @@ std::vector<double> SiftSet::begin()
 	//Récupération ds coordonnées du SIFT
 	int center_x, center_y;
 
-	fichier_sift >> center_x >> center_y;
+	fichier_sift >> sift.position[0] >> sift.position[1];
 
 	sift.resize(128);
 
 	for (int i=0; i<128; ++i)
-		fichier_sift >> sift[i];
+		fichier_sift >> sift.coeffs[i];
 
 	//fichier_sift.close();
 
@@ -186,11 +186,11 @@ std::vector<double> SiftSet::begin()
 /**
 *	Renvoie le SIFT suivant (après initialisation de l'itérateur)
 **/
-std::vector<double> SiftSet::next()
+Desc SiftSet::next()
 {
 	//On continue à lire le fichier précédent
 	//std::string line;
-	std::vector<double> sift;
+	Desc sift;
 
 	if (fichier_sift.eof())
 	{
@@ -223,12 +223,12 @@ std::vector<double> SiftSet::next()
 	//Récupération ds coordonnées du SIFT
 	int center_x, center_y;
 
-	fichier_sift >> center_x >> center_y;
+	fichier_sift >> sift.position[0] >> sift.position[1];
 
-	sift.resize(128);
+	//sift.resize(128);
 
 	for (int i=0; i<128; ++i)
-		fichier_sift >> sift[i];
+		fichier_sift >> sift.coeffs[i];
 
 	current_sift_index ++;
 
@@ -241,9 +241,9 @@ std::vector<double> SiftSet::next()
 /**
 *	Récupère les coordonnées du SIFT numéro index
 **/
-std::vector<double> SiftSet::get_descriptor(double index) const
+Desc SiftSet::get_descriptor(double index) const
 {
-	std::vector<double> sift;
+	Desc sift;
 
 	//Ouverture du fichier database
 	ifstream fichier_database(name_database, ios::in);
@@ -254,7 +254,6 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 	}
 	std::string ligne;
 	int index_ligne;
-
 
 	//Récupération du fichier et de l'offset où se trouve le sift voulu
 	for (int line=0; line<index; ++line)
@@ -279,12 +278,12 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 
 	int center_x, center_y;
 
-	fichier_sift >> center_x >> center_y;
+	fichier_sift >> sift.position[0] >> sift.position[1];
 
-	sift.resize(128);
+	//sift.resize(128);
 
 	for (int i=0; i<128; ++i)
-		fichier_sift >> sift[i];
+		fichier_sift >> sift.coeffs[i];
 
 	fichier_sift.close();
 
@@ -293,7 +292,57 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 }
 
 
-void SiftSet::do_k_means(int k, std::vector<double> *centers)
+
+std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
+{
+	//Nom du fichier image
+	std::string filename = files_names[img_index];
+
+	//Ouverture du fichier
+	ifstream fichier_sift(filename.c_str(), ios::in);
+
+	if(!fichier_sift.is_open())  // si l'ouverture n'a pas réussi
+	{
+		cerr << endl << "Impossible d'ouvrir le fichier sift!" << endl;
+		exit(2);
+	}
+
+	//Résultat : tableau de SIFTs
+	std::vector<Desc> result;
+
+	//On zappe la première ligne
+	std::string ligne;
+	getline(fichier_sift, ligne);
+
+	int center_x, center_y;
+	
+	while (!fichier_sift.eof())
+	{
+		Desc sift;
+
+		//Récupération ds coordonnées du SIFT
+		fichier_sift >> sift.position[0] >> sift.position[1];
+
+		//sift.resize(128);
+
+		for (int i=0; i<128; ++i)
+			fichier_sift >> sift.coeffs[i];
+
+		result.push_back(sift);
+	}
+
+	return result;
+}
+
+
+
+
+
+
+
+
+
+void SiftSet::do_k_means(int k, Desc *centers)
 {
 	//Initialisation des centres au pif
 	for (int i=0; i<k; ++i)
@@ -364,7 +413,8 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 		// Calculer le barycentre de chaque classe
 		for (int j=0; j<k; ++j)
 			reset(centers[j]);
-		reset(numbers);
+		for (int j=0; j<k; ++j)
+			numbers[j] = 0;
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
 			int classe = appartenances[i];
