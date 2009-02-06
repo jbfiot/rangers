@@ -91,6 +91,7 @@ std::vector<double> Desc::get_kmeans_proba(std::vector<Desc> k_centers){
     for (unsigned int i=0; i<k_centers.size(); i++){
         proba[i] = proba[i]/sum;
     }
+    return proba;
 
 }
 
