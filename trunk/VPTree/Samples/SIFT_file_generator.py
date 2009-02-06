@@ -12,6 +12,14 @@ NB_IMAGES = 10
 NB_SIFTS_INF = 10
 NB_SIFTS_SUP = 20
 
+
+def random_vector(n):
+    l=[]
+    for i in xrange(n):
+        l.append(`random.randrange(0, 100)`)
+    return l
+
+
 g=open('database.data', 'w')
 h=open('sifts_files.data', 'w')
 
@@ -32,11 +40,11 @@ for i in xrange(NB_IMAGES):
         y = random.randrange(0, 480)
         
         if START:
-            f.write(('%s\t%s'%(x, y))+('\t'+str(x+1))*128)
+            f.write(('%s\t%s\t'%(x, y))+'\t'.join(random_vector(128)))
             g.write('Samples\\image'+str(i)+'.SIFT\t'+str(j+1))
             START = False
         else:
-            f.write(('\n%s\t%s'%(x, y))+('\t'+str(x+1))*128)
+            f.write(('\n%s\t%s\t'%(x, y))+'\t'.join(random_vector(128)))
             g.write('\nSamples\\image'+str(i)+'.SIFT\t'+str(j+1))
 
     f.close()
