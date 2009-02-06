@@ -5,8 +5,8 @@
 #include <assert.h>
 
 //Visual Leak Detector
-#include "vld.h"
-#include "vldapi.h"
+//#include "vld.h"
+//#include "vldapi.h"
 
 
 using namespace std;
@@ -44,7 +44,7 @@ int main()
 		//Do stuff with sift
 	}
 
-	//Pour accéder au SIFT par son numéro
+	//Pour accÃ©der au SIFT par son numÃ©ro
 	std::vector<double> sift = siftset(11);
 	// ----------------------------------------------------------------------
 

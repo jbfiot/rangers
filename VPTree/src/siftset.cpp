@@ -19,7 +19,7 @@ std::vector<double> SiftSet::operator ()(double index)
 }
 
 /**
-*	Constructeur => prend un fichier de base de donnÈes et le fichier o˘ il y a le nom de tous les fichiers
+*	Constructeur => prend un fichier de base de donn√©es et le fichier o√π il y a le nom de tous les fichiers
 **/
 SiftSet::SiftSet(char *name_base, char *name_sifts)
 {
@@ -51,7 +51,7 @@ double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift
 }
 
 /**
- * Ajoute un sift ‡ un autre
+ * Ajoute un sift √† un autre
  **/
 void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correction)
 {
@@ -77,7 +77,7 @@ void SiftSet::divise(std::vector<double> &a_modif, double n)
 
 
 /**
- * Met ‡ 0 tous les coeffs du SIFT
+ * Met √† 0 tous les coeffs du SIFT
  **/
 template <typename T>
 void SiftSet::reset(std::vector<T> &a_modif)
@@ -97,17 +97,17 @@ void SiftSet::archive_files()
 {
 	ifstream fichier_database(name_sifts_files, ios::in);  // on ouvre le fichier en lecture
 
-	if(!fichier_database)  // si l'ouverture a rÈussi
-	{       
+	if(!fichier_database)  // si l'ouverture a r√©ussi
+	{
 		cerr << "Impossible d'ouvrir le fichier database!" << endl;
-		return;
+		exit(1);
 	}
 
-	std::string ligne; 
+	std::string ligne;
 
-	while(getline(fichier_database,ligne)) 
-	{ 
-		files_names.push_back(ligne); 
+	while(getline(fichier_database,ligne))
+	{
+		files_names.push_back(ligne);
 	}
 }
 
@@ -119,15 +119,15 @@ void SiftSet::compte_lignes()
 {
 	ifstream fichier_database(name_database, ios::in);  // on ouvre le fichier en lecture
 
-	if(!fichier_database)  // si l'ouverture a rÈussi
-	{       
+	if(!fichier_database)  // si l'ouverture a r√©ussi
+	{
 		cerr << "Impossible d'ouvrir le fichier database!" << endl;
-		return;
+		exit(1);
 	}
 
-	std::string ligne; 
+	std::string ligne;
 	double lignes = 0;
-	while(getline(fichier_database,ligne)) 
+	while(getline(fichier_database,ligne))
 		lignes++;
 
 	nb_sifts = lignes;
@@ -136,7 +136,7 @@ void SiftSet::compte_lignes()
 
 
 /**
-*	Initialise l'itÈrateur
+*	Initialise l'it√©rateur
 **/
 std::vector<double> SiftSet::begin()
 {
@@ -154,17 +154,17 @@ std::vector<double> SiftSet::begin()
 	//Ouverture du fichier sift
 	fichier_sift.open(current_file, ios::in);
 
-	if(!fichier_sift)  // si l'ouverture n'a pas rÈussi
-	{       
+	if(!fichier_sift)  // si l'ouverture n'a pas r√©ussi
+	{
 		cerr << "Impossible d'ouvrir le fichier sift!" << endl;
 		return sift;
 	}
 
-	//On zappe la premiËre ligne
+	//On zappe la premi√®re ligne
 	std::string ligne;
 	getline(fichier_sift, ligne);
 
-	//RÈcupÈration ds coordonnÈes du SIFT
+	//R√©cup√©ration ds coordonn√©es du SIFT
 	int center_x, center_y;
 
 	fichier_sift >> center_x >> center_y;
@@ -184,11 +184,11 @@ std::vector<double> SiftSet::begin()
 
 
 /**
-*	Renvoie le SIFT suivant (aprËs initialisation de l'itÈrateur)
+*	Renvoie le SIFT suivant (apr√®s initialisation de l'it√©rateur)
 **/
 std::vector<double> SiftSet::next()
 {
-	//On continue ‡ lire le fichier prÈcÈdent
+	//On continue √† lire le fichier pr√©c√©dent
 	//std::string line;
 	std::vector<double> sift;
 
@@ -206,13 +206,13 @@ std::vector<double> SiftSet::next()
 
 		fichier_sift.open(current_file, ios::in);
 
-		if(!fichier_sift.is_open())  // si l'ouverture n'a pas rÈussi
-		{       
+		if(!fichier_sift.is_open())  // si l'ouverture n'a pas r√©ussi
+		{
 			cerr << endl << "Impossible d'ouvrir le fichier sift!" << endl;
 			return sift;
 		}
 
-		//On zappe la premiËre ligne
+		//On zappe la premi√®re ligne
 		std::string ligne;
 		getline(fichier_sift, ligne);
 
@@ -220,7 +220,7 @@ std::vector<double> SiftSet::next()
 	}
 
 
-	//RÈcupÈration ds coordonnÈes du SIFT
+	//R√©cup√©ration ds coordonn√©es du SIFT
 	int center_x, center_y;
 
 	fichier_sift >> center_x >> center_y;
@@ -239,7 +239,7 @@ std::vector<double> SiftSet::next()
 
 
 /**
-*	RÈcupËre les coordonnÈes du SIFT numÈro index
+*	R√©cup√®re les coordonn√©es du SIFT num√©ro index
 **/
 std::vector<double> SiftSet::get_descriptor(double index) const
 {
@@ -247,8 +247,8 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 
 	//Ouverture du fichier database
 	ifstream fichier_database(name_database, ios::in);
-	if(!fichier_database)  // si l'ouverture a rÈussi
-	{       
+	if(!fichier_database)  // si l'ouverture a r√©ussi
+	{
 		cerr << "Impossible d'ouvrir le fichier database!" << endl;
 		return sift;
 	}
@@ -256,7 +256,7 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 	int index_ligne;
 
 
-	//RÈcupÈration du fichier et de l'offset o˘ se trouve le sift voulu
+	//R√©cup√©ration du fichier et de l'offset o√π se trouve le sift voulu
 	for (int line=0; line<index; ++line)
 		getline(fichier_database,ligne);
 
@@ -266,14 +266,14 @@ std::vector<double> SiftSet::get_descriptor(double index) const
 
 	//Ouverture du fichier sift
 	ifstream fichier_sift(ligne.c_str(), ios::in);
-	if(!fichier_sift)  // si l'ouverture a rÈussi
-	{       
+	if(!fichier_sift)  // si l'ouverture a r√©ussi
+	{
 		cerr << "Impossible d'ouvrir le fichier sift!" << endl;
 		return sift;
 	}
 
 
-	//RÈcupÈration ds coordonnÈes du SIFT
+	//R√©cup√©ration ds coordonn√©es du SIFT
 	for (int line=0; line<index_ligne;++line)
 		getline(fichier_sift,ligne);
 
@@ -305,7 +305,7 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 		}
 	}
 
-	//SÈlection des indexes des points SIFTs au pif
+	//S√©lection des indexes des points SIFTs au pif
 	int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
@@ -322,7 +322,7 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 		indexes[i] = index;
 	}
 
-	// On met les tous les SIFTs sÈlectionnÈs dans une liste
+	// On met les tous les SIFTs s√©lectionn√©s dans une liste
 	std::vector<double> sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
@@ -338,7 +338,7 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 		cout << "Iteration number " << nb_iters << endl;
 
 		bool has_changed = false;
-		// Assigner chaque point ‡ une classe
+		// Assigner chaque point √† une classe
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
 			std::vector<double> sift = sifts_list[i];
@@ -360,7 +360,7 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 
 		if (!has_changed)
 			break;
-		
+
 		// Calculer le barycentre de chaque classe
 		for (int j=0; j<k; ++j)
 			reset(centers[j]);
@@ -375,7 +375,7 @@ void SiftSet::do_k_means(int k, std::vector<double> *centers)
 			divise(centers[j], numbers[j]);
 
 		nb_iters++;
-	
+
 	}
 
 
