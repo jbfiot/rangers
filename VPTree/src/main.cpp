@@ -34,7 +34,7 @@ void display(std::vector<std::string> &sift)
 
 int main()
 {
-	SiftSet siftset("Samples\\database.data", "Samples\\sifts_files.data");
+	SiftSet siftset("../Samples/database.data", "../Samples/sifts_files.data");
 
 
 	// -------------- Utilisation de la classe SiftSet ----------------------
