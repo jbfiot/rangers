@@ -5,7 +5,7 @@
 #include <fstream>
 #include <assert.h>
 
-#include "desc.h"
+#include "Feature.h"
 
 using namespace std;
 
@@ -31,19 +31,19 @@ public:
 	template <typename T>
 	void reset(std::vector<T> &a_modif);
 
-	//Pour obtenir un SIFT à partir de son index
-	Desc get_descriptor(double index) const;
-	Desc operator()(double index);
-	std::vector<Desc> get_sifts_in_image(int img_index);
+	//Pour obtenir un SIFT Ã  partir de son index
+	Feature get_feature(double index) const;
+	Feature operator()(double index);
+	std::vector<Feature> get_sifts_in_image(int img_index);
 
-	//Pour itérer sur tous les sifts
-	Desc begin();
-	Desc next();
+	//Pour itÃ©rer sur tous les sifts
+	Feature begin();
+	Feature next();
 
 	//Pour faire un K-Means sur l'espace des SIFTs
-	void do_k_means(int k, Desc *centers);
+	void do_k_means(int k, Feature *centers);
 
-	
+
 
 private:
 	char name_database[64];					//Name of the database file

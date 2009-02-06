@@ -5,7 +5,7 @@
 //#include "vldapi.h"
 
 #include "siftset.h"
-#include "desc.h"
+#include "Feature.h"
 
 using namespace std;
 
@@ -19,23 +19,23 @@ int main()
 
 	// -------------- Utilisation de la classe SiftSet ----------------------
 	//Pour boucler sur tous les SIFTs
-	for (Desc sift = siftset.begin(); !sift.coeffs.empty(); sift = siftset.next())
+	for (Feature sift = siftset.begin(); !sift.coeffs.empty(); sift = siftset.next())
 	{
 		//Do stuff with sift
 	}
 
 	//Pour accéder au SIFT par son numéro
-	Desc sift = siftset(11);
+	Feature sift = siftset(11);
 
 	//Pour accéder à tous les SIFTs de l'image numéro...
-	std::vector<Desc> res = siftset.get_sifts_in_image(2);
+	std::vector<Feature> res = siftset.get_sifts_in_image(2);
 	cout << "Il y a " << res.size() << " sifts dans l'image " << 2 << endl;
 	// ----------------------------------------------------------------------
 
 
 	//Pour faire le K-Means sur l'espace des SIFTs
 	const int K = 5;								//Nombre de classes = K
-	Desc *centers = new Desc[K];
+	Feature *centers = new Feature[K];
 	siftset.do_k_means(K, centers);
 
 	display(centers[0].coeffs);

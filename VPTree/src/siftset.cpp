@@ -38,9 +38,9 @@ void display(std::vector<double> sift)
 
 
 
-Desc SiftSet::operator ()(double index)
+Feature SiftSet::operator ()(double index)
 {
-	return (this)->get_descriptor(index);
+	return (this)->get_feature(index);
 }
 
 /**
@@ -165,9 +165,9 @@ void SiftSet::compte_lignes()
 /**
 *	Initialise l'itérateur
 **/
-Desc SiftSet::begin()
+Feature SiftSet::begin()
 {
-	Desc sift;
+	Feature sift;
 
 	if (fichier_sift.is_open())
 	{
@@ -217,11 +217,11 @@ Desc SiftSet::begin()
 /**
 *	Renvoie le SIFT suivant (après initialisation de l'itérateur)
 **/
-Desc SiftSet::next()
+Feature SiftSet::next()
 {
 	//On continue à lire le fichier précédent
 	//std::string line;
-	Desc sift;
+	Feature sift;
 
 	if (fichier_sift.eof())
 	{
@@ -273,11 +273,11 @@ Desc SiftSet::next()
 /**
 *	Récupère les coordonnées du SIFT numéro index
 **/
-Desc SiftSet::get_descriptor(double index) const
+Feature SiftSet::get_feature(double index) const
 {
 	assert(index < getnbsift());
 
-	Desc sift;
+	Feature sift;
 
 	//Ouverture du fichier database
 	ifstream fichier_database(name_database, ios::in);
@@ -327,7 +327,7 @@ Desc SiftSet::get_descriptor(double index) const
 
 
 
-std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
+std::vector<Feature> SiftSet::get_sifts_in_image(int img_index)
 {
 	assert(img_index < files_names.size());
 
@@ -344,17 +344,17 @@ std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
 	}
 
 	//Résultat : tableau de SIFTs
-	std::vector<Desc> result;
+	std::vector<Feature> result;
 
 	//On zappe la première ligne
 	std::string ligne;
 	getline(fichier_sift, ligne);
 
 	int center_x, center_y;
-	
+
 	while (!fichier_sift.eof())
 	{
-		Desc sift;
+		Feature sift;
 
 		sift.coeffs.resize(128);
 		sift.position.resize(2);
@@ -379,7 +379,7 @@ std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
 
 
 
-void SiftSet::do_k_means(int k, Desc *centers)
+void SiftSet::do_k_means(int k, Feature *centers)
 {
 	assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<getnbsift());
 
@@ -411,10 +411,10 @@ void SiftSet::do_k_means(int k, Desc *centers)
 	}
 
 	// On met les tous les SIFTs sélectionnés dans une liste
-	Desc sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
+	Feature sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
-		sifts_list[i] = get_descriptor(indexes[i]);
+		sifts_list[i] = get_feature(indexes[i]);
 	}
 
 	//K-MEANS...
@@ -429,7 +429,7 @@ void SiftSet::do_k_means(int k, Desc *centers)
 		// Assigner chaque point à une classe
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
-			Desc sift = sifts_list[i];
+			Feature sift = sifts_list[i];
 			int index_classe=0;
 			double best_dist = INT_MAX;
 			for (int j=0; j<k; ++j)
