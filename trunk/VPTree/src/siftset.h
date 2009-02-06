@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <assert.h>
 
 #include "desc.h"
 
@@ -22,7 +23,7 @@ public:
 	void archive_files();
 	void compte_lignes();
 
-	int getnbsift() {return nb_sifts;};
+	int getnbsift() const {return nb_sifts;};
 	double get_distance(std::vector<double> sift1, std::vector<double> sift2);
 	void ajoute(std::vector<double> &a_modif, std::vector<double> &correction);
 	void divise(std::vector<double> &a_modif, double n);
@@ -61,9 +62,6 @@ private:
 };
 
 
-//template <typename T>
 void display(std::vector<double>);
-
-//void display(std::vector<std::string> &sift);
 
 

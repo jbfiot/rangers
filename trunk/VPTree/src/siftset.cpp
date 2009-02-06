@@ -275,6 +275,8 @@ Desc SiftSet::next()
 **/
 Desc SiftSet::get_descriptor(double index) const
 {
+	assert(index < getnbsift());
+
 	Desc sift;
 
 	//Ouverture du fichier database
@@ -327,6 +329,8 @@ Desc SiftSet::get_descriptor(double index) const
 
 std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
 {
+	assert(img_index < files_names.size());
+
 	//Nom du fichier image
 	std::string filename = files_names[img_index];
 
@@ -377,6 +381,8 @@ std::vector<Desc> SiftSet::get_sifts_in_image(int img_index)
 
 void SiftSet::do_k_means(int k, Desc *centers)
 {
+	assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<getnbsift());
+
 	//Initialisation des centres au pif
 	for (int i=0; i<k; ++i)
 	{
