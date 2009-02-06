@@ -1,6 +1,4 @@
 #include <iostream>
-#include <assert.h>
-
 
 //Visual Leak Detector
 //#include "vld.h"
@@ -28,21 +26,15 @@ int main()
 
 	//Pour accéder au SIFT par son numéro
 	Desc sift = siftset(11);
+
+	//Pour accéder à tous les SIFTs de l'image numéro...
+	std::vector<Desc> res = siftset.get_sifts_in_image(2);
+	cout << "Il y a " << res.size() << " sifts dans l'image " << 2 << endl;
 	// ----------------------------------------------------------------------
 
 
-
-	int index = 3;
-	std::vector<Desc> res = siftset.get_sifts_in_image(index);
-	cout << "Il y a " << res.size() << " sifts dans l'image " << index << endl;
-
-
-	const int K = 5;		//Nombre de classes
-
-	cout << siftset.getnbsift() << endl;
-
-	assert(K<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<siftset.getnbsift());
-
+	//Pour faire le K-Means sur l'espace des SIFTs
+	const int K = 5;								//Nombre de classes = K
 	Desc *centers = new Desc[K];
 	siftset.do_k_means(K, centers);
 
