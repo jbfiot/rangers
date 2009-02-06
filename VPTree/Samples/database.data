@@ -10,6 +10,10 @@ Samples\image0.SIFT	9
 Samples\image0.SIFT	10
 Samples\image0.SIFT	11
 Samples\image0.SIFT	12
+Samples\image0.SIFT	13
+Samples\image0.SIFT	14
+Samples\image0.SIFT	15
+Samples\image0.SIFT	16
 Samples\image1.SIFT	1
 Samples\image1.SIFT	2
 Samples\image1.SIFT	3
@@ -24,6 +28,7 @@ Samples\image1.SIFT	11
 Samples\image1.SIFT	12
 Samples\image1.SIFT	13
 Samples\image1.SIFT	14
+Samples\image1.SIFT	15
 Samples\image2.SIFT	1
 Samples\image2.SIFT	2
 Samples\image2.SIFT	3
@@ -35,6 +40,11 @@ Samples\image2.SIFT	8
 Samples\image2.SIFT	9
 Samples\image2.SIFT	10
 Samples\image2.SIFT	11
+Samples\image2.SIFT	12
+Samples\image2.SIFT	13
+Samples\image2.SIFT	14
+Samples\image2.SIFT	15
+Samples\image2.SIFT	16
 Samples\image3.SIFT	1
 Samples\image3.SIFT	2
 Samples\image3.SIFT	3
@@ -47,8 +57,6 @@ Samples\image3.SIFT	9
 Samples\image3.SIFT	10
 Samples\image3.SIFT	11
 Samples\image3.SIFT	12
-Samples\image3.SIFT	13
-Samples\image3.SIFT	14
 Samples\image4.SIFT	1
 Samples\image4.SIFT	2
 Samples\image4.SIFT	3
@@ -60,9 +68,6 @@ Samples\image4.SIFT	8
 Samples\image4.SIFT	9
 Samples\image4.SIFT	10
 Samples\image4.SIFT	11
-Samples\image4.SIFT	12
-Samples\image4.SIFT	13
-Samples\image4.SIFT	14
 Samples\image5.SIFT	1
 Samples\image5.SIFT	2
 Samples\image5.SIFT	3
@@ -74,6 +79,7 @@ Samples\image5.SIFT	8
 Samples\image5.SIFT	9
 Samples\image5.SIFT	10
 Samples\image5.SIFT	11
+Samples\image5.SIFT	12
 Samples\image6.SIFT	1
 Samples\image6.SIFT	2
 Samples\image6.SIFT	3
@@ -87,6 +93,7 @@ Samples\image6.SIFT	10
 Samples\image6.SIFT	11
 Samples\image6.SIFT	12
 Samples\image6.SIFT	13
+Samples\image6.SIFT	14
 Samples\image7.SIFT	1
 Samples\image7.SIFT	2
 Samples\image7.SIFT	3
@@ -103,8 +110,6 @@ Samples\image7.SIFT	13
 Samples\image7.SIFT	14
 Samples\image7.SIFT	15
 Samples\image7.SIFT	16
-Samples\image7.SIFT	17
-Samples\image7.SIFT	18
 Samples\image8.SIFT	1
 Samples\image8.SIFT	2
 Samples\image8.SIFT	3
@@ -121,6 +126,9 @@ Samples\image8.SIFT	13
 Samples\image8.SIFT	14
 Samples\image8.SIFT	15
 Samples\image8.SIFT	16
+Samples\image8.SIFT	17
+Samples\image8.SIFT	18
+Samples\image8.SIFT	19
 Samples\image9.SIFT	1
 Samples\image9.SIFT	2
 Samples\image9.SIFT	3
@@ -136,6 +144,3 @@ Samples\image9.SIFT	12
 Samples\image9.SIFT	13
 Samples\image9.SIFT	14
 Samples\image9.SIFT	15
-Samples\image9.SIFT	16
-Samples\image9.SIFT	17
-Samples\image9.SIFT	18
