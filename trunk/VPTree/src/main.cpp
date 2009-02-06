@@ -7,28 +7,10 @@
 //Visual Leak Detector
 #include "vld.h"
 #include "vldapi.h"
-
+#include "desc.h"
 
 using namespace std;
 
-
-template <typename T>
-void display(T sift)
-{
-	for (int i=0; i<sift.size();++i)
-	{
-		cout << sift[i] << " ";
-	}
-	cout << endl;
-}
-
-void display(std::vector<std::string> &sift)
-{
-	for (int i=0; i<sift.size(); ++i)
-	{
-		cout << sift[i] << endl;
-	}
-}
 
 
 
@@ -39,14 +21,22 @@ int main()
 
 	// -------------- Utilisation de la classe SiftSet ----------------------
 	//Pour boucler sur tous les SIFTs
-	for (std::vector<double> sift = siftset.begin(); !sift.empty(); sift = siftset.next())
+	for (Desc sift = siftset.begin(); !sift.coeffs.empty(); sift = siftset.next())
 	{
 		//Do stuff with sift
 	}
 
 	//Pour accéder au SIFT par son numéro
-	std::vector<double> sift = siftset(11);
+	Desc sift = siftset(11);
 	// ----------------------------------------------------------------------
+
+
+
+	int index = 3;
+	std::vector<Desc> res = siftset.get_sifts_in_image(index);
+	cout << "Il y a " << res.size() << " sifts dans l'image " << index << endl;
+	//display(res[0].coeffs);
+
 
 
 	const int K = 5;		//Nombre de classes
@@ -55,18 +45,15 @@ int main()
 
 	assert(K<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<siftset.getnbsift());
 
-	std::vector<double> *centers = new std::vector<double>[K];
+	Desc *centers = new Desc[K];
 	siftset.do_k_means(K, centers);
 
 	cout << endl;
-	display(centers[0]);
+	//display(centers[0].coeffs);
 	cout << endl;
-	display(centers[1]);
+	//display(centers[1].coeffs);
 	cout << endl;
 
-	int index = 3;
-	std::vector<std::vector<double>> res = siftset.get_sifts_in_image(index);
-	cout << "Il y a " << res.size() << " sifts dans l'image " << index << endl;
 
 
 	delete [] centers;

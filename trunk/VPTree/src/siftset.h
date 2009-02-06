@@ -31,16 +31,16 @@ public:
 	void reset(std::vector<T> &a_modif);
 
 	//Pour obtenir un SIFT à partir de son index
-	std::vector<double> get_descriptor(double index) const;
-	std::vector<double> operator()(double index);
-	std::vector<std::vector<double>> get_sifts_in_image(int img_index);
+	Desc get_descriptor(double index) const;
+	Desc operator()(double index);
+	std::vector<Desc> get_sifts_in_image(int img_index);
 
 	//Pour itérer sur tous les sifts
-	std::vector<double> begin();
-	std::vector<double> next();
+	Desc begin();
+	Desc next();
 
 	//Pour faire un K-Means sur l'espace des SIFTs
-	void do_k_means(int k, std::vector<double> *centers);
+	void do_k_means(int k, Desc *centers);
 
 	
 
@@ -62,4 +62,9 @@ private:
 
 
 };
+
+//template <typename T>
+//void display(T sift);
+//void display(std::vector<std::string> &sift);
+//
 
