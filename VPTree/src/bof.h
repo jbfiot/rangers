@@ -8,20 +8,19 @@
 #include <assert.h>
 
 
-
+/**
+*
+* Classe Bof = Bag-of-features
+*
+**/
 class Bof
 {
-
-    /**
-    *
-    * Classe Bof = Bag-of-features
-    *
-    **/
-
     public:
 
+		Bof(std::vector<Feature> feats) {features = feats;}
+
         // Méthode pour obtenir la repartition dans les k classes du k-means.
-        std::vector<double> get_kmeans_proba(std::vector<Feature> k_centers);
+        Vector get_kmeans_proba(std::vector<Feature> k_centers);
 
         // Méthode pour trouver la feuille la plus proche dans l'arbre.
         // A Faire ! :p

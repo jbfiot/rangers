@@ -13,8 +13,6 @@ using namespace std;
 
 
 
-//template <typename T>
-//void display(T sift)
 void display(std::vector<double> sift)
 {
 	for (int i=0; i<sift.size();++i)
@@ -23,16 +21,6 @@ void display(std::vector<double> sift)
 	}
 	cout << endl;
 }
-
-//void display(std::vector<std::string> &sift)
-//{
-//	for (int i=0; i<sift.size(); ++i)
-//	{
-//		cout << sift[i] << endl;
-//	}
-//}
-
-
 
 
 
@@ -44,8 +32,8 @@ Feature SiftSet::operator ()(double index)
 }
 
 /**
-*	Constructeur => prend un fichier de base de données et le fichier où il y a le nom de tous les fichiers
-**/
+ *	Constructeur => prend un fichier de base de données et le fichier où il y a le nom de tous les fichiers
+ **/
 SiftSet::SiftSet(char *name_base, char *name_sifts)
 {
 	srand ( time(NULL) );
@@ -61,63 +49,10 @@ SiftSet::SiftSet(char *name_base, char *name_sifts)
 	compte_lignes();
 }
 
-//
-///**
-//* Calcule la distance entre deux sifts
-//**/
-//double SiftSet::get_distance(std::vector<double> sift1, std::vector<double> sift2)
-//{
-//	double dist = 0;;
-//	for (int i=0; i<sift1.size(); ++i)
-//	{
-//		dist += (sift1[i] - sift2[i])*(sift1[i] - sift2[i]);
-//	}
-//	return dist;
-//}
-//
-///**
-//* Ajoute un sift à un autre
-//**/
-//void SiftSet::ajoute(std::vector<double> &a_modif, std::vector<double> &correction)
-//{
-//	for (int i=0; i<a_modif.size(); ++i)
-//	{
-//		a_modif[i] += correction[i];
-//	}
-//
-//}
-//
-//
-///**
-//* Divise un sift par un entier
-//**/
-//void SiftSet::divise(std::vector<double> &a_modif, double n)
-//{
-//	for (int i=0; i<a_modif.size(); ++i)
-//	{
-//		a_modif[i] /= n;
-//	}
-//
-//}
-//
-//
-///**
-//* Met à 0 tous les coeffs du SIFT
-//**/
-//template <typename T>
-//void SiftSet::reset(std::vector<T> &a_modif)
-//{
-//	for (int i=0; i<a_modif.size(); ++i)
-//	{
-//		a_modif[i] = 0;
-//	}
-//
-//}
-
 
 /**
-*	Met tous les noms des fichiers .SIFT dans un vecteur
-**/
+ *	Met tous les noms des fichiers .SIFT dans un vecteur
+ **/
 void SiftSet::archive_files()
 {
 	ifstream fichier_database(name_sifts_files, ios::in);  // on ouvre le fichier en lecture
@@ -133,15 +68,15 @@ void SiftSet::archive_files()
 	std::string ligne;
 
 	while(getline(fichier_database,ligne))
-	{
 		files_names.push_back(ligne);
-	}
+
+	nb_images = files_names.size();
 }
 
 
 /**
-*	Compte le noombre de points SIFTs total
-**/
+ *	Compte le noombre de points SIFTs total
+ **/
 void SiftSet::compte_lignes()
 {
 	ifstream fichier_database(name_database, ios::in);  // on ouvre le fichier en lecture
@@ -163,8 +98,8 @@ void SiftSet::compte_lignes()
 
 
 /**
-*	Initialise l'itérateur
-**/
+ *	Initialise l'itérateur
+ **/
 Feature SiftSet::begin()
 {
 	Feature sift;
@@ -215,8 +150,8 @@ Feature SiftSet::begin()
 
 
 /**
-*	Renvoie le SIFT suivant (après initialisation de l'itérateur)
-**/
+ *	Renvoie le SIFT suivant (après initialisation de l'itérateur)
+ **/
 Feature SiftSet::next()
 {
 	//On continue à lire le fichier précédent
@@ -225,7 +160,7 @@ Feature SiftSet::next()
 
 	if (fichier_sift.eof())
 	{
-		if (index_file == files_names.size())
+		if (index_file == getnbimages())
 			return sift;
 
 		std::string sift_file_name = files_names[index_file];
@@ -271,8 +206,8 @@ Feature SiftSet::next()
 
 
 /**
-*	Récupère les coordonnées du SIFT numéro index
-**/
+ *	Récupère les coordonnées du SIFT numéro index
+ **/
 Feature SiftSet::get_feature(double index) const
 {
 	assert(index < getnbsift());
@@ -326,7 +261,9 @@ Feature SiftSet::get_feature(double index) const
 }
 
 
-
+/**
+ *	Récupère tous les SIFTs dans une image donnée
+ **/
 std::vector<Feature> SiftSet::get_sifts_in_image(int img_index)
 {
 	assert(img_index < files_names.size());
@@ -378,10 +315,14 @@ std::vector<Feature> SiftSet::get_sifts_in_image(int img_index)
 
 
 
-
-void SiftSet::do_k_means(int k, Feature *centers)
+/**
+ *	Applique l'algorithme des K-Means sur le SiftSet
+ **/
+std::vector<Feature> SiftSet::do_k_means(int k)
 {
 	assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<getnbsift());
+
+	std::vector<Feature> centers(k);
 
 	//Initialisation des centres au pif
 	for (int i=0; i<k; ++i)
@@ -469,6 +410,8 @@ void SiftSet::do_k_means(int k, Feature *centers)
 		nb_iters++;
 
 	}
+
+	return centers;
 
 
 }
