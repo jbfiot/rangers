@@ -4,39 +4,38 @@
 #include <iostream>
 #include <vector>
 
+#include "vector.h"
+
 using namespace std;
 
-enum {SIFT};
 
 
 class Feature
 {
 public:
 
-	Feature(std::vector<double> position, std::vector<double> coeffs, int type);
+	//Feature(std::vector<double> position, std::vector<double> coeffs, int type);
+	Feature(std::vector<double> pos, Vector coef, int typ);
 	Feature() {type = SIFT;};
 
 	std::vector<double> get_position()
 	{ return position; }
 
-	std::vector<double> get_coeffs()
+	Vector get_coeffs()
 	{ return coeffs; }
 
-	double get_distance_with(Feature &other);
-	void add_feature(Feature &other);
-	void get_mul_cst(double other);
-	void reset();
+	void reset(){ this->coeffs.reset();}
 
 	void operator*=(double index)
-	{this->get_mul_cst(index); }
+	{coeffs *= index; }
 
 	void operator+=(Feature &other)
-	{this->add_feature(other); }
+	{coeffs += other.coeffs; }
 
 	double operator-(Feature &other)
-	{ return this->get_distance_with(other);}
+	{ return (this->coeffs - other.coeffs);}
 
-	std::vector<double> get_kmeans_proba(std::vector<Feature> k_centers);
+	Vector get_kmeans_proba(std::vector<Feature> k_centers);
 
 
 //private:
@@ -44,7 +43,7 @@ public:
 	std::vector<double> position;
 
 	//Coeffs du feature
-	std::vector<double> coeffs;
+	Vector coeffs;
 
 	int type;
 };

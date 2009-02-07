@@ -24,6 +24,7 @@ public:
 	void compte_lignes();
 
 	int getnbsift() const {return nb_sifts;};
+	int getnbimages() const {return nb_images;};
 	double get_distance(std::vector<double> sift1, std::vector<double> sift2);
 	void ajoute(std::vector<double> &a_modif, std::vector<double> &correction);
 	void divise(std::vector<double> &a_modif, double n);
@@ -41,7 +42,7 @@ public:
 	Feature next();
 
 	//Pour faire un K-Means sur l'espace des SIFTs
-	void do_k_means(int k, Feature *centers);
+	std::vector<Feature> do_k_means(int k);
 
 
 
@@ -58,6 +59,7 @@ private:
 	double index_file;						//Index in files_names vector
 
 	int nb_sifts;							//Nombre de points SITFs total
+	int nb_images;							//Nombre d'images total
 
 };
 

@@ -33,7 +33,8 @@ class Bof_db
 public:
 
 
-	Bof_db(string db_host="localhost", string db_username="ranger", string db_password="GoRangers!", string db_name="bof_db", string table_name="bof", int nb_k_centers=SAMPLE_LENGTH_FOR_K_MEANS);
+	Bof_db(std::vector<Feature> centers, string db_host="localhost", string db_username="ranger",
+		string db_password="GoRangers!", string db_name="bof_db", string table_name="bof");
 
 	~Bof_db();
 	void add_bof(Bof bag);
@@ -46,7 +47,8 @@ private:
     string db_password;
     string db_host;
     string table_name;
-    int nb_k_centers;
+	int nb_k_centers;
+    std::vector<Feature> centers;
 
 	MYSQL* db_connection;
 	unsigned int nrows;
