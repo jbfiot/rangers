@@ -33,7 +33,7 @@ int main()
 	std::vector<Feature> res = siftset.get_sifts_in_image(2);
 	cout << "Il y a " << res.size() << " sifts dans l'image " << 2 << endl;
 	// ----------------------------------------------------------------------
-
+*/
 
 	//Pour faire le K-Means sur l'espace des SIFTs
 	const int K = 5;								//Nombre de classes = K
@@ -44,7 +44,8 @@ int main()
 	cout << endl;
 	delete [] centers;
 
-    */
+
+
 
 	cout << "===================================" <<endl<<"  Utilisation de la base Bof_db" << endl <<"===================================" <<endl;
 
