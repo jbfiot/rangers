@@ -5,7 +5,8 @@
 //#include "vldapi.h"
 
 #include "siftset.h"
-#include "Feature.h"
+#include "feature.h"
+#include "bof_db.h"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ int main()
 {
 	SiftSet siftset("../Samples/database.data", "../Samples/sifts_files.data");
 
+    /*
 
 	// -------------- Utilisation de la classe SiftSet ----------------------
 	//Pour boucler sur tous les SIFTs
@@ -40,10 +42,17 @@ int main()
 
 	display(centers[0].coeffs);
 	cout << endl;
-
-
-
 	delete [] centers;
+
+    */
+
+	cout << "===================================" <<endl<<"  Utilisation de la base Bof_db" << endl <<"===================================" <<endl;
+
+	Bof_db();
+
+
+
+
 	system("pause");
 	return 0;
 }

@@ -14,7 +14,6 @@
 #include <mysql.h>
 
 
-
 #include <iostream>
 
 
@@ -26,20 +25,21 @@ class Bof_db
 
 	/**
 	*
-	* Classe Bof_db : Gestion de la base de données de features.
+	* Classe Bof_db : Gestion de la base de données de bag of features.
 	*
 	**/
 
 public:
-	Bof_db(string db_name);
+	Bof_db();
 	~Bof_db();
 	void add_bof(Bof bag);
 	void build_tree();
-
+	void error_and_exit();
 
 private:
-	string db_name;
-	//MYSQL connection;
+	MYSQL* db_connection;
+
+
 
 
 };
@@ -47,5 +47,5 @@ private:
 
 
 
-#endif
+#endif /*  bod_db.h */
 
