@@ -80,7 +80,7 @@ Feature_db::Feature_db (string db_host, string db_username,
     */
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
-	table_creation_query+=" (Feature_ID int (10) NOT NULL auto_increment,X INT NOT NULL, Y INT NOT NULL,";
+	table_creation_query+=" (Feature_ID int (10) NOT NULL auto_increment,X INT NOT NULL DEFAULT 0, Y INT NOT NULL DEFAULT 0,";
 
 	string test="yeah";
 
@@ -148,12 +148,13 @@ void Feature_db::fill_with_random(int nb_features) {
     fill_with_random_query+=") VALUES (";
 
     for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
-        fill_with_random_query+=to_string(random_coeff[i]);
+        fill_with_random_query+=to_string(random_coeff[i-1]);
         if (i!=NB_COEFF_FEATURES) {
             fill_with_random_query+=",";
         }
     }
     fill_with_random_query+=")";
+	cout << fill_with_random_query << endl;
 
     if (!mysql_query(db_connection, fill_with_random_query.c_str())) {
 	    cout << "Fill-with-random-query: OK"<<endl;

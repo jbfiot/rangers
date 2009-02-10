@@ -25,7 +25,7 @@ Bof_db::Bof_db (std::vector<Feature> centers, string db_host, string db_username
     this->db_host = db_host;
     this->table_name = table_name;
     this->centers = centers;
-	this->nb_k_centers = centers[0].coeffs[0];
+	this->nb_k_centers = centers.size();
 
     /**
     *   Server Connexion
@@ -87,7 +87,7 @@ Bof_db::Bof_db (std::vector<Feature> centers, string db_host, string db_username
 	    table_creation_query+=to_string(i);
 	    table_creation_query+=" DOUBLE NOT NULL,";
 	}
-	table_creation_query+=" Parent int(10) NOT NULL, Direction int(2) NOT NULL,";
+	table_creation_query+=" Parent int(10) NOT NULL DEFAULT 0, Direction int(2) NOT NULL DEFAULT 0,";
 
 	table_creation_query+=" PRIMARY KEY(Bof_ID))";
 
@@ -134,19 +134,19 @@ void Bof_db::add_bof(Bof bag) {
     Vector proba;
     bag.get_kmeans_proba(centers, proba);
 
-    for (unsigned int i=1; i<=proba.size(); i++){
+    for (unsigned int i=0; i<proba.size(); i++){
         add_bof_query+="Coeff";
-        add_bof_query+=to_string(i);
-        if (i!=proba.size()) {
+        add_bof_query+=to_string(i+1);
+        if (i!=proba.size() - 1) {
             add_bof_query+=",";
         }
     }
 
     add_bof_query+=") VALUES (";
 
-    for (unsigned int i=1; i<=proba.size(); i++){
+    for (unsigned int i=0; i<proba.size(); i++){
         add_bof_query+=to_string(proba[i]);
-        if (i!=proba.size()) {
+        if (i!=proba.size() - 1) {
             add_bof_query+=",";
         }
     }
