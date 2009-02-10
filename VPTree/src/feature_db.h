@@ -1,4 +1,3 @@
-
 #ifndef FEATURE_DB
 #define FEATURE_DB
 
@@ -16,9 +15,12 @@
 
 
 #include <iostream>
-#include "siftset.h"
 #include "tools.h"
+#include <string>
+#include "vector.h"
+#include "feature.h"
 
+#define SAMPLE_LENGTH_FOR_K_MEANS 1000
 
 
 class Feature_db
