@@ -50,6 +50,19 @@ int main()
 
     Feature_db fdb;
     //fdb.fill_with_random(100);
+	cout << fdb.get_nbfeatures() << endl;
+
+
+    cout << endl << "==================================="
+		 << endl << "   Etape 1: Appliquer l'algorithme de K-Means  "
+		 << endl << "===================================" <<endl;
+
+	int K = 5;
+	std::vector<Vector> centers;
+	fdb.do_k_means(K, centers);
+
+	cout << centers[0] << endl;
+
 
 	Vector vec;
 	fdb.get_feature_number(1, vec);
@@ -66,7 +79,8 @@ int main()
 
 	//// Etape2: Faire le K-Means dans l'espace des SIFTs
 	//int K = 5;
-	//std::vector<Feature> centers = siftset.do_k_means(K);				//display(centers[0].coeffs);
+	//std::vector<Vector> centers;
+	//siftset.do_k_means(K, centers);				//display(centers[0].coeffs);
 
 	//// Etape3: initialisation de la base de donnÃ©es de BOFs
 	//Bof_db bof_db(centers);//, "localhost", "root", "");

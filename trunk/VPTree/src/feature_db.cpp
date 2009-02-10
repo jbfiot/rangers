@@ -1,4 +1,4 @@
-
+#include <algorithm>
 #include "feature_db.h"
 
 #include <sstream>
@@ -200,6 +200,8 @@ void Feature_db::insert_feature(Feature &feature) {
 
 void Feature_db::get_feature_number(int index, Vector &vec)
 {
+	cout << "INDEX: " << index << endl;
+
 	/*
 	SELECT *
 	FROM `features`
@@ -234,7 +236,7 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 	row = mysql_fetch_row(result);
 
 	//On fait une boucle pour avoir la valeur de chaque champs (on zappe l'ID, le X et le Y)
-	for(i = 3; i < num_champs; i++)
+	for (int i = 3; i < num_champs; i++)
 	{
 		vec.push_back(strtodouble(row[i]));
 	}
@@ -248,3 +250,139 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 
 void get_all_features_in_image(int index, std::vector<Feature> &features);
 
+
+
+
+/**
+ *	Applique l'algorithme des K-Means sur le SiftSet
+ **/
+void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
+{
+	unsigned int nb_sifts = get_nbfeatures();
+	assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<nb_sifts);
+
+	centers.resize(k);
+
+	//Initialisation des centres au pif
+	for (int i=0; i<k; ++i)
+	{
+		for (int j=0; j<128; ++j)
+		{
+			//Coords des SIFTs entre 0 et 100?
+			centers[i].push_back( rand()*100./RAND_MAX );
+		}
+	}
+
+	//Sélection des indexes des points SIFTs au pif
+	int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
+	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+	{
+		int index;
+		while (1)
+		{
+			index = rand()%nb_sifts;
+
+			int *p = find(indexes,indexes+i,index);
+			if (p == indexes+i)
+				break;
+		}
+
+		indexes[i] = index;
+	}
+
+	// On met les tous les SIFTs sélectionnés dans une liste
+	Vector sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
+	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+	{
+		this->get_feature_number(indexes[i], sifts_list[i]);
+	}
+
+	//K-MEANS...
+	int nb_iters = 1;
+	int appartenances[SAMPLE_LENGTH_FOR_K_MEANS];
+	std::vector<int> numbers(k);
+	while (1)
+	{
+		cout << "Iteration number " << nb_iters << endl;
+
+		bool has_changed = false;
+		// Assigner chaque point à une classe
+		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+		{
+			Vector sift = sifts_list[i];
+			int index_classe=0;
+			double best_dist = INT_MAX;
+			for (int j=0; j<k; ++j)
+			{
+				double dist = centers[j] - sift;
+				if (dist<best_dist)
+				{
+					best_dist = dist;
+					index_classe = j;
+				}
+			}
+			if ((!has_changed) && (appartenances[i] != index_classe))
+				has_changed = true;
+			appartenances[i] = index_classe;
+		}
+
+		if (!has_changed)
+			break;
+
+		// Calculer le barycentre de chaque classe
+		for (int j=0; j<k; ++j)
+			centers[j].reset();
+
+		for (int j=0; j<k; ++j)
+			numbers[j] = 0;
+
+		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+		{
+			int classe = appartenances[i];
+			centers[classe] += sifts_list[i];
+			numbers[classe]++;
+		}
+
+		for (int j=0; j<k; ++j)
+			centers[j] *= 1./numbers[j];
+
+		nb_iters++;
+
+	}
+
+}
+
+
+
+unsigned int Feature_db::get_nbfeatures()
+{
+	// REQUETE SQL
+	string get_feature_query = "SELECT COUNT(*) FROM features";
+
+	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+		cout << "Get feature query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+	//RECUPERATION DU CONTENU
+	//Déclaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	//On met le jeu de résultat dans le pointeur result
+	result = mysql_use_result(db_connection);
+
+	//On récupère le nombre de champs
+	unsigned int num_champs = mysql_num_fields(result);
+
+	row = mysql_fetch_row(result);
+	int nb = strtodouble(row[0]);
+
+	//Libération du jeu de résultat
+	mysql_free_result(result);
+
+	return nb;
+	
+}
