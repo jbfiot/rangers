@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 using namespace std;
 
@@ -32,7 +33,9 @@ public:
 
 	//A implémenter
 	double compute_median() {return 0;}
-	double compute_second_moment(double val) {return 0;} //(somme(xi - val)²)
+	double compute_second_moment(double val); //(somme(xi - val)²)
+
+	friend ostream& operator <<(ostream& co, Vector& f );
 
 
 private:
