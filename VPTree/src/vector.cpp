@@ -59,3 +59,24 @@ void Vector::reset()
 	}
 }
 
+
+double Vector::compute_second_moment(double val)
+{
+	int res = 0;
+	for (unsigned int i= 0; i<(*this).size(); ++i)
+	{
+		double temp = (*this)[i] - val;
+		res += temp*temp;
+	}
+	return res;
+}
+
+ostream& operator <<(ostream& co, Vector& vec )
+{
+	cout << "Vecteur de taille: " << vec.size() << endl;
+	for (unsigned int i=0; i<vec.size(); ++i)
+	{
+		cout << vec[i] << " ";
+	}
+	return co;
+}
