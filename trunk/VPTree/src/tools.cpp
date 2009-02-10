@@ -1,9 +1,12 @@
 #include "tools.h"
 #include <time.h>
 #include <iostream>
-#include "siftset.h"
 #include <time.h>
+
 #include <algorithm>
+using namespace std;
+
+
 
 /**
  * Selectionne une liste aleatoire de k nombres entre 1 et n (n>=k)
