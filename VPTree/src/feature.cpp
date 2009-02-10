@@ -24,10 +24,10 @@ Feature::Feature(std::vector<double> pos, Vector coef, int typ){
 /**
  * Calcule les proba d'appartenance aux k-classes du k-means.
  **/
-Vector Feature::get_kmeans_proba(std::vector<Feature> k_centers){
+void Feature::get_kmeans_proba( std::vector<Feature> &k_centers, Vector &proba/* Conteneur resultat */)  {
     // Formule : proba appartenance classe-k = distance au centre k divisee par la somme des distances aux centres.
-    Vector proba;
     double sum=0;
+    proba.resize(k_centers.size());
     for (unsigned int i=0; i<k_centers.size(); i++){
 		proba[i] = 1-((*this) - k_centers[i]);
         sum+=proba[i];
@@ -35,7 +35,6 @@ Vector Feature::get_kmeans_proba(std::vector<Feature> k_centers){
     for (unsigned int i=0; i<k_centers.size(); i++){
         proba[i] = proba[i]/sum;
     }
-    return proba;
 
 }
 

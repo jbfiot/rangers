@@ -129,7 +129,36 @@ void Bof_db::error_and_exit(){
 
 void Bof_db::add_bof(Bof bag) {
     string add_bof_query = "INSERT INTO ";
-    add_bof_query+=db_name;
+    add_bof_query+=table_name;
+    add_bof_query+=" (";
+    Vector proba;
+    bag.get_kmeans_proba(centers, proba);
+
+    for (unsigned int i=1; i<=proba.size(); i++){
+        add_bof_query+="Coeff";
+        add_bof_query+=to_string(i);
+        if (i!=proba.size()) {
+            add_bof_query+=",";
+        }
+    }
+
+    add_bof_query+=") VALUES (";
+
+    for (unsigned int i=1; i<=proba.size(); i++){
+        add_bof_query+=to_string(proba[i]);
+        if (i!=proba.size()) {
+            add_bof_query+=",";
+        }
+    }
+    add_bof_query+=")";
+
+    if (!mysql_query(db_connection, add_bof_query.c_str())) {
+	    cout << "Add-bof-query: OK"<<endl;
+	}
+	else {
+        error_and_exit();
+	}
+
 }
 
 
@@ -142,7 +171,7 @@ void Bof_db::add_bof(Bof bag) {
 // PARTIE CONSTRUCTION DE L'ARBRE
 //
 ///**
-// * Sélectionne une liste aléatoire de k nombres entre 1 et n (n>=k)
+// * SÃ©lectionne une liste alÃ©atoire de k nombres entre 1 et n (n>=k)
 // **/
 //int *get_random_set_indexes(k, n)
 //{
@@ -166,15 +195,15 @@ void Bof_db::add_bof(Bof bag) {
 //
 //
 ///**
-// * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
+// * SÃ©lectionne un random set alÃ©atoire de rÃ©sultats parmi les rÃ©sultats de la requete:
 // * PARENT = parent et DIRECTION = direction
 // **/
 //std::vector<std::vector<double>> select_random_set_indexes(int index_parent, int direction)
 //{
-//	//1- Compter le nombre de résultats de la requete
+//	//1- Compter le nombre de rÃ©sultats de la requete
 //	unsigned int nb = "SELECT count(*) LIMIT INDEX WHERE parent = index_parent and direction = direction";
 //
-//	//2- Sélectionner un random set sur la liste des indexes
+//	//2- SÃ©lectionner un random set sur la liste des indexes
 //	std::vector<std::vector<double>> sample_set;
 //	if (nb<1000)
 //	{
@@ -182,7 +211,7 @@ void Bof_db::add_bof(Bof bag) {
 //		sample_set.resize(1000);
 //		for (int i=0; i<1000; ++i)
 //		{
-//			//Le random_indexes[i]-ième résultat
+//			//Le random_indexes[i]-iÃ¨me rÃ©sultat
 //			sample_set[i] =
 //				"SELECT d0,...,d1000 OFFSET random_indexes[i] LIMIT 1 WHERE parent = index_parent and direction = direction"
 //		}
@@ -190,7 +219,7 @@ void Bof_db::add_bof(Bof bag) {
 //	}
 //	else
 //	{
-//		sample_set= "SELECT d0,...,d1000 WHERE parent = index_parent and direction = direction"; 
+//		sample_set= "SELECT d0,...,d1000 WHERE parent = index_parent and direction = direction";
 //	}
 //
 //	return sample_set;
@@ -206,18 +235,18 @@ void Bof_db::add_bof(Bof bag) {
 //
 //	for (int i=0; i<sample_set.size(); ++i)
 //	{
-//		//Sélection d'un set aléatoire de l'espace qui nous intéresse
+//		//SÃ©lection d'un set alÃ©atoire de l'espace qui nous intÃ©resse
 //		std::vector<double> candidate = sample_set[i];
 //		std::vector<std::vector<double>> rand_set_for_med_test = select_random_set_indexes(int index_parent, int direction);
-//		
-//		//Précalcul des distances entre le candidat et les régions du sample_set
+//
+//		//PrÃ©calcul des distances entre le candidat et les rÃ©gions du sample_set
 //		std::vector<double> distances_p_rand_set(rand_set_for_med_test.size());
 //		for (int j=0; j<distances_p_rand_set.size(); ++j)
 //		{
 //			distances_p_rand_set[j] = candidate - rand_set_for_med_test[j];
 //		}
 //
-//		//Calcul de la variance de cet ensemble de distances (calculée avec la médiane)
+//		//Calcul de la variance de cet ensemble de distances (calculÃ©e avec la mÃ©diane)
 //		double median = distances_p_rand_set.compute_median();
 //		double spread = distances_p_rand_set.compute_second_moment(median);
 //
@@ -238,7 +267,7 @@ void Bof_db::add_bof(Bof bag) {
 //	//0- Initialisation des deux champs temporaires:
 //	// Parent: INT_MAX, direction: quelconque
 //
-//	//Fonction récursive construisant l'arbre
+//	//Fonction rÃ©cursive construisant l'arbre
 //	make_one_step(INT_MAX,0, &indexes_to_construct);
 //}
 //
@@ -247,31 +276,31 @@ void Bof_db::add_bof(Bof bag) {
 //
 //void Bof_db::make_one_step(int index_parent, int direction, *std::vector<std::vector<unsigned int>>)
 //{
-//	//1- Sélectionner la racine parmi un random set
+//	//1- SÃ©lectionner la racine parmi un random set
 //	unsigned int root = select_vp(parent, direction);
-//	
+//
 //	//2- Choisir la distance critique:
-//	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
+//	// C'est la mÃ©diane des distances du noeud Ã  tous les Ã©lÃ©ments de l'ensemble
 //
 //	//3- Set parent and direction to nodes of the set
 //	//Pour toutes les lignes de la tables ayant index_parent et direction comme champs temporaires,
 //	//	INSERT parent = median
-//	//	Si la distance avec la médiane est supérieur à mu
+//	//	Si la distance avec la mÃ©diane est supÃ©rieur Ã  mu
 //	//		INSERT direction = 1 (sous-arbre de droite)
 //	//	Sinon
 //	//		INSERT direction = 0 (sous-arbre de gauche)
 //	//
 //	//Pour les arbres de gauche et de droite
-//	//	Si il y a un seul élement
-//	//		Mettre dans la base de données que cette ligne est une feuille (mettre les deux sous-arbres à INT_MAX)
+//	//	Si il y a un seul Ã©lement
+//	//		Mettre dans la base de donnÃ©es que cette ligne est une feuille (mettre les deux sous-arbres Ã  INT_MAX)
 //	//	Si il n'y en a aucun
-//	//		Mettre le sous-arbre de la médiane égal à INT_MAX
+//	//		Mettre le sous-arbre de la mÃ©diane Ã©gal Ã  INT_MAX
 //	//
-//	//Mettre à la ligne index_parent de la base de données que le sous-arbre dans la direction direction est median
+//	//Mettre Ã  la ligne index_parent de la base de donnÃ©es que le sous-arbre dans la direction direction est median
 //
-//	//4- Si il y a au moins un élément dans le sous-arbre de gauche
+//	//4- Si il y a au moins un Ã©lÃ©ment dans le sous-arbre de gauche
 //	//		make_one_step(median, 0)
-//	//	 Si il y a au moins un élément dans le sous-arbre de droite
+//	//	 Si il y a au moins un Ã©lÃ©ment dans le sous-arbre de droite
 //	//		make_one_step(median, 1)
 //
 //}
