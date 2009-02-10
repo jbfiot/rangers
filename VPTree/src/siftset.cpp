@@ -36,8 +36,6 @@ Feature SiftSet::operator ()(double index)
  **/
 SiftSet::SiftSet(char *name_base, char *name_sifts)
 {
-	srand ( time(NULL) );
-
 	files_names.clear();
 
 	memcpy(name_database, name_base, sizeof(name_database));

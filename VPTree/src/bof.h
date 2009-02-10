@@ -20,7 +20,7 @@ class Bof
 		Bof(std::vector<Feature> feats) {features = feats;}
 
         // Méthode pour obtenir la repartition dans les k classes du k-means.
-        void get_kmeans_proba(std::vector<Feature> &k_centers, Vector &proba /* Conteneur resultat */) ;
+        void get_kmeans_proba(std::vector<Vector> &k_centers, Vector &proba /* Conteneur resultat */) ;
 
         // Méthode pour trouver la feuille la plus proche dans l'arbre.
         // A Faire ! :p

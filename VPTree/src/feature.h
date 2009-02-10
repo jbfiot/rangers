@@ -35,7 +35,7 @@ public:
 	double operator-(Feature &other)
 	{ return (this->coeffs - other.coeffs);}
 
-	void get_kmeans_proba( std::vector<Feature> &k_centers, Vector &proba/* Conteneur resultat */)  ;
+	void get_kmeans_proba( std::vector<Vector> &k_centers, Vector &proba/* Conteneur resultat */)  ;
 
 
 //private:
@@ -46,6 +46,8 @@ public:
 	Vector coeffs;
 
 	int type;
+	int index_image;
+
 };
 
 

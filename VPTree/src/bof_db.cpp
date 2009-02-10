@@ -16,7 +16,7 @@ return ss.str();
 */
 
 
-Bof_db::Bof_db (std::vector<Feature> centers, string db_host, string db_username,
+Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
 				string db_password, string db_name, string table_name)
 {
     this->db_name = db_name;

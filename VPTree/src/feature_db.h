@@ -35,14 +35,15 @@ public:
 
 	~Feature_db();
 	void insert_feature(Feature &feature);
-    void fill_with_random(int nb_features);
+    void fill_with_random(int nb_images, int nb_features);
 
 	void do_k_means(int k, std::vector<Vector> &centers);
 	unsigned int get_nbfeatures();
+	unsigned int get_nbimages();
 
 	//A IMPLEMENTER
 	void get_feature_number(int index, Vector &vec);
-	//void get_all_features_in_image(int index, std::vector<Features> &features);
+	void get_all_features_in_image(int index, std::vector<Feature> &features);
 
 
 
