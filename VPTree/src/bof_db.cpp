@@ -85,7 +85,7 @@ Bof_db::Bof_db (std::vector<Feature> centers, string db_host, string db_username
 	for (unsigned int i=1; i<=nb_k_centers;i++){
 	    table_creation_query+="Coeff";
 	    table_creation_query+=to_string(i);
-	    table_creation_query+=" int (3) NOT NULL,";
+	    table_creation_query+=" DOUBLE NOT NULL,";
 	}
 	table_creation_query+=" Parent int(10) NOT NULL, Direction int(2) NOT NULL,";
 
