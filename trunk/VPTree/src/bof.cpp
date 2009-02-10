@@ -19,7 +19,6 @@ void Bof::get_kmeans_proba(std::vector<Feature> &k_centers, Vector &proba)  {
 
     }
     proba*=1./features.size();
-    cout <<"proba.size="<<proba.size()<<endl;
 
 
 }

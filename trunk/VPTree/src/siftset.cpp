@@ -67,8 +67,10 @@ void SiftSet::archive_files()
 
 	std::string ligne;
 
-	while(getline(fichier_database,ligne))
+	while(getline(fichier_database,ligne)) {
 		files_names.push_back(ligne);
+	//	cout << ligne<<endl;
+	}
 
 	nb_images = files_names.size();
 }

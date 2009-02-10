@@ -32,7 +32,6 @@ void Feature::get_kmeans_proba( std::vector<Feature> &k_centers, Vector &proba/*
 		proba[i] = 1-((*this) - k_centers[i]);
         sum+=proba[i];
     }
-    cout << "sumF=" << sum <<endl;
     for (unsigned int i=0; i<k_centers.size(); i++){
         proba[i] = proba[i]/sum;
     }
