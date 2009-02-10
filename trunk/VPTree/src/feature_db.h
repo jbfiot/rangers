@@ -36,7 +36,14 @@ public:
 	Feature_db(string db_host="localhost", string db_username="ranger",string db_password="GoRangers!", string db_name="feature_db", string table_name="features");
 
 	~Feature_db();
+	void insert_feature(Feature &feature);
     void fill_with_random(int nb_features);
+
+	//A IMPLEMENTER
+	void get_feature_number(int index, Vector &vec);
+	//void get_all_features_in_image(int index, std::vector<Features> &features);
+
+
 
 	void error_and_exit();
 

@@ -49,7 +49,10 @@ int main()
 		 << endl << "===================================" <<endl;
 
     Feature_db fdb;
-    fdb.fill_with_random(100);
+    //fdb.fill_with_random(100);
+
+	Vector vec;
+	fdb.get_feature_number(1, vec);
 
 	system("pause");
 	return 0;
