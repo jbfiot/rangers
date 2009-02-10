@@ -88,7 +88,7 @@ Feature_db::Feature_db (string db_host, string db_username,
 	*/
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
-	table_creation_query+=" (Feature_ID int (10) NOT NULL auto_increment,X INT NOT NULL DEFAULT 0, Y INT NOT NULL DEFAULT 0,";
+	table_creation_query+=" (Feature_ID int (10) NOT NULL auto_increment,X INT NOT NULL DEFAULT 0, Y INT NOT NULL DEFAULT 0, image INT NOT NULL DEFAULT 0,";
 
 	string test="yeah";
 
@@ -136,23 +136,26 @@ void Feature_db::error_and_exit(){
 *   Fill the table with random
 */
 
-void Feature_db::fill_with_random(int nb_features) {
+void Feature_db::fill_with_random(int nb_images, int nb_features){
 
-	for (int i=0; i<nb_features; ++i)
+	for (int i=0; i<nb_images; ++i)
 	{
-		int* random_coeff = get_random_set_indexes(NB_COEFF_FEATURES+2,1000); // 1000 : max du coeff. (totalement arbitraire)
-		Feature feature;
-		feature.position.push_back(random_coeff[0]);
-		feature.position.push_back(random_coeff[1]);
+		for (int j=0; j<nb_features; ++j)
+		{
+			int* random_coeff = get_random_set_indexes(NB_COEFF_FEATURES+2,1000); // 1000 : max du coeff. (totalement arbitraire)
+			Feature feature;
+			feature.position.push_back(random_coeff[0]);
+			feature.position.push_back(random_coeff[1]);
+			feature.index_image = i+1;
 
-		for (int j=0; j<NB_COEFF_FEATURES; ++j)
-			feature.coeffs.push_back(random_coeff[j+2]);
+			for (int j=0; j<NB_COEFF_FEATURES; ++j)
+				feature.coeffs.push_back(random_coeff[j+2]);
 
-		this->insert_feature(feature);
+			this->insert_feature(feature);
 
-		delete [] random_coeff;
+			delete [] random_coeff;
+		}
 	}
-
 }
 
 
@@ -164,7 +167,7 @@ void Feature_db::insert_feature(Feature &feature) {
 	string fill_with_random_query = "INSERT INTO ";
 	fill_with_random_query+=table_name;
 	fill_with_random_query+=" (";
-	fill_with_random_query+="X,Y,";
+	fill_with_random_query+="X,Y,image,";
 
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
 		fill_with_random_query+="Coeff";
@@ -178,6 +181,8 @@ void Feature_db::insert_feature(Feature &feature) {
 	fill_with_random_query+=to_string(feature.position[0]);
 	fill_with_random_query+=",";
 	fill_with_random_query+=to_string(feature.position[1]);
+	fill_with_random_query+=",";
+	fill_with_random_query+=to_string(feature.index_image);
 	fill_with_random_query+=",";
 
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
@@ -235,8 +240,8 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 
 	row = mysql_fetch_row(result);
 
-	//On fait une boucle pour avoir la valeur de chaque champs (on zappe l'ID, le X et le Y)
-	for (int i = 3; i < num_champs; i++)
+	//On fait une boucle pour avoir la valeur de chaque champs (on zappe l'ID, le X, le Y et l'index_image)
+	for (int i = 4; i < num_champs; i++)
 	{
 		vec.push_back(strtodouble(row[i]));
 	}
@@ -248,14 +253,9 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 
 
 
-void get_all_features_in_image(int index, std::vector<Feature> &features);
-
-
-
-
 /**
- *	Applique l'algorithme des K-Means sur le SiftSet
- **/
+*	Applique l'algorithme des K-Means sur le SiftSet
+**/
 void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 {
 	unsigned int nb_sifts = get_nbfeatures();
@@ -268,8 +268,8 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 	{
 		for (int j=0; j<128; ++j)
 		{
-			//Coords des SIFTs entre 0 et 100?
-			centers[i].push_back( rand()*100./RAND_MAX );
+			//Coords des SIFTs entre 0 et 1000?
+			centers[i].push_back( rand()*1000./RAND_MAX );
 		}
 	}
 
@@ -294,7 +294,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 	Vector sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
-		this->get_feature_number(indexes[i], sifts_list[i]);
+		this->get_feature_number(indexes[i]+1, sifts_list[i]);
 	}
 
 	//K-MEANS...
@@ -344,7 +344,12 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 		}
 
 		for (int j=0; j<k; ++j)
-			centers[j] *= 1./numbers[j];
+		{
+			if (numbers[j] == 0)
+				centers[j].reset();
+			else
+				centers[j] *= 1./numbers[j];
+		}
 
 		nb_iters++;
 
@@ -384,5 +389,97 @@ unsigned int Feature_db::get_nbfeatures()
 	mysql_free_result(result);
 
 	return nb;
-	
+
+}
+
+
+
+void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &features)
+{
+	// REQUETE SQL
+	string get_feature_query = "SELECT * FROM features WHERE image=";
+	get_feature_query += to_string(index);
+
+	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+		cout << "Get feature query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+	//Déclaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	unsigned int num_champs = 0;
+
+	result = mysql_use_result(db_connection);
+
+	//On récupère le nombre de champs
+	num_champs = mysql_num_fields(result);
+
+	//on stock les valeurs de la ligne choisie
+	while (row = mysql_fetch_row(result))
+	{
+		Feature feature;
+
+		//On déclare un pointeur long non signé pour y stocker la taille des valeurs
+		unsigned long *lengths;
+
+		//On stocke cette taille dans le pointeur
+		lengths = mysql_fetch_lengths(result);
+
+		//On fait une boucle pour avoir la valeur de chaque champs
+		cout << "SIFT number " << strtodouble(row[0]) << " requested." << endl;
+
+		feature.position.push_back(strtodouble(row[1]));
+		feature.position.push_back(strtodouble(row[2]));
+		feature.index_image = strtodouble(row[3]);
+
+		for (int i = 4; i < num_champs; i++)
+			feature.coeffs.push_back(strtodouble(row[i]));
+		
+		features.push_back(feature);
+	}
+
+	//Libération du jeu de résultat
+	mysql_free_result(result);
+
+}
+
+
+
+
+
+unsigned int Feature_db::get_nbimages()
+{
+	// REQUETE SQL
+	string get_feature_query = "SELECT COUNT(DISTINCT image) FROM features";
+
+	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+		cout << "Get feature query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+	//RECUPERATION DU CONTENU
+	//Déclaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	//On met le jeu de résultat dans le pointeur result
+	result = mysql_use_result(db_connection);
+
+	//On récupère le nombre de champs
+	unsigned int num_champs = mysql_num_fields(result);
+
+	row = mysql_fetch_row(result);
+	int nb = strtodouble(row[0]);
+
+	//Libération du jeu de résultat
+	mysql_free_result(result);
+
+	return nb;
+
 }

@@ -1,7 +1,7 @@
 #include "bof.h"
 
 
-void Bof::get_kmeans_proba(std::vector<Feature> &k_centers, Vector &proba)  {
+void Bof::get_kmeans_proba(std::vector<Vector> &k_centers, Vector &proba)  {
     Vector proba_j;
     proba.resize(k_centers.size());
 

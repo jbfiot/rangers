@@ -33,7 +33,7 @@ class Bof_db
 public:
 
 
-	Bof_db(std::vector<Feature> centers, string db_host="localhost", string db_username="ranger",
+	Bof_db(std::vector<Vector> centers, string db_host="localhost", string db_username="ranger",
 		string db_password="GoRangers!", string db_name="bof_db", string table_name="bof");
 
 	~Bof_db();
@@ -48,7 +48,7 @@ private:
     string db_host;
     string table_name;
 	int nb_k_centers;
-    std::vector<Feature> centers;
+    std::vector<Vector> centers;
 
 	MYSQL* db_connection;
 	unsigned int nrows;
