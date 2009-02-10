@@ -2,7 +2,8 @@
 #include <time.h>
 #include <iostream>
 #include "siftset.h"
-
+#include <time.h>
+#include <algorithm>
 
 /**
  * Selectionne une liste aleatoire de k nombres entre 1 et n (n>=k)

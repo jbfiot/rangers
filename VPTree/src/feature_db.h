@@ -31,13 +31,14 @@ class Feature_db
 	**/
 
 public:
-
-
 	Feature_db(string db_host="localhost", string db_username="ranger",string db_password="GoRangers!", string db_name="feature_db", string table_name="features");
 
 	~Feature_db();
 	void insert_feature(Feature &feature);
     void fill_with_random(int nb_features);
+
+	void do_k_means(int k, std::vector<Vector> &centers);
+	unsigned int get_nbfeatures();
 
 	//A IMPLEMENTER
 	void get_feature_number(int index, Vector &vec);
