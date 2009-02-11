@@ -13,6 +13,10 @@ inline std::string to_string (const T& t)
 
 double strtodouble(const string& what)
 {
+	// La fonction "double atof( char* ) rÃ©alise exactement ceci : 
+	// atof( what.c_str() )
+	// http://www.cplusplus.com/reference/clibrary/cstdlib/atof.html
+	// http://www.cplusplus.com/reference/string/string/c_str.html
 	istringstream instr(what);
 	double val;
 	instr >> val;
@@ -162,7 +166,7 @@ void Feature_db::fill_with_random(int nb_images, int nb_features){
 /**
 *   Fill the table with random
 **/
-void Feature_db::insert_feature(Feature &feature) {
+void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne serait pas const ?
 
 	string fill_with_random_query = "INSERT INTO ";
 	fill_with_random_query+=table_name;
@@ -228,14 +232,14 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 
 	//RECUPERATION DU CONTENU
 
-	//Déclaration des pointeurs de structure
+	//Dï¿½claration des pointeurs de structure
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
-	//On met le jeu de résultat dans le pointeur result
+	//On met le jeu de rï¿½sultat dans le pointeur result
 	result = mysql_use_result(db_connection);
 
-	//On récupère le nombre de champs
+	//On rï¿½cupï¿½re le nombre de champs
 	unsigned int num_champs = mysql_num_fields(result);
 
 	row = mysql_fetch_row(result);
@@ -246,7 +250,7 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 		vec.push_back(strtodouble(row[i]));
 	}
 
-	//Libération du jeu de résultat
+	//Libï¿½ration du jeu de rï¿½sultat
 	mysql_free_result(result);
 }
 
@@ -273,7 +277,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 		}
 	}
 
-	//Sélection des indexes des points SIFTs au pif
+	//Sï¿½lection des indexes des points SIFTs au pif
 	int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
@@ -290,7 +294,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 		indexes[i] = index;
 	}
 
-	// On met les tous les SIFTs sélectionnés dans une liste
+	// On met les tous les SIFTs sï¿½lectionnï¿½s dans une liste
 	Vector sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
 	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 	{
@@ -306,7 +310,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
 		cout << "Iteration number " << nb_iters << endl;
 
 		bool has_changed = false;
-		// Assigner chaque point à une classe
+		// Assigner chaque point ï¿½ une classe
 		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
 		{
 			Vector sift = sifts_list[i];
@@ -372,20 +376,20 @@ unsigned int Feature_db::get_nbfeatures()
 	}
 
 	//RECUPERATION DU CONTENU
-	//Déclaration des pointeurs de structure
+	//Dï¿½claration des pointeurs de structure
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
-	//On met le jeu de résultat dans le pointeur result
+	//On met le jeu de rï¿½sultat dans le pointeur result
 	result = mysql_use_result(db_connection);
 
-	//On récupère le nombre de champs
+	//On rï¿½cupï¿½re le nombre de champs
 	unsigned int num_champs = mysql_num_fields(result);
 
 	row = mysql_fetch_row(result);
 	int nb = strtodouble(row[0]);
 
-	//Libération du jeu de résultat
+	//Libï¿½ration du jeu de rï¿½sultat
 	mysql_free_result(result);
 
 	return nb;
@@ -407,7 +411,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 		error_and_exit();
 	}
 
-	//Déclaration des pointeurs de structure
+	//Dï¿½claration des pointeurs de structure
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
@@ -415,7 +419,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 
 	result = mysql_use_result(db_connection);
 
-	//On récupère le nombre de champs
+	//On rï¿½cupï¿½re le nombre de champs
 	num_champs = mysql_num_fields(result);
 
 	//on stock les valeurs de la ligne choisie
@@ -423,7 +427,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 	{
 		Feature feature;
 
-		//On déclare un pointeur long non signé pour y stocker la taille des valeurs
+		//On dï¿½clare un pointeur long non signï¿½ pour y stocker la taille des valeurs
 		unsigned long *lengths;
 
 		//On stocke cette taille dans le pointeur
@@ -442,7 +446,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 		features.push_back(feature);
 	}
 
-	//Libération du jeu de résultat
+	//Libï¿½ration du jeu de rï¿½sultat
 	mysql_free_result(result);
 
 }
@@ -464,20 +468,20 @@ unsigned int Feature_db::get_nbimages()
 	}
 
 	//RECUPERATION DU CONTENU
-	//Déclaration des pointeurs de structure
+	//Dï¿½claration des pointeurs de structure
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
-	//On met le jeu de résultat dans le pointeur result
+	//On met le jeu de rï¿½sultat dans le pointeur result
 	result = mysql_use_result(db_connection);
 
-	//On récupère le nombre de champs
+	//On rï¿½cupï¿½re le nombre de champs
 	unsigned int num_champs = mysql_num_fields(result);
 
 	row = mysql_fetch_row(result);
 	int nb = strtodouble(row[0]);
 
-	//Libération du jeu de résultat
+	//Libï¿½ration du jeu de rï¿½sultat
 	mysql_free_result(result);
 
 	return nb;
