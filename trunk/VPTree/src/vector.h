@@ -9,13 +9,20 @@ enum {SIFT};
 
 /**
  * Classe Vecteur:
- *	Classe dérivant des std::vector<double> avec des méthodes pour faire la distance entre deux vecteurs,
+ *	Classe dï¿½rivant des std::vector<double> avec des mï¿½thodes pour faire la distance entre deux vecteurs,
  *  la somme, la multiplication par un scalaire...
  **/
 class Vector : public std::vector<double>
 {
 public:
 	Vector(int typ=SIFT) {type = SIFT;};
+
+// Une classe fille herite de tout, sauf :
+// 1) des constructeurs et du destructeur
+// 2) des classe amie (friends)
+// 3) de l'operateur =
+// Des bogues incomprehensibles vont apparaitre si au moins les constructeurs 
+// par defaut et par copie, ainsi que l'operateur = ne sont pas redefinis.
 
 	double get_distance_with(Vector &other);
 	void add_feature(Vector &other);
@@ -31,9 +38,9 @@ public:
 	double operator-(Vector &other)
 	{ return this->get_distance_with(other);}
 
-	//A implémenter
+	//A implï¿½menter
 	double compute_median() {return 0;}
-	double compute_second_moment(double val); //(somme(xi - val)²)
+	double compute_second_moment(double val); //(somme(xi - val)ï¿½)
 
 	friend ostream& operator <<(ostream& co, Vector& f );
 

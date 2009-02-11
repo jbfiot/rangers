@@ -24,6 +24,8 @@ double Vector::get_distance_with(Vector &other)
  * Ajoute un feature au feature courant
  **/
 void Vector::add_feature(Vector &other)
+// A verifier mais ca il me semble que ce serait teeeeeellement plus rapide avec des iterateurs. La ca doit etre tres tres lent.
+// Est-ce qu'il ne faudrait pas verifier que this et other ont la meme taille ?
 {
     if (type==SIFT && other.type==SIFT){
         for (unsigned int i=0; i<this->size(); ++i)
@@ -41,6 +43,7 @@ void Vector::add_feature(Vector &other)
  * Divise un feature par un double
  **/
 void Vector::get_mul_cst(double factor)
+// voir plus haut : iterateurs = mieux
 {
 	for (unsigned int i=0; i<this->size(); ++i)
 	{
@@ -49,9 +52,10 @@ void Vector::get_mul_cst(double factor)
 }
 
 /**
-* Met à 0 tous les coeffs du feature
+* Met ï¿½ 0 tous les coeffs du feature
 **/
 void Vector::reset()
+// voir plus haut : iterateurs = mieux
 {
 	for (unsigned int i=0; i<this->size(); ++i)
 	{
@@ -69,9 +73,11 @@ double Vector::compute_second_moment(double val)
 		res += temp*temp;
 	}
 	return res;
+	// Hmm... Est-ce que le second moment ne devrait pas etre normalise par le nombre d'elements ? (i.e: la taille du vecteur)
 }
 
 ostream& operator <<(ostream& co, Vector& vec )
+// vec est const
 {
 	cout << "Vecteur de taille: " << vec.size() << endl;
 	for (unsigned int i=0; i<vec.size(); ++i)
