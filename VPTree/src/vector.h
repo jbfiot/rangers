@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 enum {SIFT};
@@ -39,7 +40,7 @@ public:
 	{ return this->get_distance_with(other);}
 
 	//A implementer
-	double compute_median() {return 0;}
+	double compute_median();
 	double compute_second_moment(double val); //(somme(xi - val)e)
 
 	friend ostream& operator <<(ostream& co, Vector& f );

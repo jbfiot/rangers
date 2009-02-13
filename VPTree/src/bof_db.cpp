@@ -300,7 +300,7 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
 }
 
 
-int Bof_db::select_vp(int index_parent, int direction)
+unsigned int Bof_db::select_vp(int index_parent, int direction)
 {
 	std::vector<Vector> sample_set = select_random_set_indexes(index_parent, direction);
 	double best_spread= 0;

@@ -64,6 +64,15 @@ void Vector::reset()
 }
 
 
+double Vector::compute_median()
+{  
+   unsigned int size = this->size();
+   sort(this->begin(), this->end());
+   unsigned int mid = size/2;
+   return size % 2 == 0 ? ((*this)[mid] + (*this)[mid-1]) / 2 : (*this)[mid];
+}
+
+
 double Vector::compute_second_moment(double val)
 {
 	int res = 0;
