@@ -1,6 +1,7 @@
 #include "bof_db.h"
 
-# define RANDOM_SET_MAX_LENGTH 1000
+#define RANDOM_SET_MAX_LENGTH 1000
+#define MAX_BOF_BY_SELECT 100
 
 using namespace std;
 
@@ -73,16 +74,18 @@ Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
     */
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
-	table_creation_query+=" (Bof_ID int (10) NOT NULL auto_increment,";
+	table_creation_query+=" (Bof_ID int NOT NULL auto_increment,";
 
 	for (unsigned int i=1; i<=nb_k_centers;i++){
 	    table_creation_query+="Coeff";
 	    table_creation_query+=to_string(i);
 	    table_creation_query+=" DOUBLE NOT NULL,";
 	}
-	table_creation_query+=" Parent int(10) NOT NULL DEFAULT 0, Direction int(2) NOT NULL DEFAULT 0,";
+	table_creation_query+=" Parent int DEFAULT 0, Direction int DEFAULT 0, Mu double, Son1 int DEFAULT 0, Son2 int DEFAULT 0,";
 
 	table_creation_query+=" PRIMARY KEY(Bof_ID))";
+
+	cout << table_creation_query <<endl;
 
 	if (!mysql_query(db_connection, table_creation_query.c_str())) {
         cout << "Table creation query: OK."<<endl;
@@ -229,8 +232,8 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
         random_query+=" and direction = ";
         random_query+=direction;
 
-        if (!mysql_query(db_connection, nb_result_query.c_str())) {
-            cout << "# of results of query: OK"<<endl;
+        if (!mysql_query(db_connection, random_query.c_str())) {
+            cout << "Random query: OK"<<endl;
         }
         else {
             error_and_exit();
@@ -335,45 +338,136 @@ unsigned int Bof_db::select_vp(int index_parent, int direction)
 }
 
 
-//void Bof_db::build_tree()
-//{
-//	//0- Initialisation des deux champs temporaires:
-//	// Parent: INT_MAX, direction: quelconque
-//
-//	//Fonction récursive construisant l'arbre
-//	make_one_step(INT_MAX,0, &indexes_to_construct);
-//}
-//
-//
-//
-//
-//void Bof_db::make_one_step(int index_parent, int direction, *std::vector<std::vector<unsigned int>>)
-//{
-//	//1- Sélectionner la racine parmi un random set
-//	unsigned int root = select_vp(parent, direction);
-//
-//	//2- Choisir la distance critique:
-//	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
-//
-//	//3- Set parent and direction to nodes of the set
-//	//Pour toutes les lignes de la tables ayant index_parent et direction comme champs temporaires,
-//	//	INSERT parent = median
-//	//	Si la distance avec la médiane est supérieur à mu
-//	//		INSERT direction = 1 (sous-arbre de droite)
-//	//	Sinon
-//	//		INSERT direction = 0 (sous-arbre de gauche)
-//	//
-//	//Pour les arbres de gauche et de droite
-//	//	Si il y a un seul élement
-//	//		Mettre dans la base de données que cette ligne est une feuille (mettre les deux sous-arbres à INT_MAX)
-//	//	Si il n'y en a aucun
-//	//		Mettre le sous-arbre de la médiane égal à INT_MAX
-//	//
-//	//Mettre à la ligne index_parent de la base de données que le sous-arbre dans la direction direction est median
-//
-//	//4- Si il y a au moins un élément dans le sous-arbre de gauche
-//	//		make_one_step(median, 0)
-//	//	 Si il y a au moins un élément dans le sous-arbre de droite
-//	//		make_one_step(median, 1)
-//
-//}
+void Bof_db::build_tree()
+{
+	//Fonction récursive construisant l'arbre
+	make_one_step(0,0);
+}
+
+
+
+
+void Bof_db::make_one_step(int index_parent, int direction)
+{
+	//1- Sélectionner la racine parmi un random set
+	unsigned int root = select_vp(index_parent, direction);
+
+	//2- Choisir la distance critique:
+	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
+	double mu; // pour la distance critique
+	int median_index; // pour l'index du bof qui devient noeud de division
+
+
+	//3- Set parent and directions to nodes of the set
+	int i=0, nb_son_1=0, nb_son_2=0;
+
+    //Declaration des pointeurs de structure
+    MYSQL_RES *result = NULL;
+    MYSQL_ROW row = NULL;
+
+    unsigned int num_champs = 0;
+
+    string mos_query,median_query, dir;
+    double dist;
+
+	while(1) {
+        mos_query = "SELECT (";
+
+        for (unsigned int k=1; k<=nb_k_centers;k++){
+            mos_query+="Coeff";
+            mos_query+=to_string(k);
+            if (k!= nb_k_centers)
+                mos_query+=" ,";
+            else
+                mos_query+=") OFFSET ";
+        }
+        mos_query+=to_string(i*MAX_BOF_BY_SELECT);
+        mos_query+=" LIMIT "; mos_query+=to_string(MAX_BOF_BY_SELECT);
+        mos_query+=" WHERE parent = "; mos_query+=index_parent;
+        mos_query+=" and direction = "; mos_query+=direction;
+
+
+        if (!mysql_query(db_connection, mos_query.c_str())) {
+            cout << "MakeOneStep query: OK"<<endl;
+        }
+        else {
+            error_and_exit();
+        }
+
+        result = mysql_use_result(db_connection);
+
+        //On recupere le nombre de champs
+        num_champs = mysql_num_fields(result);
+
+        if (num_champs>0) {
+            while (row = mysql_fetch_row(result))
+            {
+                // TO-DO : recup le bof ID et calculer la distance à partir de row
+                string Bof_ID;
+
+                //dist = ...;
+                if (dist>mu) {
+                    dir = "1";
+                    nb_son_1++;
+                }
+                else {
+                    dir = "2";
+                    nb_son_2++;
+                }
+
+                median_query = "INSERT INTO ";
+                median_query+=db_name;
+                median_query+=" (Parent,direction) VALUES (";
+                median_query+=to_string(median_index);
+                median_query+=",";
+                median_query+=dir;
+                median_query+=") WHERE Bof_ID=";
+                median_query+=Bof_ID;
+
+                if (!mysql_query(db_connection, median_query.c_str())) {
+                    cout << "Median query: OK"<<endl;
+                }
+                else {
+                    error_and_exit();
+                }
+
+            }
+        }
+        else
+            break;
+
+        //Liberation du jeu de resultat
+        mysql_free_result(result);
+
+	    i++;
+
+	}
+
+
+	//Pour toutes les lignes de la tables ayant index_parent et direction comme champs temporaires,
+	//	INSERT parent = median
+	//	Si la distance avec la médiane est supérieur à mu
+	//		INSERT direction = 1 (sous-arbre de droite)
+	//	Sinon
+	//		INSERT direction = 0 (sous-arbre de gauche)
+
+
+
+
+
+	//Pour les arbres de gauche et de droite
+	//	Si il y a un seul élement
+	//		Mettre dans la base de données que cette ligne est une feuille (mettre les deux sous-arbres à INT_MAX)
+	//	Si il n'y en a aucun
+	//		Mettre le sous-arbre de la médiane égal à INT_MAX
+	//
+	//Mettre à la ligne index_parent de la base de données que le sous-arbre dans la direction direction est median
+
+	//4- Si il y a au moins un élément dans le sous-arbre de gauche
+	if (nb_son_1>0)
+        make_one_step(median_index, 1);
+	//	 Si il y a au moins un élément dans le sous-arbre de droite
+	if (nb_son_2>0)
+		make_one_step(median_index, 2);
+
+}
