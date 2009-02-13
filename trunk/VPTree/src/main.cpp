@@ -27,7 +27,7 @@ int main()
 	cout << endl << "==================================="
 		 << endl << "   Etape 1: Remplissage de la base de données de Features"
 		 << endl << "===================================" <<endl;
-    //fdb.fill_with_random(10, 200);
+    fdb.fill_with_random(10, 200);
 
     cout << endl << "==================================="
 		 << endl << "   Etape 2: Appliquer l'algorithme des K-Means  "
