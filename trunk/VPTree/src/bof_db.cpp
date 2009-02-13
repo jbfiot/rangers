@@ -1,4 +1,7 @@
 #include "bof_db.h"
+
+# define RANDOM_SET_MAX_LENGTH 1000
+
 using namespace std;
 
 
@@ -155,11 +158,6 @@ void Bof_db::add_bof(Bof bag) {
 
 
 
-
-
-
-
-
 /**
  * PARTIE CONSTRUCTION DE L'ARBRE
  **/
@@ -173,7 +171,10 @@ void Bof_db::add_bof(Bof bag) {
 std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int direction)
 {
 	//1- Compter le nombre de résultats de la requete
-	string nb_result_query = "SELECT count(*) LIMIT INDEX WHERE parent = index_parent and direction = direction";
+	string nb_result_query = "SELECT count(*) WHERE parent =";
+	nb_result_query+=to_string(index_parent);
+	nb_result_query+=" AND direction = ";
+	nb_result_query+= to_string(direction);
 
 
 	if (!mysql_query(db_connection, nb_result_query.c_str())) {
@@ -204,20 +205,20 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
 
 	//2- Sélectionner un random set sur la liste des indexes
 	std::vector<Vector> sample_set;
-	if (nb<1000)
+	if (nb>RANDOM_SET_MAX_LENGTH)
 	{
-		int *random_indexes = get_random_set_indexes(1000, nb);
-		sample_set.resize(1000);
-		for (int i=0; i<1000; ++i)
+		int *random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
+		sample_set.resize(RANDOM_SET_MAX_LENGTH);
+		for (int i=0; i<RANDOM_SET_MAX_LENGTH; ++i)
 		{
 			//Le random_indexes[i]-ième résultat
 
         random_query = "SELECT (";
 
-        for (unsigned int i=1; i<=nb_k_centers;i++){
+        for (unsigned int k=1; k<=nb_k_centers;k++){
             random_query+="Coeff";
-            random_query+=to_string(i);
-            if (i!= nb_k_centers)
+            random_query+=to_string(k);
+            if (k!= nb_k_centers)
                 random_query+=" ,";
             else
                 random_query+=") OFFSET ";
@@ -227,6 +228,14 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
         random_query+=index_parent;
         random_query+=" and direction = ";
         random_query+=direction;
+
+        if (!mysql_query(db_connection, nb_result_query.c_str())) {
+            cout << "# of results of query: OK"<<endl;
+        }
+        else {
+            error_and_exit();
+        }
+
 
         //On met le jeu de resultat dans le pointeur result
         result = mysql_use_result(db_connection);
@@ -240,39 +249,47 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
         //Liberation du jeu de resultat
         mysql_free_result(result);
 
-
-
-
-
-
-		//	sample_set[i] =
-			//	"SELECT d0,...,d1000 OFFSET random_indexes[i] LIMIT 1 WHERE parent = index_parent and direction = direction"
 		}
 
 		delete [] random_indexes;
 	}
 	else
 	{
-//		sample_set= "SELECT d0,...,d1000 WHERE parent = index_parent and direction = direction";
+	    sample_set.resize(nb);
+        random_query = "SELECT (";
+
+        for (unsigned int i=1; i<=nb_k_centers;i++){
+            random_query+="Coeff";
+            random_query+=to_string(i);
+            if (i!= nb_k_centers)
+                random_query+=" ,";
+        }
+        random_query+=")";
+        random_query+=" WHERE parent = ";
+        random_query+=index_parent;
+        random_query+=" and direction = ";
+        random_query+=direction;
+
+        if (!mysql_query(db_connection, nb_result_query.c_str())) {
+            cout << "# of results of query: OK"<<endl;
+        }
+        else {
+            error_and_exit();
+        }
+
+        //On met le jeu de resultat dans le pointeur result
+        result = mysql_use_result(db_connection);
 
 
+        row = mysql_fetch_row(result);
+        for (int i=0; i<nb;i++) {
+            for (int j=0; j<nb_k_centers;j++){
+                sample_set[i][j] = strtodouble(row[j]);
+            }
+        }
 
-
-//        //On met le jeu de resultat dans le pointeur result
-//        result = mysql_use_result(db_connection);
-//
-//
-//        row = mysql_fetch_row(result);
-//        for (int j=0; j<nb_k_centers;j++){
-//            sample_set[i][j] = strtodouble(row[j]);
-//        }
-//
-//        //Liberation du jeu de resultat
-//        mysql_free_result(result);
-//
-
-
-
+        //Liberation du jeu de resultat
+        mysql_free_result(result);
 
 
 

@@ -72,8 +72,7 @@ double Vector::compute_second_moment(double val)
 		double temp = (*this)[i] - val;
 		res += temp*temp;
 	}
-	return res;
-	// Hmm... Est-ce que le second moment ne devrait pas etre normalise par le nombre d'elements ? (i.e: la taille du vecteur)
+	return res/this->size();
 }
 
 ostream& operator <<(ostream& co, Vector& vec )
