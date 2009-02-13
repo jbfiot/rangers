@@ -301,7 +301,7 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 }
 
 
-unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root, double median)
+unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 {
 	std::vector<Vector> sample_set;
 	select_random_set_indexes(index_parent, direction, sample_set);
@@ -352,8 +352,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 {
 	//1- Sélectionner la racine parmi un random set
 	Vector root;
-	double mu;
-	unsigned int median_index = select_vp(index_parent, direction, root, mu);
+	unsigned int median_index = select_vp(index_parent, direction, root);
 
 
 	//2- Choisir la distance critique:
@@ -362,6 +361,8 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	int offset;
 	while (distances_to_current(offset, index_parent, direction, root, distances) == 0)
 		continue;
+
+	double mu = distances.compute_median();
 
 
 	//3- Set parent and directions to nodes of the set
