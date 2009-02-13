@@ -52,7 +52,7 @@ void Vector::get_mul_cst(double factor)
 }
 
 /**
-* Met � 0 tous les coeffs du feature
+* Met e 0 tous les coeffs du feature
 **/
 void Vector::reset()
 // voir plus haut : iterateurs = mieux

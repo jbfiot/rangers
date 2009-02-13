@@ -9,7 +9,7 @@ enum {SIFT};
 
 /**
  * Classe Vecteur:
- *	Classe d�rivant des std::vector<double> avec des m�thodes pour faire la distance entre deux vecteurs,
+ *	Classe derivant des std::vector<double> avec des methodes pour faire la distance entre deux vecteurs,
  *  la somme, la multiplication par un scalaire...
  **/
 class Vector : public std::vector<double>
@@ -21,7 +21,7 @@ public:
 // 1) des constructeurs et du destructeur
 // 2) des classe amie (friends)
 // 3) de l'operateur =
-// Des bogues incomprehensibles vont apparaitre si au moins les constructeurs 
+// Des bogues incomprehensibles vont apparaitre si au moins les constructeurs
 // par defaut et par copie, ainsi que l'operateur = ne sont pas redefinis.
 
 	double get_distance_with(Vector &other);
@@ -38,9 +38,9 @@ public:
 	double operator-(Vector &other)
 	{ return this->get_distance_with(other);}
 
-	//A impl�menter
+	//A implementer
 	double compute_median() {return 0;}
-	double compute_second_moment(double val); //(somme(xi - val)�)
+	double compute_second_moment(double val); //(somme(xi - val)e)
 
 	friend ostream& operator <<(ostream& co, Vector& f );
 

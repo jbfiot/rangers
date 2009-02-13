@@ -20,14 +20,14 @@ int main()
 
 
 	cout << endl << "==================================="
-		 << endl << "   Etape 0: Instanciation (et remplissage aléatoire si nécessaire) de la BDD de Features"
+		 << endl << "   Etape 0: Instanciation (et remplissage alÃ©atoire si nÃ©cessaire) de la BDD de Features"
 		 << endl << "===================================" <<endl;
     Feature_db fdb;
 
 	cout << endl << "==================================="
-		 << endl << "   Etape 1: Remplissage de la base de données de Features"
+		 << endl << "   Etape 1: Remplissage de la base de donnÃ©es de Features"
 		 << endl << "===================================" <<endl;
-    fdb.fill_with_random(10, 20);
+    //fdb.fill_with_random(10, 200);
 
     cout << endl << "==================================="
 		 << endl << "   Etape 2: Appliquer l'algorithme des K-Means  "
@@ -37,13 +37,13 @@ int main()
 	fdb.do_k_means(K, centers);
 
     cout << endl << "==================================="
-		 << endl << "   Etape3: initialisation de la base de données de BOFs   "
+		 << endl << "   Etape3: initialisation de la base de donnÃ©es de BOFs   "
 		 << endl << "===================================" <<endl;
 	Bof_db bof_db(centers);
 
 
     cout << endl << "==================================="
-		 << endl << "   Etape4: Extraire les régions dans chaque image et les insérer dans la base   "
+		 << endl << "   Etape4: Extraire les rÃ©gions dans chaque image et les insÃ©rer dans la base   "
 		 << endl << "===================================" <<endl;
 	for (int i=1; i<fdb.get_nbimages()+1; ++i)
 	{
@@ -63,7 +63,7 @@ int main()
 		/**/	std::vector<Bof> all_regions_in_image;		/**/
 		/**/	all_regions_in_image.push_back(Bof(feats));	/**/
 
-		//Ajout de la BOF à  la database
+		//Ajout de la BOF Ã Â  la database
 		for (int j=0; j<all_regions_in_image.size(); ++j)
 		{
 			Bof bof = all_regions_in_image[j];
@@ -73,7 +73,7 @@ int main()
 	}
 
 
-	// Etape5: Construire l'arbre et le sauver dans la base de données
+	// Etape5: Construire l'arbre et le sauver dans la base de donnÃ©es
 	// !! FONCTION A IMPLEMENTER !!
 	//bof_db.build_tree();
 

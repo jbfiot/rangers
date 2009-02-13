@@ -28,7 +28,7 @@ class Feature_db
 
 	/**
 	*
-	* Classe Feature_db : Gestion de la base de données de features.
+	* Classe Feature_db : Gestion de la base de donnÃ©es de features.
 	*
 	**/
 
