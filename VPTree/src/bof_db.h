@@ -12,7 +12,8 @@
 #endif
 
 #include <mysql.h>
-
+#include "tools.h"
+#include "vector.h"
 
 #include <iostream>
 
@@ -51,6 +52,11 @@ private:
 
 	MYSQL* db_connection;
 	unsigned int nrows;
+
+	int select_vp(int index_parent, int direction);
+	std::vector<Vector> select_random_set_indexes(int index_parent, int direction);
+
+	//void make_one_step(int index_parent, int direction, *std::vector<std::vector<unsigned int>>);
 
 
 

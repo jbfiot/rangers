@@ -8,6 +8,7 @@
 #include <assert.h>
 
 
+
 /**
 *
 * Classe Bof = Bag-of-features

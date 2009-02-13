@@ -12,10 +12,10 @@ using namespace std;
  * Selectionne une liste aleatoire de k nombres entre 1 et n (n>=k)
  **/
 int *get_random_set_indexes(int k,int n)
-// Est-ce que renvoyer un int* est vraiment judicieux ? 
-// Cette fonction nécessite de réaliser une allocation mémoire 
+// Est-ce que renvoyer un int* est vraiment judicieux ?
+// Cette fonction nécessite de réaliser une allocation mémoire
 // potentiellement importante à chaque fois.
-// Est-ce qu'il ne serait pas plus interessant de prendre en argument un vector<int>& 
+// Est-ce qu'il ne serait pas plus interessant de prendre en argument un vector<int>&
 // et de ne modifier sa taille seulement dans les cas indispensables ?
 {
 	int *indexes = new int[k];
@@ -36,3 +36,15 @@ int *get_random_set_indexes(int k,int n)
 	return indexes;
 }
 
+
+double strtodouble(const string& what)
+{
+	// La fonction "double atof( char* ) r�alise exactement ceci :
+	// atof( what.c_str() )
+	// http://www.cplusplus.com/reference/clibrary/cstdlib/atof.html
+	// http://www.cplusplus.com/reference/string/string/c_str.html
+	istringstream instr(what);
+	double val;
+	instr >> val;
+	return val;
+}

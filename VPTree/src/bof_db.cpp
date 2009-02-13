@@ -1,14 +1,6 @@
 #include "bof_db.h"
+using namespace std;
 
-#include <sstream>
-
-template <class T>
-inline std::string to_string (const T& t)
-{
-std::stringstream ss;
-ss << t;
-return ss.str();
-}
 
 
 /**
@@ -79,8 +71,6 @@ Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
 	table_creation_query+=" (Bof_ID int (10) NOT NULL auto_increment,";
-
-	string test="yeah";
 
 	for (unsigned int i=1; i<=nb_k_centers;i++){
 	    table_creation_query+="Coeff";
@@ -168,100 +158,166 @@ void Bof_db::add_bof(Bof bag) {
 
 
 
-// PARTIE CONSTRUCTION DE L'ARBRE
-//
-///**
-// * Sélectionne une liste aléatoire de k nombres entre 1 et n (n>=k)
-// **/
-//int *get_random_set_indexes(k, n)
-//{
-//	int *indexes = new int[k];
-//	for (int i=0; i<k; ++i)
-//	{
-//		int index;
-//		while (1)
-//		{
-//			index = rand()%n;
-//
-//			int *p = find(indexes,indexes+i,index);
-//			if (p == indexes+i)
-//				break;
-//		}
-//
-//		indexes[i] = index;
-//	}
-//	return indexes;
-//}
-//
-//
-///**
-// * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
-// * PARENT = parent et DIRECTION = direction
-// **/
-//std::vector<std::vector<double>> select_random_set_indexes(int index_parent, int direction)
-//{
-//	//1- Compter le nombre de résultats de la requete
-//	unsigned int nb = "SELECT count(*) LIMIT INDEX WHERE parent = index_parent and direction = direction";
-//
-//	//2- Sélectionner un random set sur la liste des indexes
-//	std::vector<std::vector<double>> sample_set;
-//	if (nb<1000)
-//	{
-//		int *random_indexes = get_random_set_indexes(1000, nb);
-//		sample_set.resize(1000);
-//		for (int i=0; i<1000; ++i)
-//		{
-//			//Le random_indexes[i]-ième résultat
-//			sample_set[i] =
-//				"SELECT d0,...,d1000 OFFSET random_indexes[i] LIMIT 1 WHERE parent = index_parent and direction = direction"
-//		}
-//		delete [] random_indexes;
-//	}
-//	else
-//	{
+
+
+/**
+ * PARTIE CONSTRUCTION DE L'ARBRE
+ **/
+
+
+
+/**
+ * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
+ * PARENT = parent et DIRECTION = direction
+ **/
+std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int direction)
+{
+	//1- Compter le nombre de résultats de la requete
+	string nb_result_query = "SELECT count(*) LIMIT INDEX WHERE parent = index_parent and direction = direction";
+
+
+	if (!mysql_query(db_connection, nb_result_query.c_str())) {
+	    cout << "# of results of query: OK"<<endl;
+	}
+	else {
+        error_and_exit();
+	}
+
+	//RECUPERATION DU CONTENU
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	//On met le jeu de resultat dans le pointeur result
+	result = mysql_use_result(db_connection);
+
+	//On recupere le nombre de champs
+	unsigned int num_champs = mysql_num_fields(result);
+
+	row = mysql_fetch_row(result);
+	unsigned int nb = strtodouble(row[0]);
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+    string random_query;
+
+	//2- Sélectionner un random set sur la liste des indexes
+	std::vector<Vector> sample_set;
+	if (nb<1000)
+	{
+		int *random_indexes = get_random_set_indexes(1000, nb);
+		sample_set.resize(1000);
+		for (int i=0; i<1000; ++i)
+		{
+			//Le random_indexes[i]-ième résultat
+
+        random_query = "SELECT (";
+
+        for (unsigned int i=1; i<=nb_k_centers;i++){
+            random_query+="Coeff";
+            random_query+=to_string(i);
+            if (i!= nb_k_centers)
+                random_query+=" ,";
+            else
+                random_query+=") OFFSET ";
+        }
+        random_query+=to_string(random_indexes[i]);
+        random_query+=" LIMIT 1 WHERE parent = ";
+        random_query+=index_parent;
+        random_query+=" and direction = ";
+        random_query+=direction;
+
+        //On met le jeu de resultat dans le pointeur result
+        result = mysql_use_result(db_connection);
+
+
+        row = mysql_fetch_row(result);
+        for (int j=0; j<nb_k_centers;j++){
+            sample_set[i][j] = strtodouble(row[j]);
+        }
+
+        //Liberation du jeu de resultat
+        mysql_free_result(result);
+
+
+
+
+
+
+		//	sample_set[i] =
+			//	"SELECT d0,...,d1000 OFFSET random_indexes[i] LIMIT 1 WHERE parent = index_parent and direction = direction"
+		}
+
+		delete [] random_indexes;
+	}
+	else
+	{
 //		sample_set= "SELECT d0,...,d1000 WHERE parent = index_parent and direction = direction";
-//	}
-//
-//	return sample_set;
-//
-//}
-//
-//
-//int Bof_db::select_vp(int index_parent, int direction)
-//{
-//	std::vector<std::vector<double>> sample_set = select_random_set_indexes(int index_parent, int direction);
-//	double best_spread= 0;
-//	unsigned int best_candidate = 0;
-//
-//	for (int i=0; i<sample_set.size(); ++i)
-//	{
-//		//Sélection d'un set aléatoire de l'espace qui nous intéresse
-//		std::vector<double> candidate = sample_set[i];
-//		std::vector<std::vector<double>> rand_set_for_med_test = select_random_set_indexes(int index_parent, int direction);
-//
-//		//Précalcul des distances entre le candidat et les régions du sample_set
-//		std::vector<double> distances_p_rand_set(rand_set_for_med_test.size());
-//		for (int j=0; j<distances_p_rand_set.size(); ++j)
-//		{
-//			distances_p_rand_set[j] = candidate - rand_set_for_med_test[j];
-//		}
-//
-//		//Calcul de la variance de cet ensemble de distances (calculée avec la médiane)
-//		double median = distances_p_rand_set.compute_median();
-//		double spread = distances_p_rand_set.compute_second_moment(median);
-//
-//		if (spread > best_spread)
-//		{
-//			best_spread = spread;
-//			best_candidate = i;
-//		}
-//
-//	}
-//
-//	return best_candidate;
-//}
+
+
+
+
+//        //On met le jeu de resultat dans le pointeur result
+//        result = mysql_use_result(db_connection);
 //
 //
+//        row = mysql_fetch_row(result);
+//        for (int j=0; j<nb_k_centers;j++){
+//            sample_set[i][j] = strtodouble(row[j]);
+//        }
+//
+//        //Liberation du jeu de resultat
+//        mysql_free_result(result);
+//
+
+
+
+
+
+
+	}
+
+	return sample_set;
+
+}
+
+
+int Bof_db::select_vp(int index_parent, int direction)
+{
+	std::vector<Vector> sample_set = select_random_set_indexes(index_parent, direction);
+	double best_spread= 0;
+	unsigned int best_candidate = 0;
+
+	for (int i=0; i<sample_set.size(); ++i)
+	{
+		//Sélection d'un set aléatoire de l'espace qui nous intéresse
+		Vector candidate = sample_set[i];
+		std::vector<Vector> rand_set_for_med_test = select_random_set_indexes(index_parent, direction);
+
+		//Précalcul des distances entre le candidat et les régions du sample_set
+		Vector distances_p_rand_set(rand_set_for_med_test.size());
+		for (int j=0; j<distances_p_rand_set.size(); ++j)
+		{
+			distances_p_rand_set[j] = candidate - rand_set_for_med_test[j];
+		}
+
+		//Calcul de la variance de cet ensemble de distances (calculée avec la médiane)
+		double median = distances_p_rand_set.compute_median();
+		double spread = distances_p_rand_set.compute_second_moment(median);
+
+		if (spread > best_spread)
+		{
+			best_spread = spread;
+			best_candidate = i;
+		}
+
+	}
+
+	return best_candidate;
+}
+
+
 //void Bof_db::build_tree()
 //{
 //	//0- Initialisation des deux champs temporaires:
