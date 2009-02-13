@@ -171,7 +171,7 @@ void Bof_db::add_bof(Bof bag) {
  * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
  * PARENT = parent et DIRECTION = direction
  **/
-std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int direction)
+void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set)
 {
 	//1- Compter le nombre de résultats de la requete
 	string nb_result_query = "SELECT count(*) WHERE parent =";
@@ -207,7 +207,6 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
     string random_query;
 
 	//2- Sélectionner un random set sur la liste des indexes
-	std::vector<Vector> sample_set;
 	if (nb>RANDOM_SET_MAX_LENGTH)
 	{
 		int *random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
@@ -298,14 +297,14 @@ std::vector<Vector> Bof_db::select_random_set_indexes(int index_parent, int dire
 
 	}
 
-	return sample_set;
 
 }
 
 
-unsigned int Bof_db::select_vp(int index_parent, int direction)
+unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root, double median)
 {
-	std::vector<Vector> sample_set = select_random_set_indexes(index_parent, direction);
+	std::vector<Vector> sample_set;
+	select_random_set_indexes(index_parent, direction, sample_set);
 	double best_spread= 0;
 	unsigned int best_candidate = 0;
 
@@ -313,7 +312,8 @@ unsigned int Bof_db::select_vp(int index_parent, int direction)
 	{
 		//Sélection d'un set aléatoire de l'espace qui nous intéresse
 		Vector candidate = sample_set[i];
-		std::vector<Vector> rand_set_for_med_test = select_random_set_indexes(index_parent, direction);
+		std::vector<Vector> rand_set_for_med_test;
+		select_random_set_indexes(index_parent, direction, rand_set_for_med_test);
 
 		//Précalcul des distances entre le candidat et les régions du sample_set
 		Vector distances_p_rand_set(rand_set_for_med_test.size());
@@ -330,6 +330,7 @@ unsigned int Bof_db::select_vp(int index_parent, int direction)
 		{
 			best_spread = spread;
 			best_candidate = i;
+			root = candidate;
 		}
 
 	}
@@ -350,12 +351,17 @@ void Bof_db::build_tree()
 void Bof_db::make_one_step(int index_parent, int direction)
 {
 	//1- Sélectionner la racine parmi un random set
-	unsigned int root = select_vp(index_parent, direction);
+	Vector root;
+	double mu;
+	unsigned int median_index = select_vp(index_parent, direction, root, mu);
+
 
 	//2- Choisir la distance critique:
 	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
-	double mu; // pour la distance critique
-	int median_index; // pour l'index du bof qui devient noeud de division
+	Vector distances;
+	int offset;
+	while (distances_to_current(offset, index_parent, direction, root, distances) == 0)
+		continue;
 
 
 	//3- Set parent and directions to nodes of the set
@@ -470,4 +476,78 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	if (nb_son_2>0)
 		make_one_step(median_index, 2);
 
+}
+
+
+
+
+
+
+
+
+int Bof_db::distances_to_current(int &offset, int &index_parent, int &direction, Vector &root, Vector &distances)
+{
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	//2- Sélectionner un random set sur la liste des indexes
+	string distances_query = "SELECT ";
+
+	for (unsigned int k=1; k<=nb_k_centers;k++)
+	{
+		distances_query+="Coeff";
+		distances_query+=to_string(k);
+		if (k!= nb_k_centers)
+			distances_query+=" ,";
+		else
+			distances_query+=" FROM ";
+	}
+
+	distances_query += table_name;
+	distances_query += " OFFSET ";
+	distances_query += to_string(offset);
+	distances_query += " LIMIT 1000 WHERE parent = ";
+	distances_query += to_string(index_parent);
+	distances_query += " and direction = ";
+	distances_query += to_string(direction);
+
+	if (!mysql_query(db_connection, distances_query.c_str()))
+		cout << "# of distances of query: OK"<<endl;
+	else
+		error_and_exit();
+
+	//On met le jeu de resultat dans le pointeur result
+	result = mysql_use_result(db_connection);
+
+	//On recupere le nombre de champs
+	unsigned int num_champs = mysql_num_fields(result);
+
+	//on stocke les valeurs de la ligne choisie
+	int nb_results = 0;
+	while (row = mysql_fetch_row(result))
+	{
+		Vector feat;
+
+		//On fait une boucle pour avoir la valeur de chaque champ
+		for (int i = 0; i < num_champs; i++)
+			feat.push_back(strtodouble(row[i]));
+
+		double dist = feat - root;
+		distances.push_back(dist);
+
+		nb_results ++;
+	}
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+	if (nb_results != 1000)
+		// C'était la dernière page de résultats
+		return 1;
+
+	//Il reste encore des résultats après
+	return 0;
+	
+	
 }

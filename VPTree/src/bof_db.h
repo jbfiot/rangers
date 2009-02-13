@@ -53,10 +53,12 @@ private:
 	MYSQL* db_connection;
 	unsigned int nrows;
 
-	unsigned int select_vp(int index_parent, int direction);
-	std::vector<Vector> select_random_set_indexes(int index_parent, int direction);
+	unsigned int select_vp(int index_parent, int direction, Vector &root, double median);
+	void select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
+	int distances_to_current(int &offset, int &index_parent, int &direction, Vector &root, Vector &distances);
 
 	void make_one_step(int index_parent, int direction);
+
 
 
 
