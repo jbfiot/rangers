@@ -39,11 +39,10 @@ public:
 	double operator-(Vector &other)
 	{ return this->get_distance_with(other);}
 
-	//A implementer
-	double compute_median();
-	double compute_second_moment(double val) const; //(somme(xi - val)e)
+	double compute_median() const;
+	double compute_second_moment(double val) const;
 
-	friend ostream& operator <<(ostream& co, Vector& f );
+	friend ostream& operator <<(ostream& co, const Vector& f );
 
 
 private:

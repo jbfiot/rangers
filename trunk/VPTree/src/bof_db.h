@@ -65,7 +65,7 @@ private:
 	unsigned int nrows;
 
 	unsigned int select_vp(int index_parent, int direction, Vector &root);
-	int *select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
+	void select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set, std::vector<int> &random_indexes);
 
 
 
