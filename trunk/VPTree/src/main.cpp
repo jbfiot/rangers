@@ -27,7 +27,7 @@ int main()
 	cout << endl << "==================================="
 		 << endl << "   Etape 1: Remplissage de la base de données de Features"
 		 << endl << "===================================" <<endl;
-    fdb.fill_with_random(10, 200);
+    //fdb.fill_with_random(10, 200);
 
     cout << endl << "==================================="
 		 << endl << "   Etape 2: Appliquer l'algorithme des K-Means  "
@@ -40,6 +40,24 @@ int main()
 		 << endl << "   Etape3: initialisation de la base de données de BOFs   "
 		 << endl << "===================================" <<endl;
 	Bof_db bof_db(centers);
+
+
+	Vector median;
+	median.push_back(0.197598);
+	median.push_back(0.204455);
+	median.push_back(0.2067);
+	median.push_back(0.195476);
+	median.push_back(0.195772);
+
+	//bof_db.update_distances(median);
+	bof_db.get_median(0, 0);
+	system("PAUSE");
+	return 0;
+
+
+
+
+
 
 
     cout << endl << "==================================="
@@ -71,6 +89,11 @@ int main()
 		}
 
 	}
+
+
+
+
+
 
 
 	// Etape5: Construire l'arbre et le sauver dans la base de données

@@ -41,6 +41,14 @@ public:
 	void build_tree();
 	void error_and_exit();
 
+	void set_mu_value(int index_root, double median);
+	void set_parent_direction_fields(int parent, int direction, double median, int index_median);
+	double get_median(int parent, int direction);
+	void update_distances(int parent, int direction, Vector &root);
+	void set_son_value(int index_parent, int direction, int index_median);
+	int count_elems(int parent, int direction);
+
+
 private:
     string db_name;
     string db_username;
@@ -55,9 +63,8 @@ private:
 
 	unsigned int select_vp(int index_parent, int direction, Vector &root);
 	void select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
-	int distances_to_current(int &offset, int &index_parent, int &direction, Vector &root, Vector &distances);
-
 	void make_one_step(int index_parent, int direction);
+
 
 
 
