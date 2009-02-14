@@ -301,9 +301,6 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 		double median = distances_p_rand_set.compute_median();
 		double spread = distances_p_rand_set.compute_second_moment(median);
 
-		cout << "spread: " << spread << endl;
-		system("PAUSE");
-
 		if (spread > best_spread)
 		{
 			best_spread = spread;
@@ -334,7 +331,6 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	Vector root;
 	unsigned int median_index = select_vp(index_parent, direction, root);
 	cout << "RACINE CHOISIE: " << median_index << endl;
-	return;
 
 	//2- Choisir la distance critique:
 	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
@@ -344,20 +340,29 @@ void Bof_db::make_one_step(int index_parent, int direction)
 
 	//2-2) Calcul de la médiane par la database
 	double mu = this->get_median(index_parent, direction);
+	cout << "Seuil choisi : " << mu << endl;
 
 	//3- Set parent and directions to nodes of the set
 	this->set_parent_direction_fields(index_parent, direction, mu, median_index);
 
 	//4- Mise à jour du Son correspondant pour le parent
-	this->set_son_value(index_parent, direction, median_index);
+	if (index_parent != 0)
+		this->set_son_value(index_parent, direction, median_index);
 
 	//5- Mise à jour du Mu pour la racine trouvée
-	this->set_mu_value(median_index, mu);
+	if (index_parent != 0)
+		this->set_mu_value(median_index, mu);
 
-	//6- Obtenir le nombre de noeuds à gauche et à droite
+	//6- Mise à jour du parent de la racine
+	this->set_parent(median_index, index_parent);
+
+	//7- Obtenir le nombre de noeuds à gauche et à droite
 	int nb_son_1 = this->count_elems(median_index, 1);
 	int nb_son_2 = this->count_elems(median_index, 2);
+	cout << "Répartition sous-arbres: " << nb_son_1 << " | " << nb_son_2 << endl;
 
+	system("pause");
+	return;
 	
 	//Si pas de noeud dans le sous-arbre de gauche...
 	if (nb_son_1 == 0)
@@ -372,14 +377,14 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_son_value(median_index, 2, 0);
 	}
 
-
+	
 	//4- Si il y a au moins un élément dans le sous-arbre de gauche
-	if (nb_son_1>0)
-		make_one_step(median_index, 1);
-	//	 Si il y a au moins un élément dans le sous-arbre de droite
-	if (nb_son_2>0)
-		make_one_step(median_index, 2);
-
+	//if (nb_son_1>0)
+	//	make_one_step(median_index, 1);
+	////	 Si il y a au moins un élément dans le sous-arbre de droite
+	//if (nb_son_2>0)
+	//	make_one_step(median_index, 2);
+	
 }
 
 
@@ -440,6 +445,7 @@ void Bof_db::update_distances(int parent, int direction, Vector &root)
 	set_son_query += " AND Direction=";
 	set_son_query += to_string(direction);
 
+	cout << set_son_query << endl;
 
 	if (!mysql_query(db_connection, set_son_query.c_str())) {
 		cout << "Update Distances Query: OK"<<endl;
@@ -585,3 +591,25 @@ int Bof_db::count_elems(int parent, int direction)
 
 
 
+
+/**
+* Change le champ parent à la ligne index
+**/
+void Bof_db::set_parent(int index, int index_parent)
+{
+	string set_son_query = "UPDATE ";
+	set_son_query += table_name;
+	set_son_query += " SET Parent=";
+	set_son_query += to_string(index_parent);
+
+	set_son_query += " WHERE Bof_ID=";
+	set_son_query += to_string(index);
+
+	if (!mysql_query(db_connection, set_son_query.c_str())) {
+		cout << "Set Son Value Query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+}
