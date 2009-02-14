@@ -42,15 +42,10 @@ int main()
 	Bof_db bof_db(centers);
 
 
-	Vector median;
-	median.push_back(0.197598);
-	median.push_back(0.204455);
-	median.push_back(0.2067);
-	median.push_back(0.195476);
-	median.push_back(0.195772);
 
-	//bof_db.update_distances(median);
-	bof_db.get_median(0, 0);
+
+
+	bof_db.make_one_step(0,0);
 	system("PAUSE");
 	return 0;
 
