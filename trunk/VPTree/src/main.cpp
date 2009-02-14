@@ -27,7 +27,7 @@ int main()
 	cout << endl << "==================================="
 		 << endl << "   Etape 1: Remplissage de la base de données de Features"
 		 << endl << "===================================" <<endl;
-    //fdb.fill_with_random(10, 200);
+    fdb.fill_with_random(15, 200);
 
     cout << endl << "==================================="
 		 << endl << "   Etape 2: Appliquer l'algorithme des K-Means  "
@@ -40,16 +40,6 @@ int main()
 		 << endl << "   Etape3: initialisation de la base de données de BOFs   "
 		 << endl << "===================================" <<endl;
 	Bof_db bof_db(centers);
-
-
-
-
-	bof_db.build_tree();
-	return 0;
-
-
-
-
 
 
 
@@ -85,13 +75,8 @@ int main()
 
 
 
-
-
-
-
 	// Etape5: Construire l'arbre et le sauver dans la base de données
-	// !! FONCTION A IMPLEMENTER !!
-	//bof_db.build_tree();
+	bof_db.build_tree();
 
 
 	system("pause");

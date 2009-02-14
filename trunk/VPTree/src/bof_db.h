@@ -50,7 +50,7 @@ public:
 
 	void make_one_step(int index_parent, int direction);
 
-	void set_parent(int index, int index_parent);
+	void set_parent_direction(int index, int index_parent, int direction);
 
 private:
     string db_name;
@@ -65,7 +65,7 @@ private:
 	unsigned int nrows;
 
 	unsigned int select_vp(int index_parent, int direction, Vector &root);
-	void select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
+	int *select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
 
 
 

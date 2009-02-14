@@ -169,7 +169,7 @@ void Bof_db::add_bof(Bof bag) {
 * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
 * PARENT = parent et DIRECTION = direction
 **/
-void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set)
+int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set)
 {
 	//1- Compter le nombre de résultats de la requete
 	unsigned int nb = this->count_elems(index_parent, direction);
@@ -181,10 +181,12 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
+	int *random_indexes;
+
 	//2- Sélectionner un random set sur la liste des indexes
 	if (nb>RANDOM_SET_MAX_LENGTH)
 	{
-		int *random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
+		random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
 		sample_set.resize(RANDOM_SET_MAX_LENGTH);
 
 		for (int i=0; i<RANDOM_SET_MAX_LENGTH; ++i)
@@ -232,7 +234,7 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 	}
 	else
 	{
-		random_query = "SELECT ";
+		random_query = "SELECT Bof_ID, ";
 
 		for (unsigned int i=1; i<=nb_k_centers;i++)
 		{
@@ -254,20 +256,26 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 		else
 			error_and_exit();
 
+		random_indexes = new int[nb];
 		//On met le jeu de resultat dans le pointeur result
 		result = mysql_use_result(db_connection);
 
+		int i=0;
 		while (row = mysql_fetch_row(result))
 		{
+			random_indexes[i] = strtodouble(row[0]);
 			Vector vec(nb_k_centers);
 			for (int j=0; j<nb_k_centers;j++)
-				vec.push_back(strtodouble(row[j]));
+				vec.push_back(strtodouble(row[j+1]));
 			sample_set.push_back(vec);
+			i++;
 		}
 
 		//Liberation du jeu de resultat
 		mysql_free_result(result);
 	}
+
+	return random_indexes;
 }
 
 
@@ -275,11 +283,14 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 {
 	std::vector<Vector> sample_set;
-	select_random_set_indexes(index_parent, direction, sample_set);
+	int *random_indexes_candidates = select_random_set_indexes(index_parent, direction, sample_set);
 
 
 	double best_spread= 0;
-	unsigned int best_candidate = 0;
+
+	unsigned int best_candidate = random_indexes_candidates[0];
+	root = sample_set[0];
+
 
 	std::vector<Vector> rand_set_for_med_test;
 	for (int i=0; i<sample_set.size(); ++i)
@@ -300,11 +311,13 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 		//Calcul de la variance de cet ensemble de distances (calculée avec la médiane)
 		double median = distances_p_rand_set.compute_median();
 		double spread = distances_p_rand_set.compute_second_moment(median);
+		cout << "Répartition des distances: " << distances_p_rand_set
+			<< " spread: " << spread << " median: " << median << endl;
 
 		if (spread > best_spread)
 		{
 			best_spread = spread;
-			best_candidate = i;
+			best_candidate = random_indexes_candidates[i];
 			root = candidate;
 		}
 
@@ -319,7 +332,7 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 void Bof_db::build_tree()
 {
 	//TEMP
-	string set_son_query = "UPDATE `bof` SET Parent=0, Direction=0";
+	string set_son_query = "UPDATE `bof` SET Parent=0, Direction=0, Son1=0, Son2=0";
 	mysql_query(db_connection, set_son_query.c_str());
 
 
@@ -332,9 +345,15 @@ void Bof_db::build_tree()
 
 void Bof_db::make_one_step(int index_parent, int direction)
 {
+
+	cout << endl << "--------------------------------" << endl;
+	cout << "ITERATION: Parent " << index_parent << " direction " << direction << endl;
+	cout << "--------------------------------" << endl;
+
 	//1- Sélectionner la racine parmi un random set
 	Vector root;
 	unsigned int median_index = select_vp(index_parent, direction, root);
+
 	cout << "RACINE CHOISIE: " << median_index << endl;
 
 	//2- Choisir la distance critique:
@@ -359,13 +378,11 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_mu_value(median_index, mu);
 
 	//6- Mise à jour du parent de la racine
-	this->set_parent(median_index, index_parent);
+	this->set_parent_direction(median_index, index_parent, direction);
 
 	//7- Obtenir le nombre de noeuds à gauche et à droite
 	int nb_son_1 = this->count_elems(median_index, 1);
 	int nb_son_2 = this->count_elems(median_index, 2);
-	cout << "Répartition sous-arbres: " << nb_son_1 << " | " << nb_son_2 << endl;
-
 
 	//Si pas de noeud dans le sous-arbre de gauche...
 	if (nb_son_1 == 0)
@@ -380,8 +397,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_son_value(median_index, 2, 0);
 	}
 
-	system("pause");
-	return;
+	//return;
 
 	//4- Si il y a au moins un élément dans le sous-arbre de gauche
 	if (nb_son_1>0)
@@ -390,6 +406,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	if (nb_son_2>0)
 		make_one_step(median_index, 2);
 	
+
 }
 
 
@@ -414,12 +431,12 @@ void Bof_db::set_son_value(int index_parent, int direction, int index_median)
 	set_son_query += " WHERE Bof_ID=";
 	set_son_query += to_string(index_parent);
 
-	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Set Son Value Query: OK"<<endl;
+	if (!mysql_query(db_connection, set_son_query.c_str()))
+	{
+		//cout << "Set Son Value Query: OK"<<endl;
 	}
-	else {
+	else
 		error_and_exit();
-	}
 
 }
 
@@ -450,14 +467,12 @@ void Bof_db::update_distances(int parent, int direction, Vector &root)
 	set_son_query += " AND Direction=";
 	set_son_query += to_string(direction);
 
-	cout << set_son_query << endl;
-
-	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Update Distances Query: OK"<<endl;
+	if (!mysql_query(db_connection, set_son_query.c_str()))
+	{
+		//cout << "Update Distances Query: OK"<<endl;
 	}
-	else {
+	else
 		error_and_exit();
-	}
 
 }
 
@@ -478,7 +493,6 @@ double Bof_db::get_median(int parent, int direction)
 
 	if (!mysql_query(db_connection, get_median_query.c_str()))
 		cout << "Get median query: OK"<<endl;
-	
 	else
 		error_and_exit();
 
@@ -519,13 +533,31 @@ void Bof_db::set_parent_direction_fields(int parent, int direction, double media
 	set_son_query += " AND Direction=";
 	set_son_query += to_string(direction);
 
+	// UPDATE bof SET Parent=5, Mu=SIGN(Mu-(10)) WHERE Parent=9 AND Direction=2
+	if ((parent == 9) && (direction == 2))
+	{
+		set_son_query = "UPDATE ";
+		set_son_query += table_name;
+		set_son_query += " SET Parent=";
+		set_son_query += to_string(index_median);
+		set_son_query += ", Mu=SIGN(Mu-(";
+		set_son_query += to_string(10);
+		set_son_query += "))";
 
-	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Set Parent and Direction fields query: OK"<<endl;
+		set_son_query += " WHERE Parent=";
+		set_son_query += to_string(parent);
+		set_son_query += " AND Direction=";
+		set_son_query += to_string(direction);
 	}
-	else {
+
+	cout << "set_son_query : " << set_son_query << endl;
+
+	if (!mysql_query(db_connection, set_son_query.c_str()))
+	{
+		//cout << "Set Parent and Direction fields query: OK"<<endl;
+	}
+	else
 		error_and_exit();
-	}
 
 
 }
@@ -545,12 +577,12 @@ void Bof_db::set_mu_value(int index_root, double median)
 	set_son_query += " WHERE Bof_ID=";
 	set_son_query += to_string(index_root);
 
-	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Add-bof-query: OK"<<endl;
+	if (!mysql_query(db_connection, set_son_query.c_str()))
+	{
+		//cout << "Add-bof-query: OK"<<endl;
 	}
-	else {
+	else
 		error_and_exit();
-	}
 
 }
 
@@ -570,7 +602,9 @@ int Bof_db::count_elems(int parent, int direction)
 	set_son_query += to_string(direction);
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
-		cout << "Count elements query: OK"<<endl;
+	{
+		//cout << "Count elements query: OK"<<endl;
+	}
 	else
 		error_and_exit();
 
@@ -600,21 +634,23 @@ int Bof_db::count_elems(int parent, int direction)
 /**
 * Change le champ parent à la ligne index
 **/
-void Bof_db::set_parent(int index, int index_parent)
+void Bof_db::set_parent_direction(int index, int index_parent, int direction)
 {
 	string set_son_query = "UPDATE ";
 	set_son_query += table_name;
 	set_son_query += " SET Parent=";
 	set_son_query += to_string(index_parent);
+	set_son_query += " ,Direction=";
+	set_son_query += to_string(direction);
 
 	set_son_query += " WHERE Bof_ID=";
 	set_son_query += to_string(index);
 
-	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Set Son Value Query: OK"<<endl;
+	if (!mysql_query(db_connection, set_son_query.c_str()))
+	{
+		//cout << "Set Son Value Query: OK"<<endl;
 	}
-	else {
+	else
 		error_and_exit();
-	}
 
 }

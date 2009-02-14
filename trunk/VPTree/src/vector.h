@@ -25,7 +25,7 @@ public:
 // Des bogues incomprehensibles vont apparaitre si au moins les constructeurs
 // par defaut et par copie, ainsi que l'operateur = ne sont pas redefinis.
 
-	double get_distance_with(Vector &other);
+	double get_distance_with(Vector &other) const;
 	void add_feature(Vector &other);
 	void get_mul_cst(double other);
 	void reset();
@@ -41,7 +41,7 @@ public:
 
 	//A implementer
 	double compute_median();
-	double compute_second_moment(double val); //(somme(xi - val)e)
+	double compute_second_moment(double val) const; //(somme(xi - val)e)
 
 	friend ostream& operator <<(ostream& co, Vector& f );
 
