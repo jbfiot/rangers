@@ -50,6 +50,8 @@ public:
 
 	void make_one_step(int index_parent, int direction);
 
+	void set_parent(int index, int index_parent);
+
 private:
     string db_name;
     string db_username;
