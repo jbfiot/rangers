@@ -1,11 +1,7 @@
 #include "bof_db.h"
-
-#define RANDOM_SET_MAX_LENGTH 1000
-#define MAX_BOF_BY_SELECT 100
-
 using namespace std;
 
-
+#define RANDOM_SET_MAX_LENGTH 100
 
 /**
 *   Constructor
@@ -169,7 +165,8 @@ void Bof_db::add_bof(Bof bag) {
 * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
 * PARENT = parent et DIRECTION = direction
 **/
-int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set)
+void Bof_db::select_random_set_indexes(int index_parent, int direction,
+									   std::vector<Vector> &sample_set, std::vector<int> &random_indexes)
 {
 	//1- Compter le nombre de résultats de la requete
 	unsigned int nb = this->count_elems(index_parent, direction);
@@ -181,18 +178,16 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
-	int *random_indexes;
-
 	//2- Sélectionner un random set sur la liste des indexes
 	if (nb>RANDOM_SET_MAX_LENGTH)
 	{
-		random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
+		get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb, random_indexes);
 		sample_set.resize(RANDOM_SET_MAX_LENGTH);
 
 		for (int i=0; i<RANDOM_SET_MAX_LENGTH; ++i)
 		{
-			//Le random_indexes[i]-ième résultat
-			random_query = "SELECT (";
+
+			random_query = "SELECT Bof_ID, ";
 
 			for (unsigned int k=1; k<=nb_k_centers;k++)
 			{
@@ -201,37 +196,49 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 				if (k!= nb_k_centers)
 					random_query+=" ,";
 				else
-					random_query+=") FROM ";
+					random_query+=" FROM ";
 			}
 
 			random_query+=table_name;
-			random_query+=" OFFSET ";
-			random_query+=to_string(random_indexes[i]);
-			random_query+=" LIMIT 1 WHERE Parent = ";
-			random_query+=index_parent;
+			random_query+=" WHERE Parent = ";
+			random_query+=to_string(index_parent);
 			random_query+=" and Direction = ";
-			random_query+=direction;
+			random_query+=to_string(direction);
+			random_query+=" LIMIT 1 OFFSET ";
+			random_query+=to_string(random_indexes[i]);
+
 
 			if (!mysql_query(db_connection, random_query.c_str()))
-				cout << "Random query (1 by 1) : OK"<<endl;
+			{
+				//cout << "Random query (Random) : OK"<<endl;
+			}
 			else
 				error_and_exit();
 
 			//On met le jeu de resultat dans le pointeur result
 			result = mysql_use_result(db_connection);
 
+			sample_set.resize(RANDOM_SET_MAX_LENGTH);
 			row = mysql_fetch_row(result);
-			for (int j=0; j<nb_k_centers;j++){
-				sample_set[i][j] = strtodouble(row[j]);
+
+			//Primary key of random result
+			random_indexes[i] = strtodouble(row[0]);
+
+			//Random BOF
+			Vector res;
+			res.resize(nb_k_centers);
+			for (int j=0; j<nb_k_centers;j++)
+			{
+				res[j] = strtodouble(row[j+1]);
 			}
+
+			sample_set[i] = res;
 
 			//Liberation du jeu de resultat
 			mysql_free_result(result);
-
 		}
-
-		delete [] random_indexes;
 	}
+
 	else
 	{
 		random_query = "SELECT Bof_ID, ";
@@ -252,14 +259,17 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 		random_query += to_string(direction);
 
 		if (!mysql_query(db_connection, random_query.c_str()))
-			cout << "Random query (all at once) : OK"<<endl;
+		{
+			//cout << "Random query (all at once) : OK"<<endl;
+		}
 		else
 			error_and_exit();
 
-		random_indexes = new int[nb];
+		random_indexes.resize(nb);
 		//On met le jeu de resultat dans le pointeur result
 		result = mysql_use_result(db_connection);
 
+		sample_set.resize(nb);
 		int i=0;
 		while (row = mysql_fetch_row(result))
 		{
@@ -267,7 +277,7 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 			Vector vec(nb_k_centers);
 			for (int j=0; j<nb_k_centers;j++)
 				vec.push_back(strtodouble(row[j+1]));
-			sample_set.push_back(vec);
+			sample_set[i] = vec;
 			i++;
 		}
 
@@ -275,7 +285,6 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 		mysql_free_result(result);
 	}
 
-	return random_indexes;
 }
 
 
@@ -283,7 +292,8 @@ int *Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 {
 	std::vector<Vector> sample_set;
-	int *random_indexes_candidates = select_random_set_indexes(index_parent, direction, sample_set);
+	std::vector<int> random_indexes_candidates;
+	select_random_set_indexes(index_parent, direction, sample_set, random_indexes_candidates);
 
 
 	double best_spread= 0;
@@ -297,22 +307,23 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 	{
 		//Sélection d'un set aléatoire de l'espace qui nous intéresse
 		Vector candidate = sample_set[i];
-
-		select_random_set_indexes(index_parent, direction, rand_set_for_med_test);
+		std::vector<int> random_indexes_candidates;
+		select_random_set_indexes(index_parent, direction, rand_set_for_med_test, random_indexes_candidates);
 
 		//Précalcul des distances entre le candidat et les régions du sample_set
 		Vector distances_p_rand_set;
 		distances_p_rand_set.resize(rand_set_for_med_test.size());
 		for (int j=0; j<distances_p_rand_set.size(); ++j)
 		{
-			distances_p_rand_set[j] = candidate - rand_set_for_med_test[j];
+			double tmp = candidate - rand_set_for_med_test[j];
+			distances_p_rand_set[j] = tmp;
 		}
 
 		//Calcul de la variance de cet ensemble de distances (calculée avec la médiane)
 		double median = distances_p_rand_set.compute_median();
 		double spread = distances_p_rand_set.compute_second_moment(median);
-		cout << "Répartition des distances: " << distances_p_rand_set
-			<< " spread: " << spread << " median: " << median << endl;
+		//cout << "Répartition des distances: " << distances_p_rand_set
+		//	<< " spread: " << spread << " median: " << median << endl;
 
 		if (spread > best_spread)
 		{
@@ -346,9 +357,12 @@ void Bof_db::build_tree()
 void Bof_db::make_one_step(int index_parent, int direction)
 {
 
+	static int compt=0;
+
 	cout << endl << "--------------------------------" << endl;
-	cout << "ITERATION: Parent " << index_parent << " direction " << direction << endl;
+	cout << "ITERATION " << compt << ": Parent " << index_parent << " direction " << direction << endl;
 	cout << "--------------------------------" << endl;
+	compt ++;
 
 	//1- Sélectionner la racine parmi un random set
 	Vector root;
@@ -397,7 +411,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_son_value(median_index, 2, 0);
 	}
 
-	//return;
+	cout << "Répartition : " << nb_son_1 << " | " << nb_son_2 << endl;
 
 	//4- Si il y a au moins un élément dans le sous-arbre de gauche
 	if (nb_son_1>0)
@@ -405,7 +419,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	//	 Si il y a au moins un élément dans le sous-arbre de droite
 	if (nb_son_2>0)
 		make_one_step(median_index, 2);
-	
+
 
 }
 
@@ -532,25 +546,6 @@ void Bof_db::set_parent_direction_fields(int parent, int direction, double media
 	set_son_query += to_string(parent);
 	set_son_query += " AND Direction=";
 	set_son_query += to_string(direction);
-
-	// UPDATE bof SET Parent=5, Mu=SIGN(Mu-(10)) WHERE Parent=9 AND Direction=2
-	if ((parent == 9) && (direction == 2))
-	{
-		set_son_query = "UPDATE ";
-		set_son_query += table_name;
-		set_son_query += " SET Parent=";
-		set_son_query += to_string(index_median);
-		set_son_query += ", Mu=SIGN(Mu-(";
-		set_son_query += to_string(10);
-		set_son_query += "))";
-
-		set_son_query += " WHERE Parent=";
-		set_son_query += to_string(parent);
-		set_son_query += " AND Direction=";
-		set_son_query += to_string(direction);
-	}
-
-	cout << "set_son_query : " << set_son_query << endl;
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
 	{

@@ -127,7 +127,8 @@ void Feature_db::fill_with_random(int nb_images, int nb_features){
 	{
 		for (int j=0; j<nb_features; ++j)
 		{
-			int *random_coeff = get_random_set_indexes(NB_COEFF_FEATURES+2,1000); // 1000 : max du coeff. (totalement arbitraire)
+			std::vector<int> random_coeff;
+			get_random_set_indexes(NB_COEFF_FEATURES+2,1000, random_coeff); // 1000 : max du coeff. (totalement arbitraire)
 			Feature feature;
 			feature.position.push_back(random_coeff[0]);
 			feature.position.push_back(random_coeff[1]);
@@ -188,8 +189,6 @@ void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne sera
 
 void Feature_db::get_feature_number(int index, Vector &vec)
 {
-	cout << "INDEX: " << index << endl;
-
 	/*
 	SELECT *
 	FROM `features`
@@ -211,12 +210,12 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 	get_feature_query+= to_string(index);
 
 
-	if (!mysql_query(db_connection, get_feature_query.c_str())) {
-		cout << "Get feature query: OK"<<endl;
+	if (!mysql_query(db_connection, get_feature_query.c_str()))
+	{
+		//cout << "Get feature query: OK"<<endl;
 	}
-	else {
+	else
 		error_and_exit();
-	}
 
 
 

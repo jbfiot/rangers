@@ -64,12 +64,13 @@ void Vector::reset()
 }
 
 
-double Vector::compute_median ()
+double Vector::compute_median () const
 {  
-   unsigned int size = this->size();
-   sort(this->begin(), this->end());
-   unsigned int mid = size/2;
-   return size % 2 == 0 ? ((*this)[mid] + (*this)[mid-1]) / 2 : (*this)[mid];
+	Vector tmp = (*this);
+	unsigned int size = tmp.size();
+	sort(tmp.begin(), tmp.end());
+	unsigned int mid = size/2;
+	return size % 2 == 0 ? (tmp[mid] + tmp[mid-1]) / 2 : tmp[mid];
 }
 
 
@@ -85,8 +86,7 @@ double Vector::compute_second_moment (double val) const
 	return res;
 }
 
-ostream& operator <<(ostream& co, Vector& vec )
-// vec est const
+ostream& operator <<(ostream& co, const Vector& vec )
 {
 	cout << "Vecteur de taille: " << vec.size() << endl;
 	for (unsigned int i=0; i<vec.size(); ++i)
