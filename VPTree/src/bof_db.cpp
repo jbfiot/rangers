@@ -318,6 +318,11 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 
 void Bof_db::build_tree()
 {
+	//TEMP
+	string set_son_query = "UPDATE `bof` SET Parent=0, Direction=0";
+	mysql_query(db_connection, set_son_query.c_str());
+
+
 	//Fonction récursive construisant l'arbre
 	make_one_step(0,0);
 }
@@ -361,9 +366,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	int nb_son_2 = this->count_elems(median_index, 2);
 	cout << "Répartition sous-arbres: " << nb_son_1 << " | " << nb_son_2 << endl;
 
-	system("pause");
-	return;
-	
+
 	//Si pas de noeud dans le sous-arbre de gauche...
 	if (nb_son_1 == 0)
 	{
@@ -377,13 +380,15 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_son_value(median_index, 2, 0);
 	}
 
-	
+	system("pause");
+	return;
+
 	//4- Si il y a au moins un élément dans le sous-arbre de gauche
-	//if (nb_son_1>0)
-	//	make_one_step(median_index, 1);
-	////	 Si il y a au moins un élément dans le sous-arbre de droite
-	//if (nb_son_2>0)
-	//	make_one_step(median_index, 2);
+	if (nb_son_1>0)
+		make_one_step(median_index, 1);
+	//	 Si il y a au moins un élément dans le sous-arbre de droite
+	if (nb_son_2>0)
+		make_one_step(median_index, 2);
 	
 }
 

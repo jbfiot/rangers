@@ -44,9 +44,7 @@ int main()
 
 
 
-
-	bof_db.make_one_step(0,0);
-	system("PAUSE");
+	bof_db.build_tree();
 	return 0;
 
 
