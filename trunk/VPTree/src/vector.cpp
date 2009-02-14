@@ -75,12 +75,13 @@ double Vector::compute_median()
 
 double Vector::compute_second_moment(double val)
 {
-	int res = 0;
+	double res = 0;
 	for (unsigned int i= 0; i<(*this).size(); ++i)
 	{
 		double temp = (*this)[i] - val;
 		res += temp*temp;
 	}
+
 	return res/this->size();
 }
 

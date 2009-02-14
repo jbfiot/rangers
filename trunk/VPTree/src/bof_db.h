@@ -48,6 +48,7 @@ public:
 	void set_son_value(int index_parent, int direction, int index_median);
 	int count_elems(int parent, int direction);
 
+	void make_one_step(int index_parent, int direction);
 
 private:
     string db_name;
@@ -63,7 +64,6 @@ private:
 
 	unsigned int select_vp(int index_parent, int direction, Vector &root);
 	void select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set);
-	void make_one_step(int index_parent, int direction);
 
 
 

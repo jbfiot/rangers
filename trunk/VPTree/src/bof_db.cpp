@@ -172,74 +172,51 @@ void Bof_db::add_bof(Bof bag) {
 void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vector<Vector> &sample_set)
 {
 	//1- Compter le nombre de résultats de la requete
-	string nb_result_query = "SELECT count(*) WHERE Parent =";
-	nb_result_query+=to_string(index_parent);
-	nb_result_query+=" AND Direction = ";
-	nb_result_query+= to_string(direction);
+	unsigned int nb = this->count_elems(index_parent, direction);
 
-
-	if (!mysql_query(db_connection, nb_result_query.c_str())) {
-		cout << "# of results of query: OK"<<endl;
-	}
-	else {
-		error_and_exit();
-	}
+	string random_query;
 
 	//RECUPERATION DU CONTENU
 	//Declaration des pointeurs de structure
 	MYSQL_RES *result = NULL;
 	MYSQL_ROW row = NULL;
 
-	//On met le jeu de resultat dans le pointeur result
-	result = mysql_use_result(db_connection);
-
-	//On recupere le nombre de champs
-	unsigned int num_champs = mysql_num_fields(result);
-
-	row = mysql_fetch_row(result);
-	unsigned int nb = strtodouble(row[0]);
-
-	//Liberation du jeu de resultat
-	mysql_free_result(result);
-
-	string random_query;
-
 	//2- Sélectionner un random set sur la liste des indexes
 	if (nb>RANDOM_SET_MAX_LENGTH)
 	{
 		int *random_indexes = get_random_set_indexes(RANDOM_SET_MAX_LENGTH, nb);
 		sample_set.resize(RANDOM_SET_MAX_LENGTH);
+
 		for (int i=0; i<RANDOM_SET_MAX_LENGTH; ++i)
 		{
 			//Le random_indexes[i]-ième résultat
-
 			random_query = "SELECT (";
 
-			for (unsigned int k=1; k<=nb_k_centers;k++){
+			for (unsigned int k=1; k<=nb_k_centers;k++)
+			{
 				random_query+="Coeff";
 				random_query+=to_string(k);
 				if (k!= nb_k_centers)
 					random_query+=" ,";
 				else
-					random_query+=") OFFSET ";
+					random_query+=") FROM ";
 			}
+
+			random_query+=table_name;
+			random_query+=" OFFSET ";
 			random_query+=to_string(random_indexes[i]);
 			random_query+=" LIMIT 1 WHERE Parent = ";
 			random_query+=index_parent;
 			random_query+=" and Direction = ";
 			random_query+=direction;
 
-			if (!mysql_query(db_connection, random_query.c_str())) {
-				cout << "Random query: OK"<<endl;
-			}
-			else {
+			if (!mysql_query(db_connection, random_query.c_str()))
+				cout << "Random query (1 by 1) : OK"<<endl;
+			else
 				error_and_exit();
-			}
-
 
 			//On met le jeu de resultat dans le pointeur result
 			result = mysql_use_result(db_connection);
-
 
 			row = mysql_fetch_row(result);
 			for (int j=0; j<nb_k_centers;j++){
@@ -255,66 +232,66 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction, std::vec
 	}
 	else
 	{
-		sample_set.resize(nb);
-		random_query = "SELECT (";
+		random_query = "SELECT ";
 
-		for (unsigned int i=1; i<=nb_k_centers;i++){
-			random_query+="Coeff";
-			random_query+=to_string(i);
+		for (unsigned int i=1; i<=nb_k_centers;i++)
+		{
+			random_query += "Coeff";
+			random_query += to_string(i);
 			if (i!= nb_k_centers)
-				random_query+=" ,";
+				random_query += " ,";
 		}
-		random_query+=")";
-		random_query+=" WHERE Parent = ";
-		random_query+=index_parent;
-		random_query+=" and Direction = ";
-		random_query+=direction;
 
-		if (!mysql_query(db_connection, nb_result_query.c_str())) {
-			cout << "# of results of query: OK"<<endl;
-		}
-		else {
+		random_query += " FROM ";
+		random_query += table_name;
+		random_query += " WHERE Parent = ";
+		random_query += to_string(index_parent);
+		random_query += " and Direction = ";
+		random_query += to_string(direction);
+
+		if (!mysql_query(db_connection, random_query.c_str()))
+			cout << "Random query (all at once) : OK"<<endl;
+		else
 			error_and_exit();
-		}
 
 		//On met le jeu de resultat dans le pointeur result
 		result = mysql_use_result(db_connection);
 
-
-		row = mysql_fetch_row(result);
-		for (int i=0; i<nb;i++) {
-			for (int j=0; j<nb_k_centers;j++){
-				sample_set[i][j] = strtodouble(row[j]);
-			}
+		while (row = mysql_fetch_row(result))
+		{
+			Vector vec(nb_k_centers);
+			for (int j=0; j<nb_k_centers;j++)
+				vec.push_back(strtodouble(row[j]));
+			sample_set.push_back(vec);
 		}
 
 		//Liberation du jeu de resultat
 		mysql_free_result(result);
-
-
-
 	}
-
-
 }
+
 
 
 unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 {
 	std::vector<Vector> sample_set;
 	select_random_set_indexes(index_parent, direction, sample_set);
+
+
 	double best_spread= 0;
 	unsigned int best_candidate = 0;
 
+	std::vector<Vector> rand_set_for_med_test;
 	for (int i=0; i<sample_set.size(); ++i)
 	{
 		//Sélection d'un set aléatoire de l'espace qui nous intéresse
 		Vector candidate = sample_set[i];
-		std::vector<Vector> rand_set_for_med_test;
+
 		select_random_set_indexes(index_parent, direction, rand_set_for_med_test);
 
 		//Précalcul des distances entre le candidat et les régions du sample_set
-		Vector distances_p_rand_set(rand_set_for_med_test.size());
+		Vector distances_p_rand_set;
+		distances_p_rand_set.resize(rand_set_for_med_test.size());
 		for (int j=0; j<distances_p_rand_set.size(); ++j)
 		{
 			distances_p_rand_set[j] = candidate - rand_set_for_med_test[j];
@@ -324,12 +301,17 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 		double median = distances_p_rand_set.compute_median();
 		double spread = distances_p_rand_set.compute_second_moment(median);
 
+		cout << "spread: " << spread << endl;
+		system("PAUSE");
+
 		if (spread > best_spread)
 		{
 			best_spread = spread;
 			best_candidate = i;
 			root = candidate;
 		}
+
+		rand_set_for_med_test.clear();
 
 	}
 
@@ -351,7 +333,8 @@ void Bof_db::make_one_step(int index_parent, int direction)
 	//1- Sélectionner la racine parmi un random set
 	Vector root;
 	unsigned int median_index = select_vp(index_parent, direction, root);
-
+	cout << "RACINE CHOISIE: " << median_index << endl;
+	return;
 
 	//2- Choisir la distance critique:
 	// C'est la médiane des distances du noeud à tous les éléments de l'ensemble
@@ -422,7 +405,7 @@ void Bof_db::set_son_value(int index_parent, int direction, int index_median)
 	set_son_query += to_string(index_parent);
 
 	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Add-bof-query: OK"<<endl;
+		cout << "Set Son Value Query: OK"<<endl;
 	}
 	else {
 		error_and_exit();
@@ -459,7 +442,7 @@ void Bof_db::update_distances(int parent, int direction, Vector &root)
 
 
 	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Set son Query: OK"<<endl;
+		cout << "Update Distances Query: OK"<<endl;
 	}
 	else {
 		error_and_exit();
@@ -482,12 +465,11 @@ double Bof_db::get_median(int parent, int direction)
 	get_median_query += " AND Direction=";
 	get_median_query += to_string(direction);
 
-	if (!mysql_query(db_connection, get_median_query.c_str())) {
+	if (!mysql_query(db_connection, get_median_query.c_str()))
 		cout << "Get median query: OK"<<endl;
-	}
-	else {
+	
+	else
 		error_and_exit();
-	}
 
 	//RECUPERATION DU CONTENU
 	//Declaration des pointeurs de structure
@@ -504,7 +486,6 @@ double Bof_db::get_median(int parent, int direction)
 	//Liberation du jeu de resultat
 	mysql_free_result(result);
 
-	cout << "RESULTAT DE LA REQUETE GET MEDIAN: " << median << endl;
 	return median;
 }
 
@@ -529,7 +510,7 @@ void Bof_db::set_parent_direction_fields(int parent, int direction, double media
 
 
 	if (!mysql_query(db_connection, set_son_query.c_str())) {
-		cout << "Set son Query: OK"<<endl;
+		cout << "Set Parent and Direction fields query: OK"<<endl;
 	}
 	else {
 		error_and_exit();
@@ -569,7 +550,7 @@ void Bof_db::set_mu_value(int index_root, double median)
 **/
 int Bof_db::count_elems(int parent, int direction)
 {
-	string set_son_query = "SELECT COUNT(*) FROM";
+	string set_son_query = "SELECT COUNT(*) FROM ";
 	set_son_query += table_name;
 
 	set_son_query += " WHERE Parent=";
@@ -578,7 +559,7 @@ int Bof_db::count_elems(int parent, int direction)
 	set_son_query += to_string(direction);
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
-		cout << "Add-bof-query: OK"<<endl;
+		cout << "Count elements query: OK"<<endl;
 	else
 		error_and_exit();
 
