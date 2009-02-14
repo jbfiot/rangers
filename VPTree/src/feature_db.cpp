@@ -127,7 +127,7 @@ void Feature_db::fill_with_random(int nb_images, int nb_features){
 	{
 		for (int j=0; j<nb_features; ++j)
 		{
-			int* random_coeff = get_random_set_indexes(NB_COEFF_FEATURES+2,1000); // 1000 : max du coeff. (totalement arbitraire)
+			int *random_coeff = get_random_set_indexes(NB_COEFF_FEATURES+2,1000); // 1000 : max du coeff. (totalement arbitraire)
 			Feature feature;
 			feature.position.push_back(random_coeff[0]);
 			feature.position.push_back(random_coeff[1]);
@@ -137,8 +137,6 @@ void Feature_db::fill_with_random(int nb_images, int nb_features){
 				feature.coeffs.push_back(random_coeff[j+2]);
 
 			this->insert_feature(feature);
-
-			delete [] random_coeff;
 		}
 	}
 }

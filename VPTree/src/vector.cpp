@@ -4,7 +4,7 @@
 /**
  * Calcule la distance entre deux features
  **/
-double Vector::get_distance_with(Vector &other)
+double Vector::get_distance_with (Vector &other) const
 {
 	if (type == SIFT && other.type==SIFT)
 	{
@@ -64,7 +64,7 @@ void Vector::reset()
 }
 
 
-double Vector::compute_median()
+double Vector::compute_median ()
 {  
    unsigned int size = this->size();
    sort(this->begin(), this->end());
@@ -73,7 +73,7 @@ double Vector::compute_median()
 }
 
 
-double Vector::compute_second_moment(double val)
+double Vector::compute_second_moment (double val) const
 {
 	double res = 0;
 	for (unsigned int i= 0; i<(*this).size(); ++i)
@@ -82,7 +82,7 @@ double Vector::compute_second_moment(double val)
 		res += temp*temp;
 	}
 
-	return res/this->size();
+	return res;
 }
 
 ostream& operator <<(ostream& co, Vector& vec )
