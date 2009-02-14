@@ -20,7 +20,7 @@
 #include "vector.h"
 #include "feature.h"
 
-#define SAMPLE_LENGTH_FOR_K_MEANS 1000
+#define SAMPLE_LENGTH_FOR_K_MEANS 100
 
 
 class Feature_db
