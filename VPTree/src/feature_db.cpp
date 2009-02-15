@@ -178,7 +178,7 @@ void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne sera
 	fill_with_random_query+=")";
 
 	if (!mysql_query(db_connection, fill_with_random_query.c_str())) {
-		cout << "Fill-with-random-query: OK"<<endl;
+		//cout << "Fill-with-random-query: OK"<<endl;
 	}
 	else {
 		error_and_exit();
