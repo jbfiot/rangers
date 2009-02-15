@@ -73,7 +73,7 @@ Feature_db::Feature_db (string db_host, string db_username,
 	*/
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
-	table_creation_query+=" (Feature_ID int (10) NOT NULL auto_increment,X INT NOT NULL DEFAULT 0, Y INT NOT NULL DEFAULT 0, image INT NOT NULL DEFAULT 0,";
+	table_creation_query+=" (Feature_ID int NOT NULL auto_increment,X INT DEFAULT 0, Y INT DEFAULT 0, Img_ID INT DEFAULT 0,";
 
 	string test="yeah";
 
@@ -151,7 +151,7 @@ void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne sera
 	string fill_with_random_query = "INSERT INTO ";
 	fill_with_random_query+=table_name;
 	fill_with_random_query+=" (";
-	fill_with_random_query+="X,Y,image,";
+	fill_with_random_query+="X,Y,Img_ID,";
 
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
 		fill_with_random_query+="Coeff";
@@ -189,12 +189,6 @@ void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne sera
 
 void Feature_db::get_feature_number(int index, Vector &vec)
 {
-	/*
-	SELECT *
-	FROM `features`
-	WHERE `Feature_ID` =12
-	*/
-
 	//// REQUETE SQL
 	std::string get_feature_query = "SELECT ";
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
@@ -216,12 +210,6 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 	}
 	else
 		error_and_exit();
-
-
-
-
-
-
 
 
 	//RECUPERATION DU CONTENU
@@ -405,7 +393,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 	}
 	get_feature_query += " FROM ";
 	get_feature_query += table_name;
-	get_feature_query+=" WHERE image=";
+	get_feature_query+=" WHERE Img_ID=";
 	get_feature_query+= to_string(index);
 
 
@@ -462,7 +450,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 unsigned int Feature_db::get_nbimages()
 {
 	// REQUETE SQL
-	string get_feature_query = "SELECT COUNT(DISTINCT image) FROM features";
+	string get_feature_query = "SELECT COUNT(DISTINCT Img_ID) FROM features";
 
 	if (!mysql_query(db_connection, get_feature_query.c_str())) {
 		cout << "Get feature query: OK"<<endl;
