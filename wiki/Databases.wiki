@@ -1,0 +1,16 @@
+#summary Différentes bases de données et requirements.
+
+= Bases de données =
+
+== Requirements ==
+
+  * mysql
+  * [http://www.mooreds.com/wordpress/archives/000376 Installing the median user defined function on MySQL] (Update indispensable)
+  * (optionnel) phpmyadmin
+
+
+== Feature_db == 
+Base qui contient les descripteurs
+
+== Bof_db == 
+Base qui contient les bag of features
