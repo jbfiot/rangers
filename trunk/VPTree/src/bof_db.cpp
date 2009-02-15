@@ -177,8 +177,8 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction,
 	MYSQL_ROW row = NULL;
 
 	//2- Sélectionner un random set sur la liste des indexes
-    sample_set.resize(max(RANDOM_SET_MAX_LENGTH,nb));
-    random_indexes.resize(max(RANDOM_SET_MAX_LENGTH,nb));
+    sample_set.resize(min(RANDOM_SET_MAX_LENGTH,nb));
+    random_indexes.resize(min(RANDOM_SET_MAX_LENGTH,nb));
 
     string random_query = "SELECT Bof_ID, ";
 
