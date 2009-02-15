@@ -12,5 +12,9 @@
 == Feature_db == 
 Base qui contient les descripteurs
 
+[http://rangers.googlecode.com/files/Feature_db.png]
+
 == Bof_db == 
 Base qui contient les bag of features
+
+[http://rangers.googlecode.com/files/Bof_db.png]
