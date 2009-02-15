@@ -52,6 +52,7 @@ public:
 
 	void set_parent_direction(int index, int index_parent, int direction);
 
+
 private:
     string db_name;
     string db_username;
