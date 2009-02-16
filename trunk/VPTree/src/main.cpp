@@ -53,15 +53,15 @@ int main()
 		std::vector<Feature> res;
 		fdb.get_all_features_in_image(i, res);
 
-		// !! FONCTION A IMPLEMENTER !!
-		//std::vector<Bof> all_regions_in_image = get_all_regions_subsets( res );
+		// Calcul des régions
+		std::vector<Bof> all_regions_in_image = get_all_regions_subsets( res );
 
 		//Pour l'instant, on ne met qu'un BOF contenant les 2 premiers SIFTs de l'image
-		/**/	std::vector<Feature> feats;					/**/
-		/**/	feats.push_back(res[0]);					/**/
-		/**/	feats.push_back(res[1]);					/**/
-		/**/	std::vector<Bof> all_regions_in_image;		/**/
-		/**/	all_regions_in_image.push_back(Bof(feats));	/**/
+		/**	std::vector<Feature> feats;					**/
+		/**	feats.push_back(res[0]);					**/
+		/**	feats.push_back(res[1]);					**/
+		/**	std::vector<Bof> all_regions_in_image;		**/
+		/**	all_regions_in_image.push_back(Bof(feats));	**/
 
 		//Ajout de la BOF à  la database
 		for (int j=0; j<all_regions_in_image.size(); ++j)
