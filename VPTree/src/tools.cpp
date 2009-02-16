@@ -43,7 +43,7 @@ void get_random_set_indexes(int k,int n, std::vector<int> &indexes)
 
 double strtodouble(const string& what)
 {
-	// La fonction "double atof( char* ) réalise exactement ceci :
+	// La fonction "double atof( char* ) rï¿½alise exactement ceci :
 	// atof( what.c_str() )
 	// http://www.cplusplus.com/reference/clibrary/cstdlib/atof.html
 	// http://www.cplusplus.com/reference/string/string/c_str.html
@@ -54,7 +54,18 @@ double strtodouble(const string& what)
 }
 
 /***
- ** calcul des regions : 4 régions par image
+ ** calcul des regions : 4 rï¿½gions par image
+ ** Le probleme avec 4 regions/image c'est que le descripteur obtenu 
+ ** n'est pas robuste aux symetries autour de l'axe vertical. 
+ ** Or, il arrive frequemment que des objets non-symetriques soient 
+ ** photographies en etant orientes vers la gauche ou vers la droite. 
+ ** C'est pour cette raison que les descripteurs les plus populaires 
+ ** se basent sur deux ou trois regions : haut, bas et eventuellement 
+ ** milieu. Les objets sont rarement photographies la tete en bas.
+
+ ** Par ailleurs : quand on retourne un vector<Bof> l'objet retourne doit etre copie, 
+ ** ce qui est couteux en temps de calcul. 
+ ** Il serait plus judicieux de prendre comme argument "vector<Bof>& all_regions_in_image".
 **/
 
 vector<Bof> get_all_regions_subsets( const vector<Feature>& res )
