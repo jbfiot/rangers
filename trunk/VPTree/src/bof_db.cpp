@@ -166,10 +166,11 @@ void Bof_db::add_bof(Bof bag) {
 * PARENT = parent et DIRECTION = direction
 **/
 void Bof_db::select_random_set_indexes(int index_parent, int direction,
-									   std::vector<Vector> &sample_set, std::vector<int> &random_indexes)
+									   std::vector<Vector> &sample_set, std::vector<int> &random_indexes,
+									   unsigned int not_this_one)
 {
 	//1- Compter le nombre de résultats de la requete
-	int nb = this->count_elems(index_parent, direction);
+	int nb = this->count_elems(index_parent, direction, not_this_one);
 
 	//RECUPERATION DU CONTENU
 	//Declaration des pointeurs de structure
@@ -196,6 +197,14 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction,
     random_query+=to_string(index_parent);
     random_query+=" and Direction = ";
     random_query+=to_string(direction);
+
+	if (not_this_one != 0)
+	{
+		random_query += " and BOF_ID != ";
+		random_query += to_string(not_this_one);
+	}
+
+
     random_query+=" ORDER BY RAND() LIMIT ";
     random_query+=to_string(RANDOM_SET_MAX_LENGTH);
 
@@ -239,20 +248,23 @@ unsigned int Bof_db::select_vp(int index_parent, int direction, Vector &root)
 	std::vector<int> random_indexes_candidates;
 	select_random_set_indexes(index_parent, direction, sample_set, random_indexes_candidates);
 
-
-	double best_spread= 0;
+	double best_spread = 0;
 
 	unsigned int best_candidate = random_indexes_candidates[0];
 	root = sample_set[0];
 
+	if (random_indexes_candidates.size() == 1)
+		//Il n'a qu'un seul élément dans l'ensemble
+		return best_candidate;
 
 	std::vector<Vector> rand_set_for_med_test;
 	for (int i=0; i<sample_set.size(); ++i)
 	{
 		//Sélection d'un set aléatoire de l'espace qui nous intéresse
 		Vector candidate = sample_set[i];
-		std::vector<int> random_indexes_candidates;
-		select_random_set_indexes(index_parent, direction, rand_set_for_med_test, random_indexes_candidates);
+		std::vector<int> rand_set_for_med_test_indexes;
+		select_random_set_indexes(index_parent, direction,
+			rand_set_for_med_test, rand_set_for_med_test_indexes, random_indexes_candidates[i]);
 
 		//Précalcul des distances entre le candidat et les régions du sample_set
 		Vector distances_p_rand_set;
@@ -531,7 +543,7 @@ void Bof_db::set_mu_value(int index_root, double median)
 /**
 * Obtenir le nombre de noeuds dans chaque sous-arbre
 **/
-int Bof_db::count_elems(int parent, int direction)
+int Bof_db::count_elems(int parent, int direction, unsigned int not_this_one)
 {
 	string set_son_query = "SELECT COUNT(*) FROM ";
 	set_son_query += table_name;
@@ -540,6 +552,12 @@ int Bof_db::count_elems(int parent, int direction)
 	set_son_query += to_string(parent);
 	set_son_query += " AND Direction=";
 	set_son_query += to_string(direction);
+
+	if (not_this_one != 0)
+	{
+		set_son_query += " AND BOF_ID != ";
+		set_son_query += to_string(not_this_one);
+	}
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
 	{
