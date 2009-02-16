@@ -1,6 +1,10 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+#include "feature.h"
+#include "bof.h"
+#include "vector.h"
+
 #include <sstream>
 #include <string>
 #include <vector>
@@ -17,5 +21,6 @@ inline std::string to_string (const T& t)
 
 double strtodouble(const std::string &what);
 
+std::vector<Bof> get_all_regions_subsets( const std::vector<Feature>& res );
 
 #endif
