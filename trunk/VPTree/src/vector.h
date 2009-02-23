@@ -29,6 +29,7 @@ public:
 	void add_feature(Vector &other);
 	void get_mul_cst(double other);
 	void reset();
+	double get_min();
 
 	void operator*=(double index)
 	{this->get_mul_cst(index); }

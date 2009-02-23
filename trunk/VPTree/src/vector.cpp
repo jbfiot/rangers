@@ -86,6 +86,20 @@ double Vector::compute_second_moment (double val) const
 	return res;
 }
 
+
+double Vector::get_min()
+{
+	double min = INT_MAX;
+	for (int i=0; i<this->size(); ++i)
+	{
+		if ((*this)[i] < min)
+			min = (*this)[i];
+	}
+	return min;
+}
+
+
+
 ostream& operator <<(ostream& co, const Vector& vec )
 {
 	cout << "Vecteur de taille: " << vec.size() << endl;
