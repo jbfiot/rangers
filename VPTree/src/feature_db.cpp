@@ -75,7 +75,6 @@ Feature_db::Feature_db (string db_host, string db_username,
 	table_creation_query+=table_name;
 	table_creation_query+=" (Feature_ID int NOT NULL auto_increment,X INT DEFAULT 0, Y INT DEFAULT 0, Img_ID INT DEFAULT 0,";
 
-	string test="yeah";
 
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++){
 		table_creation_query+="Coeff";
@@ -242,104 +241,241 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 /**
 *	Applique l'algorithme des K-Means sur le SiftSet
 **/
-void Feature_db::do_k_means(int k, std::vector<Vector> &centers)
+void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, bool Save)
 {
-	unsigned int nb_sifts = get_nbfeatures();
-	assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<nb_sifts);
 
-	centers.resize(k);
+    unsigned int nb_sifts = get_nbfeatures();
+    assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<nb_sifts);
+    centers.resize(k);
 
-	//Initialisation des centres au pif
-	for (int i=0; i<k; ++i)
-	{
-		for (int j=0; j<128; ++j)
-		{
-			//Coords des SIFTs entre 0 et 1000?
-			centers[i].push_back( rand()*1000./RAND_MAX );
-		}
+
+    bool load_successfull=false;
+    string k_center_table_name = "k_centers";
+
+    if (Try_load) {
+        /**
+        *   LOADING K-MEANS
+        */
+
+        cout << endl<< "Trying to load k-centers..." <<endl;
+
+        string get_k_centers_query = "SELECT * FROM ";
+        get_k_centers_query += k_center_table_name;
+
+        if (!mysql_query(db_connection, get_k_centers_query.c_str()))
+        {
+            MYSQL_RES *result = NULL;
+            MYSQL_ROW row = NULL;
+            result = mysql_use_result(db_connection);
+
+            unsigned int num_rows = mysql_num_rows(result);
+
+            if (num_rows == k && false){
+                row = mysql_fetch_row(result);
+
+                for (int i = 0; i < num_rows; i++)
+                {
+                    centers.push_back(strtodouble(row[i]));
+                }
+                load_successfull=true;
+                cout << "-> K-centers Loading successfull. No computation." <<endl;
+                mysql_free_result(result);
+
+            }
+            else {
+                mysql_free_result(result);
+                cout << "-> Wrong number of the centers in the database: "<<num_rows << " instead of " << k <<endl;
+                string drop_query= "DROP TABLE ";
+                drop_query+=k_center_table_name;
+
+                if (!mysql_query(db_connection, drop_query.c_str())) {
+                    cout << "-> Table " <<k_center_table_name<< " dropped."<<endl;
+                }
+                else {
+                    error_and_exit();
+                }
+
+
+            }
+
+
+
+        }
+        else {
+            cout << "-> Impossible to load k-centers." << endl;
+        }
+    }
+
+
+
+    if (Try_load == false || load_successfull==false) {
+        /**
+        *   COMPUTING K-MEANS
+        */
+        cout << endl<< "Computing the k-centers..." << endl;
+
+        //Initialisation des centres au pif
+        for (int i=0; i<k; ++i)
+        {
+            for (int j=0; j<128; ++j)
+            {
+                //Coords des SIFTs entre 0 et 1000?
+                centers[i].push_back( rand()*1000./RAND_MAX );
+            }
+        }
+
+        //Selection des indexes des points SIFTs au pif
+        int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
+        for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+        {
+            int index;
+            while (1)
+            {
+                index = rand()%nb_sifts;
+
+                int *p = find(indexes,indexes+i,index);
+                if (p == indexes+i)
+                    break;
+            }
+
+            indexes[i] = index;
+        }
+
+        // On met les tous les SIFTs selectionnes dans une liste
+        Vector sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
+        for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+        {
+            this->get_feature_number(indexes[i]+1, sifts_list[i]);
+        }
+
+        //K-MEANS...
+        int nb_iters = 1;
+        int appartenances[SAMPLE_LENGTH_FOR_K_MEANS];
+        std::vector<int> numbers(k);
+        while (1)
+        {
+            cout << "-> Iteration #" << nb_iters << endl;
+
+            bool has_changed = false;
+            // Assigner chaque point e une classe
+            for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+            {
+                Vector sift = sifts_list[i];
+                int index_classe=0;
+                double best_dist = INT_MAX;
+                for (int j=0; j<k; ++j)
+                {
+                    double dist = centers[j] - sift;
+                    if (dist<best_dist)
+                    {
+                        best_dist = dist;
+                        index_classe = j;
+                    }
+                }
+                if ((!has_changed) && (appartenances[i] != index_classe))
+                    has_changed = true;
+                appartenances[i] = index_classe;
+            }
+
+            if (!has_changed)
+                break;
+
+            // Calculer le barycentre de chaque classe
+            for (int j=0; j<k; ++j)
+                centers[j].reset();
+
+            for (int j=0; j<k; ++j)
+                numbers[j] = 0;
+
+            for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
+            {
+                int classe = appartenances[i];
+                centers[classe] += sifts_list[i];
+                numbers[classe]++;
+            }
+
+            for (int j=0; j<k; ++j)
+            {
+                if (numbers[j] == 0)
+                    centers[j].reset();
+                else
+                    centers[j] *= 1./numbers[j];
+            }
+
+            nb_iters++;
+
+        }
+    }
+
+
+
+    /**
+	*   SAVING K-MEANS
+	*/
+
+	if (Save) {
+        cout << endl<< "Saving the k-centers..." << endl;
+
+	    // Table creation
+        string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
+        table_creation_query+=k_center_table_name;
+        table_creation_query+=" (Center_ID int auto_increment,";
+
+
+        for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++){
+            table_creation_query+="Coeff";
+            table_creation_query+=to_string(i);
+            table_creation_query+=" DOUBLE NOT NULL,";
+        }
+
+        table_creation_query+=" PRIMARY KEY(Center_ID))";
+
+        if (!mysql_query(db_connection, table_creation_query.c_str())) {
+            cout << "-> K-centers table creation query: OK."<<endl;
+        }
+        else {
+            error_and_exit();
+        }
+
+        // Data insertion
+        for (int j=1;j<=k;j++) { // Boucle sur les k-centres, on fait 1 requete par centre à sauver.
+            string insert_k_centers_query = "INSERT INTO ";
+            insert_k_centers_query+=k_center_table_name;
+            insert_k_centers_query+=" (";
+
+            for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
+                insert_k_centers_query+="Coeff";
+                insert_k_centers_query+=to_string(i);
+                if (i!=NB_COEFF_FEATURES)
+                    insert_k_centers_query+=",";
+            }
+
+            insert_k_centers_query+=") VALUES (";
+
+
+            for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
+                insert_k_centers_query+=to_string(centers[j][i]);
+                if (i!=NB_COEFF_FEATURES)
+                    insert_k_centers_query+=",";
+            }
+            insert_k_centers_query+=")";
+
+            if (!mysql_query(db_connection, insert_k_centers_query.c_str())) {
+                //cout << "Save-kcenters-query: OK"<<endl;
+            }
+            else {
+                error_and_exit();
+            }
+        }
+
+        cout << "-> K-centers successfully saved." << endl;
 	}
 
-	//Selection des indexes des points SIFTs au pif
-	int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
-	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
-	{
-		int index;
-		while (1)
-		{
-			index = rand()%nb_sifts;
 
-			int *p = find(indexes,indexes+i,index);
-			if (p == indexes+i)
-				break;
-		}
 
-		indexes[i] = index;
-	}
 
-	// On met les tous les SIFTs selectionnes dans une liste
-	Vector sifts_list[SAMPLE_LENGTH_FOR_K_MEANS];
-	for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
-	{
-		this->get_feature_number(indexes[i]+1, sifts_list[i]);
-	}
 
-	//K-MEANS...
-	int nb_iters = 1;
-	int appartenances[SAMPLE_LENGTH_FOR_K_MEANS];
-	std::vector<int> numbers(k);
-	while (1)
-	{
-		cout << "Iteration number " << nb_iters << endl;
 
-		bool has_changed = false;
-		// Assigner chaque point e une classe
-		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
-		{
-			Vector sift = sifts_list[i];
-			int index_classe=0;
-			double best_dist = INT_MAX;
-			for (int j=0; j<k; ++j)
-			{
-				double dist = centers[j] - sift;
-				if (dist<best_dist)
-				{
-					best_dist = dist;
-					index_classe = j;
-				}
-			}
-			if ((!has_changed) && (appartenances[i] != index_classe))
-				has_changed = true;
-			appartenances[i] = index_classe;
-		}
-
-		if (!has_changed)
-			break;
-
-		// Calculer le barycentre de chaque classe
-		for (int j=0; j<k; ++j)
-			centers[j].reset();
-
-		for (int j=0; j<k; ++j)
-			numbers[j] = 0;
-
-		for (int i=0; i<SAMPLE_LENGTH_FOR_K_MEANS; ++i)
-		{
-			int classe = appartenances[i];
-			centers[classe] += sifts_list[i];
-			numbers[classe]++;
-		}
-
-		for (int j=0; j<k; ++j)
-		{
-			if (numbers[j] == 0)
-				centers[j].reset();
-			else
-				centers[j] *= 1./numbers[j];
-		}
-
-		nb_iters++;
-
-	}
 
 }
 
@@ -479,3 +615,6 @@ unsigned int Feature_db::get_nbimages()
 	return nb;
 
 }
+
+
+

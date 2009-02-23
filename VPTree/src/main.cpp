@@ -26,7 +26,7 @@ int main()
 	cout << endl << "============================================================"
 		 << endl << "   Etape 1: Remplissage de la base de données de Features"
 		 << endl << "============================================================" <<endl;
-    fdb.fill_with_random(15, 200);
+    //fdb.fill_with_random(15, 200);
 
     cout << endl << "============================================================"
 		 << endl << "   Etape 2: K-Means  "
@@ -34,6 +34,7 @@ int main()
 	int K = 5;
 	std::vector<Vector> centers;
 	fdb.do_k_means(K, centers);
+	exit(0);
 
     cout << endl << "============================================================"
 		 << endl << "   Etape3:Initialisation de la base de données de BOFs   "

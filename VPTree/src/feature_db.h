@@ -39,7 +39,8 @@ public:
 	void insert_feature(Feature &feature);
     void fill_with_random(int nb_images, int nb_features);
 
-	void do_k_means(int k, std::vector<Vector> &centers);
+	void do_k_means(int k, std::vector<Vector> &centers, bool Try_load=true, bool Save=true);
+
 	unsigned int get_nbfeatures();
 	unsigned int get_nbimages();
 
