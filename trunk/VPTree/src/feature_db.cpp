@@ -241,7 +241,7 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 /**
 *	Applique l'algorithme des K-Means sur le SiftSet
 **/
-void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, bool Save)
+void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, bool save)
 {
 
     unsigned int nb_sifts = get_nbfeatures();
@@ -252,7 +252,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, 
     bool load_successfull=false;
     string k_center_table_name = "k_centers";
 
-    if (Try_load) {
+    if (try_load) {
         /**
         *   LOADING K-MEANS
         */
@@ -308,7 +308,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, 
 
 
 
-    if (Try_load == false || load_successfull==false) {
+    if (try_load == false || load_successfull==false) {
         /**
         *   COMPUTING K-MEANS
         */
@@ -413,7 +413,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, 
 	*   SAVING K-MEANS
 	*/
 
-	if (Save) {
+	if (save) {
         cout << endl<< "Saving the k-centers..." << endl;
 
 	    // Table creation
@@ -437,6 +437,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, 
             error_and_exit();
         }
 
+
         // Data insertion
         for (int j=1;j<=k;j++) { // Boucle sur les k-centres, on fait 1 requete par centre à sauver.
             string insert_k_centers_query = "INSERT INTO ";
@@ -454,7 +455,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool Try_load, 
 
 
             for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
-                insert_k_centers_query+=to_string(centers[j][i]);
+                insert_k_centers_query+=to_string(centers[j-1][i-1]);
                 if (i!=NB_COEFF_FEATURES)
                     insert_k_centers_query+=",";
             }
