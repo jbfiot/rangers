@@ -21,3 +21,25 @@ void Bof::get_kmeans_proba(std::vector<Vector> &k_centers, Vector &proba)  {
 
 
 }
+
+
+double Bof::get_distance_region(Bof &other)
+{
+	Vector distances;
+
+	for (int i=0; i<this->features.size(); ++i)
+	{
+		//Calcul de la distance de xi à l'ensemble des yj
+		double dist = INT_MAX;
+		Feature feat = this->features[i];
+
+		for (int j=0; j<other.features.size(); ++j)
+		{
+			double dist_temp = other.features[j] - feat;
+			if (dist_temp < dist)
+				dist = dist_temp;		
+		}
+	}
+
+	return distances.get_min();
+}
