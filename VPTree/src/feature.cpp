@@ -29,7 +29,7 @@ void Feature::get_kmeans_proba( std::vector<Vector> &k_centers, Vector &proba/* 
     double sum=0;
     proba.resize(k_centers.size());
     for (int i=0; i<k_centers.size(); i++){
-		proba[i] = 1-(this->coeffs - k_centers[i]);
+		proba[i] = 1-(this->coeffs.get_distance_with_chi2(k_centers[i]));
         sum+=proba[i];
     }
     for (unsigned int i=0; i<k_centers.size(); i++){

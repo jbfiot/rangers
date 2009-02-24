@@ -25,8 +25,8 @@ void Bof::get_kmeans_proba(std::vector<Vector> &k_centers, Vector &proba)  {
 
 double Bof::get_distance_region(Bof &other)
 {
-	Vector distances;
-
+	Vector distances1;
+	distances1.resize(this->features.size());
 	for (int i=0; i<this->features.size(); ++i)
 	{
 		//Calcul de la distance de xi à l'ensemble des yj
@@ -35,11 +35,28 @@ double Bof::get_distance_region(Bof &other)
 
 		for (int j=0; j<other.features.size(); ++j)
 		{
-			double dist_temp = other.features[j] - feat;
+			double dist_temp = other.features[j].coeffs.get_distance_with_chi2( feat.coeffs );
+			if (dist_temp < dist)
+				dist = dist_temp;		
+		}
+		distances1[i] = dist;
+	}
+
+	Vector distances2;
+	distances1.resize(other.features.size());
+	for (int i=0; i<other.features.size(); ++i)
+	{
+		//Calcul de la distance de yi à l'ensemble des xj
+		double dist = INT_MAX;
+		Feature feat = other.features[i];
+
+		for (int j=0; j<this->features.size(); ++j)
+		{
+			double dist_temp = features[j].coeffs.get_distance_with_chi2( feat.coeffs );
 			if (dist_temp < dist)
 				dist = dist_temp;		
 		}
 	}
 
-	return distances.get_min();
+	return (distances1.get_sum() + distances2.get_sum())/(this->features.size() + other.features.size());
 }

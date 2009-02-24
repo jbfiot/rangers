@@ -26,10 +26,13 @@ public:
 // par defaut et par copie, ainsi que l'operateur = ne sont pas redefinis.
 
 	double get_distance_with(Vector &other) const;
+	double get_distance_with_chi2(Vector &other) const;
+
 	void add_feature(Vector &other);
 	void get_mul_cst(double other);
 	void reset();
 	double get_min();
+	double get_sum();
 
 	void operator*=(double index)
 	{this->get_mul_cst(index); }
