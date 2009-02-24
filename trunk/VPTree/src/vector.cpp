@@ -21,6 +21,21 @@ double Vector::get_distance_with (Vector &other) const
 
 
 /**
+ * Calcule la distance Chi2 entre deux features
+ **/
+double Vector::get_distance_with_chi2 (Vector &other) const
+{
+	double dist = 0;;
+	for (unsigned int i=0; i<this->size(); ++i)
+	{
+		dist += ((*this)[i] - other[i])*((*this)[i] - other[i]) / ((*this)[i] + other[i]);
+	}
+	return dist;
+}
+
+
+
+/**
  * Ajoute un feature au feature courant
  **/
 void Vector::add_feature(Vector &other)
@@ -96,6 +111,15 @@ double Vector::get_min()
 			min = (*this)[i];
 	}
 	return min;
+}
+
+
+double Vector::get_sum()
+{
+	double sum = 0;
+	for (int i=0; i<this->size(); ++i)
+		sum += (*this)[i];
+	return sum;
 }
 
 
