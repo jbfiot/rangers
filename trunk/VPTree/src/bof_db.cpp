@@ -8,7 +8,7 @@ using namespace std;
 */
 
 
-Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
+Bof_db::Bof_db (std::vector<Vector> centers, Vector sigmas, string db_host, string db_username,
 				string db_password, string db_name, string table_name)
 {
 	this->db_name = db_name;
@@ -18,6 +18,7 @@ Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
 	this->table_name = table_name;
 	this->centers = centers;
 	this->nb_k_centers = centers.size();
+	this->sigmas = sigmas;
 
 	/**
 	*   Server Connexion
@@ -89,7 +90,6 @@ Bof_db::Bof_db (std::vector<Vector> centers, string db_host, string db_username,
 	}
 
 
-
 }
 
 
@@ -105,13 +105,15 @@ Bof_db::~Bof_db(){
 /**
 *   Error function (display error and exit program).
 */
-void Bof_db::error_and_exit(){
+void Bof_db::error_and_exit()
+{
 	printf("Error %u: %s\n", mysql_errno(db_connection), mysql_error(db_connection));
 	system("pause");
 	exit(4);
-
-
 }
+
+
+
 
 /**
 *   Add-feature function (add a line to the table).
@@ -122,7 +124,7 @@ void Bof_db::add_bof(Bof bag) {
 	add_bof_query+=table_name;
 	add_bof_query+=" (";
 	Vector proba;
-	bag.get_kmeans_proba(centers, proba);
+	bag.get_kmeans_proba(centers, this->sigmas, proba);
 
 	for (unsigned int i=0; i<proba.size(); i++){
 		add_bof_query+="Coeff";
@@ -141,6 +143,7 @@ void Bof_db::add_bof(Bof bag) {
 		}
 	}
 	add_bof_query+=")";
+
 
 	if (!mysql_query(db_connection, add_bof_query.c_str())) {
 		cout << "Add-bof-query: OK"<<endl;

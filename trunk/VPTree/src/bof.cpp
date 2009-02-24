@@ -1,17 +1,16 @@
 #include "bof.h"
 
 
-void Bof::get_kmeans_proba(std::vector<Vector> &k_centers, Vector &proba)  {
+void Bof::get_kmeans_proba(std::vector<Vector> &k_centers, Vector &sigmas, Vector &proba)  {
     Vector proba_j;
     proba.resize(k_centers.size());
 
     // Initialisation
-    for (unsigned int i=0; i<k_centers.size();i++)
-        proba[i]=0;
+	proba.reset();
     
     // Ajout des proba pour chaque feature du bag of feature. Le tout est divisé par le nombre de features.
     for (unsigned int j=0; j<features.size(); j++){
-        features[j].get_kmeans_proba(k_centers, proba_j);
+        features[j].get_kmeans_proba(k_centers, sigmas, proba_j);
         for (unsigned int i=0; i<k_centers.size();i++){
             proba[i] += proba_j[i];
         }

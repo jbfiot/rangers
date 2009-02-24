@@ -27,10 +27,10 @@ class Feature_db
 {
 
 	/**
-	*
-	* Classe Feature_db : Gestion de la base de données de features.
-	*
-	**/
+	 *
+	 * Classe Feature_db : Gestion de la base de données de features.
+	 *
+	 **/
 
 public:
 	Feature_db(string db_host="localhost", string db_username="ranger",string db_password="GoRangers!", string db_name="feature_db", string table_name="features");
@@ -39,7 +39,7 @@ public:
 	void insert_feature(Feature &feature);
     void fill_with_random(int nb_images, int nb_features);
 
-	void do_k_means(int k, std::vector<Vector> &centers, bool try_load=true, bool save=true);
+	void do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas, bool try_load=true, bool save=false);
 
 	unsigned int get_nbfeatures();
 	unsigned int get_nbimages();

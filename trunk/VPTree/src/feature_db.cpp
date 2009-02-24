@@ -241,8 +241,9 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 /**
 *	Applique l'algorithme des K-Means sur le SiftSet
 **/
-void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, bool save)
+void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas, bool try_load, bool save)
 {
+	sigmas.resize(k);
 
     unsigned int nb_sifts = get_nbfeatures();
     assert(k<SAMPLE_LENGTH_FOR_K_MEANS && SAMPLE_LENGTH_FOR_K_MEANS<nb_sifts);
@@ -254,49 +255,57 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
 
     if (try_load) {
         /**
-        *   LOADING K-MEANS
-        */
+         *   LOADING K-MEANS
+         **/
 
         cout << endl<< "Trying to load k-centers..." <<endl;
 
-        string get_k_centers_query = "SELECT * FROM ";
-        get_k_centers_query += k_center_table_name;
+
+		std::string get_k_centers_query = "SELECT Sigma, ";
+		for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
+		{
+			get_k_centers_query+="Coeff";
+			get_k_centers_query+=to_string(i);
+			if (i!= NB_COEFF_FEATURES)
+				get_k_centers_query+=" ,";
+		}
+		get_k_centers_query += " FROM ";
+		get_k_centers_query += k_center_table_name;
+
 
         if (!mysql_query(db_connection, get_k_centers_query.c_str()))
         {
             MYSQL_RES *result = NULL;
             MYSQL_ROW row = NULL;
-            result = mysql_use_result(db_connection);
+            result = mysql_store_result(db_connection);
 
             unsigned int num_rows = mysql_num_rows(result);
 
-            if (num_rows == k && false){
-                row = mysql_fetch_row(result);
+            if (num_rows == k)
+			{
+				int index_center = 0;
+				while(row = mysql_fetch_row(result))
+				{
+					sigmas[index_center] = strtodouble(row[0]);
 
-                for (int i = 0; i < num_rows; i++)
-                {
-                    centers.push_back(strtodouble(row[i]));
-                }
+					Vector center;
+					for (int i = 0; i < NB_COEFF_FEATURES; i++)
+						center.push_back(strtodouble(row[i+1]));
+					centers[index_center] = center;
+					index_center++;
+				}
+
                 load_successfull=true;
                 cout << "-> K-centers Loading successfull. No computation." <<endl;
                 mysql_free_result(result);
 
             }
-            else {
+            else
+			{
                 mysql_free_result(result);
                 cout << "-> Wrong number of the centers in the database: "<<num_rows << " instead of " << k <<endl;
-                string drop_query= "DROP TABLE ";
-                drop_query+=k_center_table_name;
-
-                if (!mysql_query(db_connection, drop_query.c_str())) {
-                    cout << "-> Table " <<k_center_table_name<< " dropped."<<endl;
-                }
-                else {
-                    error_and_exit();
-                }
-
-
-            }
+            			
+			}
 
 
 
@@ -308,7 +317,8 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
 
 
 
-    if (try_load == false || load_successfull==false) {
+    if (try_load == false || load_successfull==false)
+	{
         /**
         *   COMPUTING K-MEANS
         */
@@ -317,7 +327,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
         //Initialisation des centres au pif
         for (int i=0; i<k; ++i)
         {
-            for (int j=0; j<128; ++j)
+            for (int j=0; j<NB_COEFF_FEATURES; ++j)
             {
                 //Coords des SIFTs entre 0 et 1000?
                 centers[i].push_back( rand()*1000./RAND_MAX );
@@ -405,6 +415,22 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
             nb_iters++;
 
         }
+
+
+		//Computing sigmas
+		for (int i=0; i<k; ++i)
+		{
+			double sigma = 0;
+			Vector center = centers[i];
+
+			for (int j=0; j< SAMPLE_LENGTH_FOR_K_MEANS; ++j)
+				sigma += center.get_distance_with_chi2(sifts_list[j]);	
+
+			//Sigma = demi-moyenne des distance des sifts au centre considéré
+			sigmas[i] = sigma/(2*SAMPLE_LENGTH_FOR_K_MEANS);
+		}
+
+
     }
 
 
@@ -413,16 +439,27 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
 	*   SAVING K-MEANS
 	*/
 
-	if (save) {
+
+	if ((load_successfull==false) || save) {
         cout << endl<< "Saving the k-centers..." << endl;
+
+		//Deletes data
+        string drop_query= "DROP TABLE IF EXISTS ";
+        drop_query+=k_center_table_name;
+
+        if (!mysql_query(db_connection, drop_query.c_str()))
+            cout << "-> Table " <<k_center_table_name<< " dropped."<<endl;
+        else
+            error_and_exit();
 
 	    // Table creation
         string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
         table_creation_query+=k_center_table_name;
-        table_creation_query+=" (Center_ID int auto_increment,";
+        table_creation_query+=" (Center_ID int auto_increment, Sigma double default 0, ";
 
 
-        for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++){
+        for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
+		{
             table_creation_query+="Coeff";
             table_creation_query+=to_string(i);
             table_creation_query+=" DOUBLE NOT NULL,";
@@ -442,7 +479,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
         for (int j=1;j<=k;j++) { // Boucle sur les k-centres, on fait 1 requete par centre à sauver.
             string insert_k_centers_query = "INSERT INTO ";
             insert_k_centers_query+=k_center_table_name;
-            insert_k_centers_query+=" (";
+            insert_k_centers_query+=" (Sigma, ";
 
             for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
                 insert_k_centers_query+="Coeff";
@@ -453,6 +490,8 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, bool try_load, 
 
             insert_k_centers_query+=") VALUES (";
 
+			insert_k_centers_query+=to_string(sigmas[j-1]);
+			insert_k_centers_query+=",";
 
             for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
                 insert_k_centers_query+=to_string(centers[j-1][i-1]);
