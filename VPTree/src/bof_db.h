@@ -33,7 +33,7 @@ class Bof_db
 public:
 
 
-	Bof_db(std::vector<Vector> centers, string db_host="localhost", string db_username="ranger",
+	Bof_db(std::vector<Vector> centers, Vector sigmas, string db_host="localhost", string db_username="ranger",
 		string db_password="GoRangers!", string db_name="bof_db", string table_name="bof");
 
 	~Bof_db();
@@ -52,6 +52,7 @@ private:
     string table_name;
 	int nb_k_centers;
     std::vector<Vector> centers;
+	Vector sigmas;
 
 	MYSQL* db_connection;
 	unsigned int nrows;
@@ -71,8 +72,6 @@ private:
 	void make_one_step(int index_parent, int direction);
 
 	void set_parent_direction(int index, int index_parent, int direction);
-
-
 
 
 };
