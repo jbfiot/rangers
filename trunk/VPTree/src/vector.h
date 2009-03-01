@@ -41,7 +41,7 @@ public:
 	{this->add_feature(other); }
 
 	double operator-(Vector &other)
-	{ return this->get_distance_with(other);}
+	{ return this->get_distance_with_chi2(other);}
 
 	double compute_median() const;
 	double compute_second_moment(double val) const;

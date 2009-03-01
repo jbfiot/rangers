@@ -12,7 +12,7 @@
 using namespace std;
 
 #include "tools.h"
-
+#include "symmatrix.h"
 
 int main()
 {
@@ -34,7 +34,10 @@ int main()
 	int K = 5;
 	std::vector<Vector> centers;
 	Vector sigmas;
-	fdb.do_k_means(K, centers, sigmas);
+	fdb.do_k_means(K, centers, sigmas,true);
+
+
+	cout << endl << fdb.distances << endl;
 
 	system("pause");
 	exit(0);
