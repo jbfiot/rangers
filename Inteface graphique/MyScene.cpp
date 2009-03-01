@@ -2,34 +2,44 @@
 #include <QtGui>
 #include <QWidget>
 #include <QFileDialog>
-#include <iostream>
-#include <QPen>
-
-using namespace std;
 
 MyScene::MyScene() : QGraphicsScene()
 {
 	QString fichier = QFileDialog::getOpenFileName(0, "Ouvrir un fichier", QString(), "Images (*.png *.gif *.jpg *.jpeg)");
 	QPixmap image = QPixmap(fichier);
-	QSize size = image.size();
+	size = image.size();
 	
-	impix = this->addPixmap(image);
+	impix=addPixmap(image);
 
 	point1 = QPointF();
 	point2 = QPointF();
-	MyRectItem = new QGraphicsRectItem;
-	rect = QRectF();
 	numero=true;
+	MyRectItem=new QGraphicsRectItem;
+	rect = QRectF();
+}
+
+MyScene::MyScene(QString fileName) : QGraphicsScene()
+{
+	
+	QPixmap image = QPixmap(fileName);
+	size=image.size();
+	impix=addPixmap(image);
+
+	point1 = QPointF();
+	point2 = QPointF();
+	numero=true;
+	MyRectItem=new QGraphicsRectItem;
+	rect = QRectF();
 }
 
  void MyScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
  {
 	 if (mouseEvent->button() == Qt::LeftButton) {
-		 if (numero) {
-			this->removeItem(MyRectItem);
+		 if	(numero) {
+			removeItem(MyRectItem);
 			numero=false;
 			point1 = mouseEvent->scenePos();
-			MyRectItem = this->addRect(point1.x(), point1.y(), 0, 0);
+			MyRectItem = addRect(point1.x(), point1.y(), 0, 0);
 
 			QPen * pen = new QPen;
 			pen->setWidth(3);
@@ -43,7 +53,7 @@ MyScene::MyScene() : QGraphicsScene()
  }
 
 void MyScene::mouseMoveEvent( QGraphicsSceneMouseEvent * mouseEvent )
-{	
+{
 	if (impix->isUnderMouse()) {
 		if (!numero) {
 		MyRectItem->setRect(QRectF(point1,mouseEvent->scenePos()));
@@ -67,7 +77,6 @@ void MyScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 		 }
 	 }
  }
-
 
 QPixmap MyScene::getPixResult()
 {
