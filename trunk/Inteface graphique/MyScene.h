@@ -13,6 +13,8 @@ class MyScene : public QGraphicsScene
 
     public:
     MyScene();
+	MyScene(QString fileName);
+	QSize size;
 	QPixmap getPixResult();
 
 	public slots:
@@ -20,7 +22,7 @@ class MyScene : public QGraphicsScene
 	protected:
 	void mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent * mouseEvent);
+	void mouseMoveEvent( QGraphicsSceneMouseEvent * mouseEvent);
 
     private:
 	bool numero;
@@ -28,8 +30,9 @@ class MyScene : public QGraphicsScene
 	QPointF point2;
 	QRectF rect;
 	QGraphicsRectItem * MyRectItem;
-	QGraphicsPixmapItem * impix;
+	QGraphicsPixmapItem *impix;
 	QGraphicsScene * SceneRes;
+
 };
  
 #endif
