@@ -2,13 +2,12 @@
 using namespace std;
 
 #define RANDOM_SET_MAX_LENGTH 100
+#define MAX_ROWS_BY_DISTANCE_REQUEST 2
 
 /**
-*   Constructor
-*/
-
-
-Bof_db_Region::Bof_db_Region (std::vector<Vector> centers, Vector sigmas, string db_host, string db_username,
+ *   Constructor
+ **/
+Bof_db_Region::Bof_db_Region (Feature_db *feature_db,  int k, string db_host, string db_username,
 				string db_password, string db_name, string table_name)
 {
 	this->db_name = db_name;
@@ -16,95 +15,74 @@ Bof_db_Region::Bof_db_Region (std::vector<Vector> centers, Vector sigmas, string
 	this->db_password = db_password;
 	this->db_host = db_host;
 	this->table_name = table_name;
-	this->centers = centers;
-	this->nb_k_centers = centers.size();
-	this->sigmas = sigmas;
+	this->nb_k_centers = k;
+	this->fdb = feature_db;
 
-	/**
-	*   Server Connexion
-	*/
-	if (!(db_connection = mysql_init(NULL))) {
+	//Server Connexion
+	if (!(db_connection = mysql_init(NULL)))
 		error_and_exit();
 
-	}
-
-	if (mysql_real_connect(db_connection,db_host.c_str(),db_username.c_str(),db_password.c_str(),NULL,0,NULL,0)) {
+	if (mysql_real_connect(db_connection,db_host.c_str(),db_username.c_str(),db_password.c_str(),NULL,0,NULL,0))
 		// Notice we do not specify the database because it might not exists.
 		cout << "SQL server connection: OK"<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
 
-
-	/**
-	*   Database creation
-	*/
+	//Database creation
 	string db_creation_query = "CREATE DATABASE IF NOT EXISTS ";
-	db_creation_query+=db_name;
+	db_creation_query += db_name;
 
 
-	if (!mysql_query(db_connection, db_creation_query.c_str())) {
+	if (!mysql_query(db_connection, db_creation_query.c_str()))
 		cout << "Database creation query: OK"<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
 
 
-	/**
-	*   Database selection
-	*/
+	//Database selection
 	string db_selection_query = "USE ";
-	db_selection_query+=db_name;
+	db_selection_query += db_name;
 
-	if (!mysql_query(db_connection, db_selection_query.c_str())) {
+	if (!mysql_query(db_connection, db_selection_query.c_str()))
 		cout << "Database selection query: OK"<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
 
 
-	/**
-	*   Table creation
-	*/
+	//Table creation
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
-	table_creation_query+=table_name;
-	table_creation_query+=" (Bof_ID int NOT NULL auto_increment,";
+	table_creation_query += table_name;
+	table_creation_query += " (Bof_Region_ID int NOT NULL auto_increment,";
 
-	for (unsigned int i=1; i<=nb_k_centers;i++){
-		table_creation_query+="Coeff";
-		table_creation_query+=to_string(i);
-		table_creation_query+=" DOUBLE NOT NULL,";
+	for (unsigned int i=1; i<=this->nb_k_centers; i++)
+	{
+		table_creation_query += "Coeff";
+		table_creation_query += to_string(i);
+		table_creation_query += " DOUBLE NOT NULL,";
 	}
-	table_creation_query+=" Parent int DEFAULT 0, Direction int DEFAULT 0, Mu double, Son1 int DEFAULT 0, Son2 int DEFAULT 0,";
+	table_creation_query += " Parent int DEFAULT 0, Direction int DEFAULT 0, Mu double, Son1 int DEFAULT 0, Son2 int DEFAULT 0,";
+	table_creation_query += " PRIMARY KEY(Bof_Region_ID))";
 
-	table_creation_query+=" PRIMARY KEY(Bof_ID))";
-
-	if (!mysql_query(db_connection, table_creation_query.c_str())) {
+	if (!mysql_query(db_connection, table_creation_query.c_str()))
 		cout << "Table creation query: OK."<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
-
-
 }
 
 
 /**
 *   Destructor
 */
-Bof_db_Region::~Bof_db_Region(){
+Bof_db_Region::~Bof_db_Region()
+{
 	mysql_close(db_connection);
 	cout << "Closing connection: OK."<<endl;
 }
 
 
 /**
-*   Error function (display error and exit program).
-*/
+ *   Error function (display error and exit program).
+ **/
 void Bof_db_Region::error_and_exit()
 {
 	printf("Error %u: %s\n", mysql_errno(db_connection), mysql_error(db_connection));
@@ -116,58 +94,55 @@ void Bof_db_Region::error_and_exit()
 
 
 /**
-*   Add-feature function (add a line to the table).
-*/
+ *   Add-Bag of Features function (add a line to the table).
+ **/
+void Bof_db_Region::add_bof(Bof_Region bag)
+{
+	Vector histogram;
+	bag.get_histogram(histogram);
 
-void Bof_db_Region::add_bof(Bof_Region bag) {
-	string add_bof_query = "INSERT INTO ";
-	add_bof_query+=table_name;
-	add_bof_query+=" (";
+	string add_bof_region_query = "INSERT INTO ";
+	add_bof_region_query += table_name;
+	add_bof_region_query += " (";
 
-	Vector proba = bag.histo_centers;
-
-	for (unsigned int i=0; i<proba.size(); i++){
-		add_bof_query+="Coeff";
-		add_bof_query+=to_string(i+1);
-		if (i!=proba.size() - 1) {
-			add_bof_query+=",";
-		}
+	for (unsigned int i=0; i<this->nb_k_centers; i++)
+	{
+		add_bof_region_query += "Coeff";
+		add_bof_region_query += to_string(i+1);
+		if (i != this->nb_k_centers - 1)
+			add_bof_region_query += ",";
 	}
+	add_bof_region_query += ") VALUES (";
 
-	add_bof_query+=") VALUES (";
-
-	for (unsigned int i=0; i<proba.size(); i++){
-		add_bof_query+=to_string(proba[i]);
-		if (i!=proba.size() - 1) {
-			add_bof_query+=",";
-		}
+	for (unsigned int i=0; i<this->nb_k_centers; i++)
+	{
+		add_bof_region_query += to_string(histogram[i]);
+		if (i != this->nb_k_centers - 1)
+			add_bof_region_query += ",";
 	}
-	add_bof_query+=")";
+	add_bof_region_query += ")";
 
 
-	if (!mysql_query(db_connection, add_bof_query.c_str())) {
-		cout << "Add-bof-query: OK"<<endl;
-	}
-	else {
+	if (!mysql_query(db_connection, add_bof_region_query.c_str()))
+		cout << "Add-bof_region-query: OK"<<endl;
+	else
 		error_and_exit();
-	}
 
 }
 
 
 
 
+/**
+ * PARTIE CONSTRUCTION DE L'ARBRE
+ **/
+
+
 
 /**
-* PARTIE CONSTRUCTION DE L'ARBRE
-**/
-
-
-
-/**
-* Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
-* PARENT = parent et DIRECTION = direction
-**/
+ * Sélectionne un random set aléatoire de résultats parmi les résultats de la requete:
+ * PARENT = parent et DIRECTION = direction
+ **/
 void Bof_db_Region::select_random_set_indexes(int index_parent, int direction,
 									   std::vector<Vector> &sample_set, std::vector<int> &random_indexes,
 									   unsigned int not_this_one)
@@ -184,7 +159,7 @@ void Bof_db_Region::select_random_set_indexes(int index_parent, int direction,
     sample_set.resize(min(RANDOM_SET_MAX_LENGTH,nb));
     random_indexes.resize(min(RANDOM_SET_MAX_LENGTH,nb));
 
-    string random_query = "SELECT Bof_ID, ";
+    string random_query = "SELECT Bof_Region_ID, ";
 
     for (unsigned int k=1; k<=nb_k_centers;k++)
     {
@@ -203,7 +178,7 @@ void Bof_db_Region::select_random_set_indexes(int index_parent, int direction,
 
 	if (not_this_one != 0)
 	{
-		random_query += " and BOF_ID != ";
+		random_query += " and BoF_Region_ID != ";
 		random_query += to_string(not_this_one);
 	}
 
@@ -225,15 +200,14 @@ void Bof_db_Region::select_random_set_indexes(int index_parent, int direction,
     Vector res;
     res.resize(nb_k_centers);
 
-    while(row = mysql_fetch_row(result)){
+    while(row = mysql_fetch_row(result))
+	{
         //Primary key of random result
         random_indexes[i] = strtodouble(row[0]);
 
         //Random BOF
         for (int j=0; j<nb_k_centers;j++)
-        {
             res[j] = strtodouble(row[j+1]);
-        }
 
         sample_set[i] = res;
         i++;
@@ -244,8 +218,10 @@ void Bof_db_Region::select_random_set_indexes(int index_parent, int direction,
 }
 
 
-
-unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Vector &root)
+/**
+ * Sélectionne la racine du VP-Tree
+ **/
+unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Bof_Region &root)
 {
 	std::vector<Vector> sample_set;
 	std::vector<int> random_indexes_candidates;
@@ -254,7 +230,7 @@ unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Vector &r
 	double best_spread = 0;
 
 	unsigned int best_candidate = random_indexes_candidates[0];
-	root = sample_set[0];
+	root = Bof_Region(sample_set[0], this->fdb);
 
 	if (random_indexes_candidates.size() == 1)
 		//Il n'a qu'un seul élément dans l'ensemble
@@ -264,17 +240,20 @@ unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Vector &r
 	for (int i=0; i<sample_set.size(); ++i)
 	{
 		//Sélection d'un set aléatoire de l'espace qui nous intéresse
-		Vector candidate = sample_set[i];
+		Bof_Region candidate_region(sample_set[i], this->fdb);
+
 		std::vector<int> rand_set_for_med_test_indexes;
 		select_random_set_indexes(index_parent, direction,
 			rand_set_for_med_test, rand_set_for_med_test_indexes, random_indexes_candidates[i]);
+		
 
 		//Précalcul des distances entre le candidat et les régions du sample_set
 		Vector distances_p_rand_set;
 		distances_p_rand_set.resize(rand_set_for_med_test.size());
 		for (int j=0; j<distances_p_rand_set.size(); ++j)
 		{
-			double tmp = candidate - rand_set_for_med_test[j];
+			Bof_Region random_region(rand_set_for_med_test[j], this->fdb);
+			double tmp = candidate_region - random_region;
 			distances_p_rand_set[j] = tmp;
 		}
 
@@ -288,7 +267,7 @@ unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Vector &r
 		{
 			best_spread = spread;
 			best_candidate = random_indexes_candidates[i];
-			root = candidate;
+			root = candidate_region;
 		}
 
 		rand_set_for_med_test.clear();
@@ -301,10 +280,20 @@ unsigned int Bof_db_Region::select_vp(int index_parent, int direction, Vector &r
 
 void Bof_db_Region::build_tree()
 {
-	//TEMP
-	string set_son_query = "UPDATE `bof` SET Parent=0, Direction=0, Son1=0, Son2=0";
+	//Initialisation des champs temporaires
+	string set_son_query = "UPDATE ";
+	set_son_query += table_name;
+	set_son_query += " SET Parent=0, Direction=0, Son1=0, Son2=0, Mu=0";
 	mysql_query(db_connection, set_son_query.c_str());
 
+	/*Vector lol;
+	lol.push_back(0);
+	lol.push_back(2);
+	lol.push_back(1);
+	lol.push_back(0);
+	lol.push_back(1);
+	Bof_Region region(lol, this->fdb);
+	this->update_distances(0, 0, region);*/
 
 	//Fonction récursive construisant l'arbre
 	make_one_step(0,0);
@@ -324,7 +313,7 @@ void Bof_db_Region::make_one_step(int index_parent, int direction)
 	compt ++;
 
 	//1- Sélectionner la racine parmi un random set
-	Vector root;
+	Bof_Region root;
 	unsigned int median_index = select_vp(index_parent, direction, root);
 
 	cout << "RACINE CHOISIE: " << median_index << endl;
@@ -401,7 +390,7 @@ void Bof_db_Region::set_son_value(int index_parent, int direction, int index_med
 	set_son_query += "=";
 	set_son_query += to_string(index_median);
 
-	set_son_query += " WHERE Bof_ID=";
+	set_son_query += " WHERE Bof_Region_ID=";
 	set_son_query += to_string(index_parent);
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
@@ -416,44 +405,113 @@ void Bof_db_Region::set_son_value(int index_parent, int direction, int index_med
 
 
 /**
-* Insère les distances à la racine dans le champ mu
-**/
-void Bof_db_Region::update_distances(int parent, int direction, Vector &root)
+ * Insère les distances à la racine dans le champ mu
+ **/
+void Bof_db_Region::update_distances(int parent, int direction, Bof_Region &root)
 {
-	string set_son_query = "UPDATE ";
-	set_son_query += table_name;
-	set_son_query+=" SET Mu=";
+	Vector distances;
+	Vector ids;
 
-	for (int i=0; i<root.size(); ++i)
+	int offset = 0;
+
+	while (true)
 	{
-		set_son_query += "POW(Coeff";
-		set_son_query += to_string(i+1);
-		set_son_query += " - ";
-		set_son_query += to_string(root[i]);
-		set_son_query += ", 2)";
-		if (i != root.size() - 1)
-			set_son_query += " + ";
-	}
+		//######################################
+		// Sélection des 1000 premières régions
+		//######################################
+		MYSQL_RES *result = NULL;
+		MYSQL_ROW row = NULL;
 
-	set_son_query += " WHERE Parent=";
-	set_son_query += to_string(parent);
-	set_son_query += " AND Direction=";
-	set_son_query += to_string(direction);
+		string distances_query = "SELECT Bof_Region_ID, ";
 
-	if (!mysql_query(db_connection, set_son_query.c_str()))
-	{
-		//cout << "Update Distances Query: OK"<<endl;
+		for (unsigned int k=1; k<=nb_k_centers;k++)
+		{
+			distances_query += " Coeff";
+			distances_query += to_string(k);
+			if (k!= nb_k_centers)
+				distances_query += " ,";
+			else
+				distances_query += " FROM ";
+		}
+
+		distances_query += table_name;
+		distances_query += " WHERE parent = ";
+		distances_query += to_string(parent);
+		distances_query += " and direction = ";
+		distances_query += to_string(direction);
+		distances_query += " LIMIT ";
+		distances_query += to_string(MAX_ROWS_BY_DISTANCE_REQUEST);
+		distances_query += " OFFSET ";
+		distances_query += to_string(offset);
+
+		if (!mysql_query(db_connection, distances_query.c_str()))
+		{
+			//cout << "# of distances of query: OK" << endl;
+		}
+		else
+			error_and_exit();
+
+		result = mysql_use_result(db_connection);
+		unsigned int num_champs = mysql_num_fields(result);
+
+		//on stocke les valeurs de la ligne choisie
+		ids.clear();
+		distances.clear();
+		int nb_results = 0;
+		while (row = mysql_fetch_row(result))
+		{
+			ids.push_back(strtodouble(row[0]));
+
+			//On fait une boucle pour avoir la valeur de chaque champ
+			Vector feat;
+			for (int i = 1; i < num_champs; i++)
+				feat.push_back(strtodouble(row[i]));
+
+			double dist = Bof_Region(feat, this->fdb) - root;
+			distances.push_back(dist);
+
+			nb_results ++;
+		}
+
+		if (nb_results == 0)
+			//Mise à jour des distances finie!
+			break;
+
+		//########################################
+		// Insertion des 1000 distances calculées
+		//########################################
+		string distances_insertion_query = "UPDATE ";
+		distances_insertion_query += table_name;
+		distances_insertion_query += " SET Mu = CASE Bof_Region_ID ";
+
+		for (int i=0; i<nb_results; ++i)
+		{
+			distances_insertion_query += " WHEN ";
+			distances_insertion_query += to_string(ids[i]);
+			distances_insertion_query += " THEN ";
+			distances_insertion_query += to_string(distances[i]);
+		}
+		distances_insertion_query += " ELSE Mu END";
+
+		if (mysql_query(db_connection, distances_insertion_query.c_str()))
+			error_and_exit();
+
+		mysql_free_result(result);
+
+		if (nb_results != MAX_ROWS_BY_DISTANCE_REQUEST)
+			//Il n'y a pas plus de 1000 résultats => 
+			break;
+
+		offset += nb_results;
 	}
-	else
-		error_and_exit();
 
 }
 
 
 /**
-* Calcul de la médiane par le serveur SQL (prend en paramètres le nombre de décimales)
-* Nécessite d'installer la fonction médiane de UDF
-**/
+ * Calcul de la médiane par le serveur SQL (prend en paramètres le nombre de décimales)
+ * Nécessite d'installer la fonction médiane de UDF
+ **/
 double Bof_db_Region::get_median(int parent, int direction)
 {
 	// REQUETE SQL
@@ -464,7 +522,8 @@ double Bof_db_Region::get_median(int parent, int direction)
 	get_median_query += " AND Direction=";
 	get_median_query += to_string(direction);
 
-	if (!mysql_query(db_connection, get_median_query.c_str())){
+	if (!mysql_query(db_connection, get_median_query.c_str()))
+	{
 		//cout << "Get median query: OK"<<endl;
 	}
 	else
@@ -513,8 +572,6 @@ void Bof_db_Region::set_parent_direction_fields(int parent, int direction, doubl
 	}
 	else
 		error_and_exit();
-
-
 }
 
 
@@ -529,7 +586,7 @@ void Bof_db_Region::set_mu_value(int index_root, double median)
 	set_son_query += " SET Mu=";
 	set_son_query += to_string(median);
 
-	set_son_query += " WHERE Bof_ID=";
+	set_son_query += " WHERE Bof_Region_ID=";
 	set_son_query += to_string(index_root);
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))
@@ -558,7 +615,7 @@ int Bof_db_Region::count_elems(int parent, int direction, unsigned int not_this_
 
 	if (not_this_one != 0)
 	{
-		set_son_query += " AND BOF_ID != ";
+		set_son_query += " AND BoF_Region_ID != ";
 		set_son_query += to_string(not_this_one);
 	}
 
@@ -604,7 +661,7 @@ void Bof_db_Region::set_parent_direction(int index, int index_parent, int direct
 	set_son_query += " ,Direction=";
 	set_son_query += to_string(direction);
 
-	set_son_query += " WHERE Bof_ID=";
+	set_son_query += " WHERE Bof_Region_ID=";
 	set_son_query += to_string(index);
 
 	if (!mysql_query(db_connection, set_son_query.c_str()))

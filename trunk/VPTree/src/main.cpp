@@ -4,15 +4,18 @@
 //#include "vld.h"
 //#include "vldapi.h"
 
-#include "feature.h"
-#include "bof_db.h"
-#include "feature_db.h"
 #include "time.h"
+#include "tools.h"
+
+#include "feature_db.h"
+#include "bof_db.h"
+#include "bof_db_region.h"
 
 using namespace std;
 
-#include "tools.h"
-#include "symmatrix.h"
+
+#define USE_REGION
+
 
 int main()
 {
@@ -37,19 +40,15 @@ int main()
 	fdb.do_k_means(K, centers, sigmas,true);
 
 
-	cout << endl << fdb.distances << endl;
 
-	system("pause");
-	exit(0);
-
-
-
-
-    cout << endl << "============================================================"
+	cout << endl << "============================================================"
 		 << endl << "   Etape3:Initialisation de la base de données de BOFs   "
 		 << endl << "============================================================" <<endl;
-	Bof_db bof_db(centers, sigmas);
-
+#ifdef USE_REGION
+		Bof_db_Region bof_db(&fdb, centers.size());
+#else
+		Bof_db bof_db(centers, sigmas);
+#endif
 
 
     cout << endl << "========================================================================"
@@ -64,21 +63,26 @@ int main()
 		fdb.get_all_features_in_image(i, res);
 
 		// Calcul des régions
-		std::vector<Bof> all_regions_in_image = get_all_regions_subsets( res );
+#ifdef USE_REGION
+		std::vector<Bof_Region> all_regions_in_image;
 
-		//Pour l'instant, on ne met qu'un BOF contenant les 2 premiers SIFTs de l'image
-		/**	std::vector<Feature> feats;					**/
-		/**	feats.push_back(res[0]);					**/
-		/**	feats.push_back(res[1]);					**/
-		/**	std::vector<Bof> all_regions_in_image;		**/
-		/**	all_regions_in_image.push_back(Bof(feats));	**/
+		//Pour l'instant, on ne met qu'un BOF_Region contenant deux sifts au PIF
+		// (des indexs de 2 features entre 1 et 1000)
+		std::vector<int> feature_indexes;
+		feature_indexes.push_back(rand()%1000);
+		feature_indexes.push_back(rand()%1000);
+
+		Bof_Region region(feature_indexes, &fdb, &centers);
+		all_regions_in_image.push_back( region );
+
+#else
+		std::vector<Bof> all_regions_in_image = get_all_regions_subsets( res );
+#endif
+
 
 		//Ajout de la BOF à  la database
 		for (int j=0; j<all_regions_in_image.size(); ++j)
-		{
-			Bof bof = all_regions_in_image[j];
-			bof_db.add_bof(bof);
-		}
+			bof_db.add_bof( all_regions_in_image[j] );
 
 	}
 

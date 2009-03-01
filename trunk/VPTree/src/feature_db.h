@@ -1,8 +1,6 @@
 #ifndef FEATURE_DB
 #define FEATURE_DB
 
-#include "feature_db.h"
-
 #include <string>
 #include <vector>
 #include <assert.h>
