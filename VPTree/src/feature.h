@@ -48,6 +48,8 @@ public:
 	int type;
 	int index_image;
 
+	int index;
+
 };
 
 

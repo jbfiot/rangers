@@ -572,10 +572,10 @@ unsigned int Feature_db::get_nbfeatures()
 
 
 
-void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &features)
+void Feature_db::get_all_features_in_image(int index_image, std::vector<Feature> &features)
 {
 	// REQUETE SQL
-	std::string get_feature_query = "SELECT X, Y, ";
+	std::string get_feature_query = "SELECT Feature_ID, X, Y, ";
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
 	{
 		get_feature_query+="Coeff";
@@ -586,15 +586,13 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 	get_feature_query += " FROM ";
 	get_feature_query += table_name;
 	get_feature_query+=" WHERE Img_ID=";
-	get_feature_query+= to_string(index);
+	get_feature_query+= to_string(index_image);
 
 
-	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+	if (!mysql_query(db_connection, get_feature_query.c_str()))
 		cout << "Get feature query: OK"<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
 
 	//Declaration des pointeurs de structure
 	MYSQL_RES *result = NULL;
@@ -619,17 +617,18 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 		lengths = mysql_fetch_lengths(result);
 
 		//On fait une boucle pour avoir la valeur de chaque champs
-		feature.position.push_back(strtodouble(row[0]));
+		feature.index = strtodouble(row[0]);
 		feature.position.push_back(strtodouble(row[1]));
-		feature.index_image = index;
+		feature.position.push_back(strtodouble(row[2]));
+		feature.index_image = index_image;
 
-		for (int i = 2; i < num_champs; i++)
+		for (int i = 3; i < num_champs; i++)
 			feature.coeffs.push_back(strtodouble(row[i]));
 
 		features.push_back(feature);
 	}
 
-	cout << features.size() << " features in image " << index << endl;
+	cout << features.size() << " features in image " << index_image << endl;
 	//Liberation du jeu de resultat
 	mysql_free_result(result);
 
@@ -641,7 +640,7 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 void Feature_db::get_features_by_indexes(std::vector<int> &indexes, std::vector<Feature> &features)
 {
 	// REQUETE SQL
-	std::string get_feature_query = "SELECT X, Y, Img_ID, ";
+	std::string get_feature_query = "SELECT X, Y, Feature_ID, Img_ID, ";
 
 	for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
 	{
@@ -658,19 +657,17 @@ void Feature_db::get_features_by_indexes(std::vector<int> &indexes, std::vector<
 	for (unsigned int i=0; i<indexes.size();i++)
 	{
 		get_feature_query += to_string(indexes[i]);
-		if (i!= NB_COEFF_FEATURES)
+		if (i!= indexes.size() - 1)
 			get_feature_query+=" ,";
 	}
 
 	get_feature_query += " )";
 
 
-	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+	if (!mysql_query(db_connection, get_feature_query.c_str()))
 		cout << "Get feature query: OK"<<endl;
-	}
-	else {
+	else
 		error_and_exit();
-	}
 
 	//Declaration des pointeurs de structure
 	MYSQL_RES *result = NULL;
@@ -697,9 +694,10 @@ void Feature_db::get_features_by_indexes(std::vector<int> &indexes, std::vector<
 		//On fait une boucle pour avoir la valeur de chaque champs
 		feature.position.push_back(strtodouble(row[0]));
 		feature.position.push_back(strtodouble(row[1]));
-		feature.index_image = strtodouble(row[2]);
+		feature.index = strtodouble(row[2]);
+		feature.index_image = strtodouble(row[3]);
 
-		for (int i = 3; i < num_champs; i++)
+		for (int i = 4; i < num_champs; i++)
 			feature.coeffs.push_back(strtodouble(row[i]));
 
 		features.push_back(feature);

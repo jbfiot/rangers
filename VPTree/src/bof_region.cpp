@@ -4,13 +4,13 @@
 /**
  * Répartition des k_centers en un histogramme
  **/
-void Bof_Region::get_nearest_neighbours()
+void Bof_Region::compute_nearest_neighbours()
 {
 	//Resize
-    histo_centers.resize(this->centers->size());
+	this->nearest_centers.resize(this->features.size());
 
     // Initialisation
-	histo_centers.reset();
+	this->nearest_centers.reset();
     
     // Ajout des proba pour chaque feature du bag of feature. Le tout est divisé par le nombre de features.
 	for (unsigned int j=0; j<this->features.size(); j++)
@@ -29,9 +29,35 @@ void Bof_Region::get_nearest_neighbours()
 			}
         }
 
-		histo_centers[nearest] += 1;
+		this->nearest_centers[j] = nearest;
     }
 
+}
+
+
+/**
+ *	Conversion histogramme en vecteur d'index des plus proches centres
+ **/
+void Bof_Region::set_nearest_centers(Vector &histogram)
+{
+	for (int i=0; i<histogram.size(); ++i)
+		for (int j=0; j<histogram[i]; ++j)
+			this->nearest_centers.push_back(i);
+}
+
+
+
+/**
+ *	Conversion histogramme en vecteur d'index des plus proches centres
+ **/
+void Bof_Region::get_histogram(Vector &histogram)
+{
+	//Initialisation à 0 de l'histogramme
+	histogram.resize(this->centers->size());
+	histogram.reset();
+
+	for (int i=0; i<this->nearest_centers.size(); ++i)
+		histogram[this->nearest_centers[i]]++;
 }
 
 
@@ -39,16 +65,16 @@ void Bof_Region::get_nearest_neighbours()
 double Bof_Region::get_distance_region(Bof_Region &other)
 {
 	Vector distances1;
-	distances1.resize(this->centers->size());
-	for (int i=0; i<this->histo_centers.size(); ++i)
+	distances1.resize(this->nearest_centers.size());
+	for (int i=0; i<this->nearest_centers.size(); ++i)
 	{
 		//Calcul de la distance de xi à l'ensemble des yj
 		double dist = INT_MAX;
-		int index1 = this->histo_centers[i];
+		int index1 = this->nearest_centers[i];
 
-		for (int j=0; j<other.histo_centers.size(); ++j)
+		for (int j=0; j<other.nearest_centers.size(); ++j)
 		{
-			int index2 = other.histo_centers[j];
+			int index2 = other.nearest_centers[j];
 			double dist_temp = this->fdb->distances(index1, index2);
 			if (dist_temp < dist)
 				dist = dist_temp;
@@ -58,16 +84,16 @@ double Bof_Region::get_distance_region(Bof_Region &other)
 	}
 
 	Vector distances2;
-	distances2.resize(other.histo_centers.size());
-	for (int i=0; i<other.histo_centers.size(); ++i)
+	distances2.resize(other.nearest_centers.size());
+	for (int i=0; i<other.nearest_centers.size(); ++i)
 	{
 		//Calcul de la distance de xi à l'ensemble des yj
 		double dist = INT_MAX;
-		int index1 = other.histo_centers[i];
+		int index1 = other.nearest_centers[i];
 
-		for (int j=0; j<this->histo_centers.size(); ++j)
+		for (int j=0; j<this->nearest_centers.size(); ++j)
 		{
-			int index2 = this->histo_centers[j];
+			int index2 = this->nearest_centers[j];
 			double dist_temp = this->fdb->distances(index1, index2);
 			if (dist_temp < dist)
 				dist = dist_temp;
@@ -76,5 +102,5 @@ double Bof_Region::get_distance_region(Bof_Region &other)
 		distances2[i] = dist;
 	}
 
-	return (distances1.get_sum() + distances2.get_sum())/(this->features.size() + other.features.size());
+	return (distances1.get_sum() + distances2.get_sum())/(this->nearest_centers.size() + other.nearest_centers.size());
 }
