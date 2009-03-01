@@ -19,8 +19,14 @@
 #include <string>
 #include "vector.h"
 #include "feature.h"
+#include "symmatrix.h"
+
+
 
 #define SAMPLE_LENGTH_FOR_K_MEANS 100
+
+
+
 
 
 class Feature_db
@@ -39,18 +45,21 @@ public:
 	void insert_feature(Feature &feature);
     void fill_with_random(int nb_images, int nb_features);
 
-	void do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas, bool try_load=true, bool save=false);
+	void do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
+		bool compute_matrix=true, bool try_load=true, bool save=false);
 
 	unsigned int get_nbfeatures();
 	unsigned int get_nbimages();
 
-	//A IMPLEMENTER
 	void get_feature_number(int index, Vector &vec);
 	void get_all_features_in_image(int index, std::vector<Feature> &features);
+	void get_features_by_indexes(std::vector<int> &indexes, std::vector<Feature> &features);
 
-
+	void precompute_distances_k_centers(std::vector<Vector> &centers);
 
 	void error_and_exit();
+
+	SymMatrix distances;
 
 private:
     string db_name;

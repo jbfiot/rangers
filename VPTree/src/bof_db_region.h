@@ -1,7 +1,7 @@
-#ifndef BOF_DB
-#define BOF_DB
+#ifndef BOF_DB_REGION
+#define BOF_DB_REGION
 
-#include "Bof.h"
+#include "bof_region.h"
 
 #include <string>
 #include <vector>
@@ -21,7 +21,7 @@
 
 
 
-class Bof_db
+class Bof_db_Region
 {
 
 	/**
@@ -33,13 +33,13 @@ class Bof_db
 public:
 
 
-	Bof_db(std::vector<Vector> centers, Vector sigmas, string db_host="localhost", string db_username="ranger",
+	Bof_db_Region(std::vector<Vector> centers, Vector sigmas, string db_host="localhost", string db_username="ranger",
 		string db_password="GoRangers!", string db_name="bof_db", string table_name="bof");
 
-	~Bof_db();
+	~Bof_db_Region();
 
-	void add_bof(Bof bag);
-	void add_bof_region(Bof bag);
+	void add_bof(Bof_Region bag);
+	void add_bof_region(Bof_Region bag);
 
 	void build_tree();
 	void error_and_exit();

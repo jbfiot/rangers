@@ -4,7 +4,6 @@
 #include <sstream>
 
 
-
 #define NB_COEFF_FEATURES 128
 
 
@@ -236,12 +235,27 @@ void Feature_db::get_feature_number(int index, Vector &vec)
 }
 
 
+/**
+ *	Calcul de la matrice des distances entre les centres
+ **/
+void Feature_db::precompute_distances_k_centers(std::vector<Vector> &centers)
+{
+	this->distances.resize(centers.size());
+	for (int i=0; i<centers.size(); ++i)
+	{
+		for (int j=0; j<i; ++j)
+		{
+			this->distances(i,j) = centers[i] - centers[j];
+		}
+	}
+}
 
 
 /**
 *	Applique l'algorithme des K-Means sur le SiftSet
 **/
-void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas, bool try_load, bool save)
+void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
+							bool compute_distances, bool try_load, bool save)
 {
 	sigmas.resize(k);
 
@@ -511,6 +525,8 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
         cout << "-> K-centers successfully saved." << endl;
 	}
 
+	if (compute_distances)
+		this->precompute_distances_k_centers(centers);
 
 
 
@@ -618,6 +634,84 @@ void Feature_db::get_all_features_in_image(int index, std::vector<Feature> &feat
 	mysql_free_result(result);
 
 }
+
+
+
+
+void Feature_db::get_features_by_indexes(std::vector<int> &indexes, std::vector<Feature> &features)
+{
+	// REQUETE SQL
+	std::string get_feature_query = "SELECT X, Y, Img_ID, ";
+
+	for (unsigned int i=1; i<=NB_COEFF_FEATURES;i++)
+	{
+		get_feature_query+="Coeff";
+		get_feature_query+=to_string(i);
+		if (i!= NB_COEFF_FEATURES)
+			get_feature_query+=" ,";
+	}
+
+	get_feature_query += " FROM ";
+	get_feature_query += table_name;
+	get_feature_query += " WHERE Feature_ID in (";
+
+	for (unsigned int i=0; i<indexes.size();i++)
+	{
+		get_feature_query += to_string(indexes[i]);
+		if (i!= NB_COEFF_FEATURES)
+			get_feature_query+=" ,";
+	}
+
+	get_feature_query += " )";
+
+
+	if (!mysql_query(db_connection, get_feature_query.c_str())) {
+		cout << "Get feature query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	unsigned int num_champs = 0;
+
+	result = mysql_use_result(db_connection);
+
+	//On recupere le nombre de champs
+	num_champs = mysql_num_fields(result);
+
+	//on stock les valeurs de la ligne choisie
+	while (row = mysql_fetch_row(result))
+	{
+		Feature feature;
+
+		//On declare un pointeur long non signe pour y stocker la taille des valeurs
+		unsigned long *lengths;
+
+		//On stocke cette taille dans le pointeur
+		lengths = mysql_fetch_lengths(result);
+
+		//On fait une boucle pour avoir la valeur de chaque champs
+		feature.position.push_back(strtodouble(row[0]));
+		feature.position.push_back(strtodouble(row[1]));
+		feature.index_image = strtodouble(row[2]);
+
+		for (int i = 3; i < num_champs; i++)
+			feature.coeffs.push_back(strtodouble(row[i]));
+
+		features.push_back(feature);
+	}
+
+	cout << features.size() << " results." << endl;
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+}
+
+
 
 
 
