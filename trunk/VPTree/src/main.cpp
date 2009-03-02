@@ -14,7 +14,7 @@
 using namespace std;
 
 
-#define USE_REGION
+//#define USE_REGION
 
 
 int main()
@@ -76,7 +76,9 @@ int main()
 		all_regions_in_image.push_back( region );
 
 #else
-		std::vector<Bof> all_regions_in_image = get_all_regions_subsets( res );
+		std::vector<Bof> all_regions_in_image;
+		int nb_pixels=200;
+		get_all_regions_subsets( res, all_regions_in_image, nb_pixels );
 #endif
 
 

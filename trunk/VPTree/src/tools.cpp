@@ -54,65 +54,87 @@ double strtodouble(const string& what)
 }
 
 /***
- ** calcul des regions : 4 r�gions par image
- ** Le probleme avec 4 regions/image c'est que le descripteur obtenu 
- ** n'est pas robuste aux symetries autour de l'axe vertical. 
- ** Or, il arrive frequemment que des objets non-symetriques soient 
- ** photographies en etant orientes vers la gauche ou vers la droite. 
- ** C'est pour cette raison que les descripteurs les plus populaires 
- ** se basent sur deux ou trois regions : haut, bas et eventuellement 
- ** milieu. Les objets sont rarement photographies la tete en bas.
-
- ** Par ailleurs : quand on retourne un vector<Bof> l'objet retourne doit etre copie, 
- ** ce qui est couteux en temps de calcul. 
- ** Il serait plus judicieux de prendre comme argument "vector<Bof>& all_regions_in_image".
+ ** calcul des regions : une région est formée d'un ou plusieurs carres de taille nb_pixels
 **/
 
-vector<Bof> get_all_regions_subsets( const vector<Feature>& res )
+void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regions_in_image, int nb_pixels )
 {
-	int maxX=0, maxY=0;
-	int minX=10000, minY=10000;
-	int ind_max=0, ind_min=0;
-	vector<Feature> feats_1, feats_2, feats_3, feats_4;
-	vector<Bof> all_regions_in_image;
-
-	for (int i=0; i<res.size(); i++)
+	int maxX=0, maxY=0;	
+	int i=0, j=0, k=0, u=0;
+	int itX=0, itY=0;
+	vector<Feature> feats;
+	
+	for (i=0; i<res.size(); i++)
 	{
-		if (maxX<res[i].position[0] && maxY<res[i].position[1])
-		{
+		if (maxX<res[i].position[0]) 
 			maxX=res[i].position[0];
+		if (maxY<res[i].position[1])
 			maxY=res[i].position[1];
-			ind_max=i;
-		}
-		if (minX>res[i].position[0] && minY>res[i].position[1])
-		{
-			minX=res[i].position[0];
-			minY=res[i].position[1];
-			ind_min=i;
-		}
 	}
 
-	for (int j=0; j<res.size(); j++)
+	vector< vector<int> > tab(maxX+1, vector<int> (maxY+1,0));
+
+	for (i=0; i<res.size(); i++)
 	{
-		if (res[j].position[0]>(res[ind_max].position[0]-res[ind_min].position[0])/2 &&
-			res[j].position[1]>(res[ind_max].position[1]-res[ind_min].position[1])/2)
-			feats_1.push_back(res[j]);
-		else if (res[j].position[0]>(res[ind_max].position[0]-res[ind_min].position[0])/2 &&
-			res[j].position[1]<=(res[ind_max].position[1]-res[ind_min].position[1])/2)
-			feats_2.push_back(res[j]);
-		else if (res[j].position[0]<=(res[ind_max].position[0]-res[ind_min].position[0])/2 &&
-			res[j].position[1]>(res[ind_max].position[1]-res[ind_min].position[1])/2)
-			feats_3.push_back(res[j]);
-		else
-			feats_4.push_back(res[j]);
-
+		tab[int(res[i].position[0])][int(res[i].position[1])]=i+1;
 	}
 
-	all_regions_in_image.push_back(Bof(feats_1));
-	all_regions_in_image.push_back(Bof(feats_2));
-	all_regions_in_image.push_back(Bof(feats_3));
-	all_regions_in_image.push_back(Bof(feats_4));
 
-	return all_regions_in_image;
+	i=0;
+	while (i<=maxX)
+	{
+		itY=0;
+		j=0;
+		while (j<=maxY)
+		{
+			for (i=nb_pixels*itX; i<nb_pixels*(itX+1);i++)
+			{
+				for (j=nb_pixels*itY; j<nb_pixels*(itY+1); j++)
+				{
+					if (i<=maxX && j<=maxY && tab[i][j])
+						feats.push_back(res[tab[i][j]-1]);
+				}
+			}
+			itY++;
+			if (!feats.empty()) 
+				all_regions_in_image.push_back(Bof(feats));
+			feats.clear();
+		}
+		itX++;
+	}
+
+	// calcul de tous les rectangles possibles verticaux
+	
+	for (i=0; i<itX; i++)
+	{
+		for (u=0; u<itY; u++)
+		{
+			for (j=i*itY+u; j<(i+1)*itY; j++)
+			{
+				for (k=0; k<all_regions_in_image[j].features.size(); k++)
+					feats.push_back(all_regions_in_image[j].features[k]);
+				if (j>(i*itY)+u)
+					all_regions_in_image.push_back(Bof(feats));
+			}
+			feats.clear();
+		}
+	}
+
+	// calcul de tous les rectangles possibles horizontaux
+	for (j=0; j<itY; j++)
+	{
+		for (u=0; u<itX; u++)
+		{
+			for (i=0; i<itX-u; i++)
+			{
+				for (k=0; k<all_regions_in_image[j+(i+u)*itX].features.size(); k++)
+					feats.push_back(all_regions_in_image[j+(i+u)*itX].features[k]);
+				if (i>0)
+					all_regions_in_image.push_back(Bof(feats));
+			}
+			feats.clear();
+		}
+	}
+	
 }
 
