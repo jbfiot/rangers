@@ -31,7 +31,8 @@ class MyScene : public QGraphicsScene
 	QRectF rect;
 	QGraphicsRectItem * MyRectItem;
 	QGraphicsPixmapItem *impix;
-	QGraphicsScene * SceneRes;
+	QGraphicsScene * SceneSelection;
+	QGraphicsPixmapItem* Selection;
 
 };
  
