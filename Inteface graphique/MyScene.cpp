@@ -16,6 +16,7 @@ MyScene::MyScene() : QGraphicsScene()
 	numero=true;
 	MyRectItem=new QGraphicsRectItem;
 	rect = QRectF();
+
 }
 
 MyScene::MyScene(QString fileName) : QGraphicsScene()
@@ -30,6 +31,8 @@ MyScene::MyScene(QString fileName) : QGraphicsScene()
 	numero=true;
 	MyRectItem=new QGraphicsRectItem;
 	rect = QRectF();
+	SceneSelection = new QGraphicsScene;
+	Selection = SceneSelection->addPixmap(image);
 }
 
  void MyScene::mousePressEvent(QGraphicsSceneMouseEvent * mouseEvent)
@@ -68,12 +71,20 @@ void MyScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 		 if (!numero) {
 			numero=true;
 			point2 = mouseEvent->scenePos();
-			rect = QRectF(point1,point2);
+
+			qreal minx = (point1.x()<point2.x())?point1.x():point2.x();
+			qreal miny = (point1.y()<point2.y())?point1.y():point2.y();
+			qreal maxx = (point1.x()>point2.x())?point1.x():point2.x();
+			qreal maxy = (point1.y()>point2.y())?point1.y():point2.y();
+			QPointF TopLeft=QPointF(minx,miny);
+			QPointF BottomRight=QPointF(maxx,maxy);
+			rect = QRectF(TopLeft,BottomRight);
 			
-			SceneRes = new QGraphicsScene;
-			SceneRes->addPixmap(this->getPixResult());
-			QGraphicsView* ViewRes = new QGraphicsView(SceneRes);
-			ViewRes->show();
+			//SceneSelection->removeItem(Selection);
+			SceneSelection = new QGraphicsScene;
+			Selection = SceneSelection->addPixmap(this->getPixResult());
+			QGraphicsView* ViewSelection = new QGraphicsView(SceneSelection);
+			ViewSelection->show();
 		 }
 	 }
  }
