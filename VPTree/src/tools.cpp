@@ -60,7 +60,7 @@ double strtodouble(const string& what)
 void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regions_in_image, int nb_pixels )
 {
 	int maxX=0, maxY=0;	
-	int i=0, j=0, k=0, u=0;
+	int i=0, j=0, k=0, u=0, v=0, w=0;
 	int itX=0, itY=0;
 	vector<Feature> feats;
 	
@@ -76,10 +76,10 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 
 	for (i=0; i<res.size(); i++)
 	{
-		tab[int(res[i].position[0])][int(res[i].position[1])]=i+1;
+		tab[res[i].position[0]][res[i].position[1]]=i+1;
 	}
 
-
+	//calcul de tous les carres possibles
 	i=0;
 	while (i<=maxX)
 	{
@@ -103,8 +103,9 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 		itX++;
 	}
 
+
+
 	// calcul de tous les rectangles possibles verticaux
-	
 	for (i=0; i<itX; i++)
 	{
 		for (u=0; u<itY; u++)
@@ -135,6 +136,31 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 			feats.clear();
 		}
 	}
-	
+
+	//calcul de tous les rectangles possibles horizontaux+verticaux
+	for (i=0; i<itX; i++)
+	{
+		for (u=0; u<itY; u++)
+		{
+			for (j=i*itX+u+1; j<(i+1)*itX; j++)
+			{
+				for (v=1; v<itX-i; v++)
+				{
+					for (w=i*itX+u; w<j+1; w++)
+					{
+						if (v==1)
+							for (k=0; k<all_regions_in_image[w].features.size(); k++)
+								feats.push_back(all_regions_in_image[w].features[k]);
+						for (k=0; k<all_regions_in_image[w+v*itX].features.size(); k++)
+							feats.push_back(all_regions_in_image[w+v*itX].features[k]);
+					}
+					if (v>1)
+						all_regions_in_image.push_back(Bof(feats));
+				}
+				feats.clear();
+			}
+		}
+	}
+
 }
 
