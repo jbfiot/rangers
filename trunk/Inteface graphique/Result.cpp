@@ -8,3 +8,4 @@ Result::Result(QPixmap *nImage,float nScore,std::string nLink) {
 	Score=nScore;
 	Link=nLink;
 }
+

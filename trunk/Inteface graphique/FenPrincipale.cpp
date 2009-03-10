@@ -1,5 +1,13 @@
-#include "FenPrincipale.h"
+#include <iostream>
+#include <string>
+#include "protocol.h"
 #include "MyScene.h"
+#include "FenPrincipale.h"
+
+
+#include <QApplication>
+
+#pragma comment(lib, "ws2_32.lib")
 
 FenPrincipale::FenPrincipale()
 {	
@@ -31,7 +39,7 @@ FenPrincipale::FenPrincipale()
 	toolBarFichier->addSeparator();
 	toolBarFichier->addAction(actionSend);
 	
-	QObject::connect(actionLoadImage, SIGNAL(triggered()), this, SLOT(LoadImage()));
+	QObject::connect(actionLoadImage, SIGNAL(triggered()), this, SLOT(LoadImageW()));
     QObject::connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
     QObject::connect(actionSend, SIGNAL(triggered()), this, SLOT(SendServer()));
 	QObject::connect(actionSend, SIGNAL(triggered()), this, SLOT(ShowResults()));
@@ -59,7 +67,7 @@ FenPrincipale::FenPrincipale()
 
 	QSize s(220,20);
 
-	QTextEdit *adressServer1 = new QTextEdit;
+	adressServer1 = new QLineEdit(QString("138.195.102.25"));
 	adressServer1->setFixedSize(s);
 
 	QHBoxLayout *adressLayout = new QHBoxLayout;
@@ -68,7 +76,7 @@ FenPrincipale::FenPrincipale()
 	QWidget *adressWidget = new QWidget;
 	adressWidget->setLayout(adressLayout);
 
-	QTextEdit *portAdressServer = new QTextEdit;
+	portAdressServer = new QLineEdit(QString("6006"));
 	portAdressServer->setFixedSize(s);
 
 	QHBoxLayout *portLayout = new QHBoxLayout;
@@ -111,7 +119,9 @@ FenPrincipale::FenPrincipale()
 	T.push_back(R);
 }
 
-void FenPrincipale::LoadImage() {
+
+
+void FenPrincipale::LoadImageW() {
 	delete ImageWidget;
 	ImageWidget = new QWidget;
 	dockImage->setWidget(ImageWidget);
@@ -128,8 +138,8 @@ void FenPrincipale::LoadImage() {
         QMessageBox::warning(this, tr("Error"), msg);
         return;
     }
-	//QLabel *image=new QLabel;
-	MyScene *scene = new MyScene(fileName);
+
+	scene = new MyScene(fileName);
 	QGraphicsView *view = new QGraphicsView(scene);
 
 	view->setFixedSize(scene->size+QSize(10,10));
@@ -144,8 +154,38 @@ void FenPrincipale::LoadImage() {
 	
 }
 void FenPrincipale::SendServer() {
-	QMessageBox::information(this,"Envoi des données au serveur","Les données sont envoyées");
 
+	// Lecture de l'adresse et du port
+	
+	int port;
+	sscanf(portAdressServer->text().toStdString().c_str(),"%d",&port);
+
+
+	// Config du serveur
+
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2,0), &WSAData);
+	SOCKET sock;
+	SOCKADDR_IN sin;
+	sock = socket(AF_INET, SOCK_STREAM,0);
+
+	sin.sin_addr.s_addr	= inet_addr(adressServer1->text().toStdString().c_str());
+	sin.sin_family		= AF_INET;
+	sin.sin_port		= htons(port);
+	sock = socket(AF_INET,SOCK_STREAM,0);
+
+	::connect(sock, (SOCKADDR *)&sin, sizeof(sin));
+	
+	Protocol P(sock);
+
+	Image im=scene->getRawImage();
+	
+	int err=P.SendImage(im);
+
+	if (err==0) 
+		QMessageBox::information(this,"Envoi des données au serveur","Les données sont envoyées");
+	else if(err==-1)
+		QMessageBox::information(this,"Envoi des données au serveur","Erreur, les données n'ont pu être envoyées");
 }
 void FenPrincipale::ShowResults() {
 	QHBoxLayout *layoutScores = new QHBoxLayout;
@@ -183,3 +223,5 @@ QWidget* showResult(const Result T) {
 
 
 }
+
+

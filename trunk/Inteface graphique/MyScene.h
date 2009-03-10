@@ -1,6 +1,7 @@
 #ifndef DEF_MYSCENE
 #define DEF_MYSCENE
  
+#include "protocol.h"
 #include <QApplication>
 #include <QWidget>
 #include <QGraphicsScene>
@@ -16,6 +17,7 @@ class MyScene : public QGraphicsScene
 	MyScene(QString fileName);
 	QSize size;
 	QPixmap getPixResult();
+	Image getRawImage();
 
 	public slots:
 
