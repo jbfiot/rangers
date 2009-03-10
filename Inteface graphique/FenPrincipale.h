@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include "Result.h"
+#include "MyScene.h"
 #include <QtGui>
-
+#include <QApplication>
 
 class FenPrincipale : public QMainWindow
 {
@@ -12,7 +13,7 @@ class FenPrincipale : public QMainWindow
 
 	public:
 		FenPrincipale();
-
+		
 
 	private:
 		QDockWidget *dockImage;
@@ -21,11 +22,13 @@ class FenPrincipale : public QMainWindow
 		QDockWidget *dockResults;
 		QWidget *WidgetResults;
 		std::vector<Result> T;
-		
+		QLineEdit *adressServer1;
+		QLineEdit *portAdressServer;
+		MyScene *scene;
 
 	public slots :
 		void SendServer();
-		void LoadImage();
+		void LoadImageW();
 		void ShowResults();
 };
 

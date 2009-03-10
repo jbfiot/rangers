@@ -1,3 +1,4 @@
+#include "protocol.h"
 #include "MyScene.h"
 #include <QtGui>
 #include <QWidget>
@@ -83,8 +84,9 @@ void MyScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 			//SceneSelection->removeItem(Selection);
 			SceneSelection = new QGraphicsScene;
 			Selection = SceneSelection->addPixmap(this->getPixResult());
-			QGraphicsView* ViewSelection = new QGraphicsView(SceneSelection);
-			ViewSelection->show();
+
+			/*QGraphicsView* ViewSelection = new QGraphicsView(SceneSelection);
+			ViewSelection->show();*/
 		 }
 	 }
  }
@@ -92,4 +94,29 @@ void MyScene::mouseReleaseEvent(QGraphicsSceneMouseEvent * mouseEvent)
 QPixmap MyScene::getPixResult()
 {
 	return (impix->pixmap()).copy(rect.toRect());
+}
+
+Image MyScene::getRawImage()
+{	
+	QImage res = (this->getPixResult()).toImage();
+
+	int width = res.width();
+	int height = res.height();
+	int** IntArray = new int*[height];
+	
+	for(int i=0;i<height;i++){
+		IntArray[i] = new int[width];
+	}
+
+	for(int i=0;i<height;i++){
+		for(int j=0;j<width;j++){
+			IntArray[i][j] = qGray(res.pixel(i,j));
+		}
+	}
+
+	Image im;
+	im.data=IntArray;
+	im.x_size=width;
+	im.y_size=height;
+	return im;
 }
