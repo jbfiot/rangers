@@ -77,7 +77,7 @@ int main()
 
 #else
 		std::vector<Bof> all_regions_in_image;
-		int nb_pixels=200;
+		int nb_pixels=100;
 		get_all_regions_subsets( res, all_regions_in_image, nb_pixels );
 #endif
 

@@ -154,8 +154,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 						for (k=0; k<all_regions_in_image[w+v*itX].features.size(); k++)
 							feats.push_back(all_regions_in_image[w+v*itX].features[k]);
 					}
-					if (v>1)
-						all_regions_in_image.push_back(Bof(feats));
+					all_regions_in_image.push_back(Bof(feats));
 				}
 				feats.clear();
 			}
