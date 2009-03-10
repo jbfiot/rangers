@@ -97,11 +97,14 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 			}
 			itY++;
 			if (!feats.empty()) 
-				all_regions_in_image.push_back(Bof(feats));
+				all_regions_in_image.push_back(Bof());
+				all_regions_in_image.back().init_Bof(feats);
 			feats.clear();
 		}
 		itX++;
 	}
+
+	cout<<"tous les carres faits"<<endl;
 
 
 
@@ -115,11 +118,14 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 				for (k=0; k<all_regions_in_image[j].features.size(); k++)
 					feats.push_back(all_regions_in_image[j].features[k]);
 				if (j>(i*itY)+u)
-					all_regions_in_image.push_back(Bof(feats));
+					all_regions_in_image.push_back(Bof());
+					all_regions_in_image.back().init_Bof(feats);
 			}
 			feats.clear();
 		}
 	}
+
+	cout<<"tous les retangles verticaux faits"<<endl;
 
 	// calcul de tous les rectangles possibles horizontaux
 	for (j=0; j<itY; j++)
@@ -131,11 +137,14 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 				for (k=0; k<all_regions_in_image[j+(i+u)*itX].features.size(); k++)
 					feats.push_back(all_regions_in_image[j+(i+u)*itX].features[k]);
 				if (i>0)
-					all_regions_in_image.push_back(Bof(feats));
+					all_regions_in_image.push_back(Bof());
+					all_regions_in_image.back().init_Bof(feats);
 			}
 			feats.clear();
 		}
 	}
+
+	cout<<"tous les rectangles horizontaux faits"<<endl;
 
 	//calcul de tous les rectangles possibles horizontaux+verticaux
 	for (i=0; i<itX; i++)
@@ -154,12 +163,15 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 						for (k=0; k<all_regions_in_image[w+v*itX].features.size(); k++)
 							feats.push_back(all_regions_in_image[w+v*itX].features[k]);
 					}
-					all_regions_in_image.push_back(Bof(feats));
+					all_regions_in_image.push_back(Bof());
+					all_regions_in_image.back().init_Bof(feats);
 				}
 				feats.clear();
 			}
 		}
 	}
+
+	cout<<"rectangles horizontaux+verticaux"<<endl;
 
 }
 
