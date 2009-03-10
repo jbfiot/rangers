@@ -43,7 +43,7 @@ using namespace std;
 		string GetCmd();
 		int SendCmd(string cmd);
 		void GetImage(Image &image);
-		int SendImage(Image image);
+		int SendImage(Image &image);
 
 	};
 	

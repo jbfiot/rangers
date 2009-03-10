@@ -93,34 +93,35 @@
 		delete[] row;
 	}
 
-	int Protocol::SendImage(Image image) {
+	int Protocol::SendImage(Image &image) {
 		int control = 0;
 		string line;
 		ostringstream oss;
 
-		SendCmd("SENDIMAGE");
+		SendCmd("SENDIMAGE");		
 		
-		oss << image.x_size << "\r\n" << image.y_size << "\r\n";
+
+		oss << image.x_size << "\r\n";
 		line = oss.str();
+		send(soc,line.c_str(),line.length(),0);
+		
+		ostringstream oss2;
+
+		oss2 << image.y_size << "\r\n";
+		line = oss2.str();
 		send(soc,line.c_str(),line.length(),0);
 
 		for(int i = 0; i < image.x_size;i++)
 		{
-			ostringstream oss;
-
 			for(int j = 0; j < image.y_size; j++)
 			{
-				/*if (image.data[i][j]<10)
-					oss << "00";
-				else if(image.data[i][j]<100)
-					oss < "0";*/
+				ostringstream oss;
 				oss << image.data[i][j] << "\r\n";
+			
+				line=oss.str();
+				if(send(soc, line.c_str(), line.length(), 0) == -1) 
+					control = -1;
 			}
-			line=oss.str();
-			//line.erase(line.length()-1,1);
-			//line.append("\r\n");
-			if(send(soc, line.c_str(), line.length(), 0) == -1) 
-				control = -1;
 
 		}
 		return control;
@@ -129,7 +130,7 @@
 	int Protocol::SendCmd(string cmd) {
 		int control;
 		string cmd2=cmd.append("\r\n");
-		control = ::send(soc, cmd2.c_str(), cmd.length()+2, 0);
+		control = send(soc, cmd2.c_str(), cmd2.length(), 0);
 		return control;
 	}
 
