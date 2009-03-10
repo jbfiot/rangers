@@ -34,7 +34,7 @@ using namespace std;
 		string recvline();
 		int recvint();
 		int recvint(string line);
-		void recvintrow(int* row,int y); 
+		int* recvintrow(int y); 
 
 	public:
 		Protocol(SOCKET socket); 
