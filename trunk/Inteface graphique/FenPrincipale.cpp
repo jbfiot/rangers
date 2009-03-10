@@ -68,7 +68,7 @@ FenPrincipale::FenPrincipale()
 	QSize s(220,20);
 
 	adressServer1 = new QLineEdit(QString("138.195.102.25"));
-	adressServer1->setFixedSize(s);
+	adressServer1->setMaximumSize(s);
 
 	QHBoxLayout *adressLayout = new QHBoxLayout;
 	adressLayout->addWidget(adressServer1);
@@ -77,7 +77,7 @@ FenPrincipale::FenPrincipale()
 	adressWidget->setLayout(adressLayout);
 
 	portAdressServer = new QLineEdit(QString("6006"));
-	portAdressServer->setFixedSize(s);
+	portAdressServer->setMaximumSize(s);
 
 	QHBoxLayout *portLayout = new QHBoxLayout;
 	portLayout->addWidget(portAdressServer);
@@ -101,22 +101,66 @@ FenPrincipale::FenPrincipale()
 	paramLayout->setAlignment(Qt::AlignLeft);
 	paramDock->setLayout(paramLayout);
 	//dockServeur->setGeometry(QRect(100,200,200,250));
-	dockServeur->setFixedSize(250,200);
+	dockServeur->setMaximumSize(250,200);
 
 	// dock RESULTATS
 
 	dockResults = new QDockWidget("Resultats",this);
 	addDockWidget(Qt::RightDockWidgetArea, dockResults);
-	dockResults->setMinimumWidth(250);
+	dockResults->setMaximumWidth(250);
 
 	WidgetResults = new QWidget;
-	dockResults->setWidget(WidgetResults);
+	scrollArea = new QScrollArea;
+
+	dockResults->setWidget(scrollArea);
+
+
 	
 
 	QPixmap *mini = new QPixmap(QString("test.jpg"));
 	Result R(mini,98,"t");
-	
+	QPixmap *mini2 = new QPixmap(QString("9143.gif.jpg"));
+	Result R2(mini2,95,"v");
+	QPixmap *mini3 = new QPixmap(QString("test.jpg"));
+	Result R3(mini3,92,"t");
+	QPixmap *mini4 = new QPixmap(QString("test.jpg"));
+	Result R4(mini4,90,"t");
+	QPixmap *mini5 = new QPixmap(QString("test.jpg"));
+	Result R5(mini5,88,"t");
+	QPixmap *mini6 = new QPixmap(QString("test.jpg"));
+	Result R6(mini6,86,"t");
+	QPixmap *mini7 = new QPixmap(QString("test.jpg"));
+	Result R7(mini7,84,"t");
+	QPixmap *mini8 = new QPixmap(QString("test.jpg"));
+	Result R8(mini8,82,"t");
+	QPixmap *mini9 = new QPixmap(QString("test.jpg"));
+	Result R9(mini9,81,"t");
+	QPixmap *mini10 = new QPixmap(QString("test.jpg"));
+	Result R10(mini10,79,"t");
+	QPixmap *mini11 = new QPixmap(QString("test.jpg"));
+	Result R11(mini11,78,"t");
+	QPixmap *mini12 = new QPixmap(QString("test.jpg"));
+	Result R12(mini12,77,"t");
+	QPixmap *mini13 = new QPixmap(QString("test.jpg"));
+	Result R13(mini13,76,"t");
+	QPixmap *mini14 = new QPixmap(QString("test.jpg"));
+	Result R14(mini14,75,"t");
+
 	T.push_back(R);
+	T.push_back(R2);
+	T.push_back(R3);
+	T.push_back(R4);
+	T.push_back(R5);
+	T.push_back(R6);
+	T.push_back(R7);
+	T.push_back(R8);
+	T.push_back(R9);
+	T.push_back(R10);
+	T.push_back(R11);
+	T.push_back(R12);
+	T.push_back(R13);
+	T.push_back(R14);
+
 }
 
 
@@ -142,7 +186,7 @@ void FenPrincipale::LoadImageW() {
 	scene = new MyScene(fileName);
 	QGraphicsView *view = new QGraphicsView(scene);
 
-	view->setFixedSize(scene->size+QSize(10,10));
+	view->setMaximumSize(scene->size+QSize(10,10));
 	//view->show();
 
 	//image->setPixmap(QPixmap(fileName));
@@ -188,14 +232,18 @@ void FenPrincipale::SendServer() {
 		QMessageBox::information(this,"Envoi des données au serveur","Erreur, les données n'ont pu être envoyées");
 }
 void FenPrincipale::ShowResults() {
-	QHBoxLayout *layoutScores = new QHBoxLayout;
+	QVBoxLayout *layoutScores = new QVBoxLayout;
 	for (unsigned int i=0;i<T.size();i++) {
 		layoutScores->addWidget(showResult(T[i]));
 	}
 
+	
 	WidgetResults->setLayout(layoutScores);
-	dockResults->setFixedSize(250,T.size()*150);
+
+	scrollArea->setWidget(WidgetResults);
+
 	dockResults->show();
+
 
 }
 QWidget* showResult(const Result T) {
@@ -218,10 +266,27 @@ QWidget* showResult(const Result T) {
 	layoutResult->addSpacing(15);
 	layoutResult->addWidget(labelScore);
 	res->setLayout(layoutResult);
-	
+	res->setFixedHeight(100);
+
 	return res;
 
 
+}
+
+void FenPrincipale::LoadImageResult(char* str) {
+
+	scene = new MyScene(QString(str));
+	QGraphicsView *view = new QGraphicsView(scene);
+
+	view->setFixedSize(scene->size+QSize(10,10));
+	//view->show();
+
+	//image->setPixmap(QPixmap(fileName));
+	QVBoxLayout *dockLayout = new QVBoxLayout;
+	dockLayout->addWidget(view);
+	ImageWidget->setLayout(dockLayout);
+	
+	dockImage->show();
 }
 
 
