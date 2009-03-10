@@ -21,7 +21,7 @@ class Pic_db
 {
 
  public:
-    Pic_db(string db_host="localhost", string db_username="ranger",string db_password="GoRangers!", string db_name="pic_db", string table_name="pics", path data_folder="./Data");
+    Pic_db(path data_folder="", string db_host="localhost", string db_username="ranger",string db_password="GoRangers!", string db_name="pic_db", string table_name="pics");
     ~Pic_db();
     void fill_db();
 

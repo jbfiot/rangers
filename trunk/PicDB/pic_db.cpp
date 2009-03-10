@@ -5,10 +5,10 @@
 /**
 *   Constructor
 */
-Pic_db::Pic_db(string db_host, string db_username,string db_password, string db_name, string table_name, path data_folder){
+Pic_db::Pic_db(path data_folder, string db_host, string db_username,string db_password, string db_name, string table_name){
 
-    this->data_folder = data_folder;
-    this->db_name = db_name;
+	this->data_folder = data_folder;
+	this->db_name = db_name;
 	this->db_username = db_username;
 	this->db_password = db_password;
 	this->db_host = db_host;
@@ -105,7 +105,7 @@ void Pic_db::error_and_exit(){
 
 void Pic_db::add_file_to_db(string filename)
 {
-    cout << "      " << filename << endl;
+	cout << "      " << filename << endl;
 
 	string fill_query = "INSERT INTO ";
 	fill_query+=table_name;
@@ -139,9 +139,9 @@ void Pic_db::add_files_to_db(std::vector<string> &files)
 	fill_query+=") VALUES (\"";
 
 	for (int i=1;i<=files.size();i++) {
-        fill_query+=files[i-1];
-        if (i!=files.size())
-            fill_query+="\"),(\"";
+		fill_query+=files[i-1];
+		if (i!=files.size())
+			fill_query+="\"),(\"";
 	}
 
 	fill_query+="\")";
@@ -160,36 +160,40 @@ void Pic_db::add_files_to_db(std::vector<string> &files)
 
 
 void Pic_db::process_folder(path folder,std::vector<string> &files) {
-    cout << "Processing "<<folder.native_directory_string() << " folder... "<<endl;
-    if ( !exists(folder ) ) {
-        cout << "Folder not found. Aborting.";
-        exit(1);
-    }
+	cout << "Processing "<<folder.native_directory_string() << " folder... "<<endl << endl;
+	if ( !exists(folder ) ) {
+		cout << "Folder not found. Aborting.";
+		system("pause");
+		exit(1);
+	}
 
-    directory_iterator itr(folder), end_itr;
+	directory_iterator itr(folder), end_itr;
 
-    for ( ; itr != end_itr; ++itr ){
-        /*if (is_directory(itr->status())){
-            // Pour la recursion, non utilise pour l'instant.
-            process_folder(itr->path());
-        }
-        else*/ if (is_regular(itr->status())) {
-            string filename = itr->leaf();
-            if (filename.substr(filename.length()-3,3) == "jpg") {
-                //cout<<itr->leaf()<< " => jpg found!!"<< endl;
-                //add_file_to_db(folder.native_directory_string()+"/"+itr->leaf());
-                //add_file_to_db(itr->leaf());
-                files.push_back(itr->leaf());
-            }
-        }
+	for ( ; itr != end_itr; ++itr ){
+		/*if (is_directory(itr->status())){
+		// Pour la recursion, non utilise pour l'instant.
+		process_folder(itr->path());
+		}
+		else*/
+		if (is_regular(itr->status())) {
+			string filename = itr->leaf();
+			string extension = filename.substr(filename.length()-3,3);
+			if (extension == "jpg" || extension =="png" || extension =="bmp") {
+				cout<<filename<< " => image found!!"<< endl;
+				files.push_back(filename);
+			}
+			else
+				cout<<filename<< " is not an image"<< endl;
 
-    }
-    cout << "Done." << endl;
+		}
+
+	}
+	cout << "Done." << endl;
 }
 
 void Pic_db::fill_db(){
-    std::vector<string> files;
-    process_folder(data_folder,files);
-    add_files_to_db(files);
+	std::vector<string> files;
+	process_folder(data_folder,files);
+	add_files_to_db(files);
 
 }
