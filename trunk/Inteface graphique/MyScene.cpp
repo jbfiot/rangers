@@ -110,13 +110,23 @@ Image MyScene::getRawImage()
 
 	for(int i=0;i<height;i++){
 		for(int j=0;j<width;j++){
-			IntArray[i][j] = qGray(res.pixel(i,j));
+			IntArray[i][j] = qGray(res.pixel(j,i));
 		}
 	}
 
 	Image im;
 	im.data=IntArray;
-	im.x_size=width;
-	im.y_size=height;
+	im.x_size=height;
+	im.y_size=width;
+
+
+	
+	/*for (int i=0;i<im.x_size;i++) {
+		for (int j=0;j<im.y_size;j++) {
+			fprintf_s(f,"%d\t",im.data[i][j]);
+		}
+		fprintf_s(f,"\n");
+	}*/
+
 	return im;
 }
