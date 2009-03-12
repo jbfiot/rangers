@@ -7,8 +7,9 @@
 
 
 #if defined(WIN32) || defined(WIN64)
-	#include <winsock.h>
+#include <winsock.h>
 #endif
+
 
 #include <mysql.h>
 
