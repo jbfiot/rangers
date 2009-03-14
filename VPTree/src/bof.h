@@ -1,7 +1,7 @@
 #ifndef BOF
 #define BOF
 
-#include "Feature.h"
+#include "feature.h"
 
 #include <string>
 #include <vector>
