@@ -2,7 +2,7 @@
 using namespace std;
 
 #define RANDOM_SET_MAX_LENGTH 100
-#define MAX_ROWS_BY_DISTANCE_REQUEST 2
+#define MAX_ROWS_BY_DISTANCE_REQUEST 100
 
 /**
  *   Constructor
@@ -123,9 +123,7 @@ void Bof_db_Region::add_bof(Bof_Region bag)
 	add_bof_region_query += ")";
 
 
-	if (!mysql_query(db_connection, add_bof_region_query.c_str()))
-		cout << "Add-bof_region-query: OK"<<endl;
-	else
+	if (mysql_query(db_connection, add_bof_region_query.c_str()))
 		error_and_exit();
 
 }
@@ -285,15 +283,6 @@ void Bof_db_Region::build_tree()
 	set_son_query += table_name;
 	set_son_query += " SET Parent=0, Direction=0, Son1=0, Son2=0, Mu=0";
 	mysql_query(db_connection, set_son_query.c_str());
-
-	/*Vector lol;
-	lol.push_back(0);
-	lol.push_back(2);
-	lol.push_back(1);
-	lol.push_back(0);
-	lol.push_back(1);
-	Bof_Region region(lol, this->fdb);
-	this->update_distances(0, 0, region);*/
 
 	//Fonction récursive construisant l'arbre
 	make_one_step(0,0);
@@ -607,14 +596,19 @@ int Bof_db_Region::count_elems(int parent, int direction, unsigned int not_this_
 	string set_son_query = "SELECT COUNT(*) FROM ";
 	set_son_query += table_name;
 
-	set_son_query += " WHERE Parent=";
-	set_son_query += to_string(parent);
-	set_son_query += " AND Direction=";
-	set_son_query += to_string(direction);
+	if (parent != -1)
+	{
+		set_son_query += " WHERE Parent=";
+		set_son_query += to_string(parent);
+
+		set_son_query += " AND Direction=";
+		set_son_query += to_string(direction);
+	}
+
 
 	if (not_this_one != 0)
 	{
-		set_son_query += " AND BoF_Region_ID != ";
+		set_son_query += " AND BOF_Region_ID != ";
 		set_son_query += to_string(not_this_one);
 	}
 
@@ -671,3 +665,164 @@ void Bof_db_Region::set_parent_direction(int index, int index_parent, int direct
 		error_and_exit();
 
 }
+
+
+
+
+void Bof_db_Region::get_bof_number(int index, Bof_Region &res, double &mu, double &son1, double &son2)
+{
+	//RECUPERATION DU CONTENU
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	string random_query = "SELECT Mu, Son1, Son2, ";
+
+	for (unsigned int k=1; k<=this->nb_k_centers;k++)
+	{
+		random_query+=" Coeff";
+		random_query+=to_string(k);
+		if (k!= this->nb_k_centers)
+			random_query+=" ,";
+	}
+
+	random_query += " FROM ";
+	random_query += table_name;
+	random_query+=" WHERE Bof_Region_ID = ";
+	random_query+=to_string(index);
+
+	if (!mysql_query(db_connection, random_query.c_str()))
+	{
+		//cout << "Random query (Random) : OK"<<endl;
+	}
+	else
+		error_and_exit();
+
+	result = mysql_use_result(db_connection);
+
+	Vector histo_centers;
+	histo_centers.resize(this->nb_k_centers);
+
+	row = mysql_fetch_row(result);
+	if (!row)
+	{
+		cout << "Pas de bof ayant le numero " << index << endl;
+		error_and_exit();
+	}
+
+	mu = strtodouble(row[0]);
+	son1 = strtodouble(row[1]);
+	son2 = strtodouble(row[2]);
+
+	for (int j=0; j<this->nb_k_centers;j++)
+		histo_centers[j] = strtodouble(row[j+3]);
+
+	res = Bof_Region(histo_centers, this->fdb);
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+}
+
+
+
+unsigned int Bof_db_Region::get_root_node()
+{
+	//RECUPERATION DU CONTENU
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	string random_query = "SELECT Bof_Region_ID FROM ";
+	random_query += table_name;
+	random_query+=" WHERE Parent = 0";
+
+	if (mysql_query(db_connection, random_query.c_str()))
+		error_and_exit();
+
+	result = mysql_use_result(db_connection);
+	row = mysql_fetch_row(result);
+
+	unsigned int root_index = strtodouble(row[0]);
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+	return root_index;
+}
+
+
+
+
+unsigned int Bof_db_Region::find_nearest_leaf(Bof_Region &bof)
+{
+	cout << endl << "Recherche dans le VP-Tree..." << endl;
+
+	//Déclaration des variables de la fonction
+	unsigned int root_index = this->get_root_node();
+	cout << "Le parent est le noeud " << root_index << endl << endl;
+
+	std::vector<unsigned int> nodes_to_search;
+	nodes_to_search.push_back(root_index);
+
+	bool first = true;
+	double distance_max = INT_MAX;
+	unsigned int nearest = 0;
+	int noeuds_parcourus = 0;
+
+	//Tant qu'il y a des noeuds dans lesquels rechercher...
+	while (!nodes_to_search.empty())
+	{
+		noeuds_parcourus++;
+
+		unsigned int search_node = nodes_to_search.back();
+		nodes_to_search.pop_back();
+		cout << "Recherche dans le sous-arbre " << search_node << endl;
+
+		Bof_Region root_bof;
+		double mu, son1, son2;
+		this->get_bof_number(search_node, root_bof, mu, son1, son2);
+		double dist_to_node = root_bof - bof;
+
+		if (dist_to_node < distance_max)
+		{
+			nearest = search_node;
+			distance_max = dist_to_node;
+		}
+
+		//Si on est au tout en haut de l'arbre, on recherche dans les deux sous-arbres
+		if (first)
+		{
+			nodes_to_search.push_back(son1);
+			nodes_to_search.push_back(son2);
+			distance_max = dist_to_node;
+			first = false;
+			cout << endl;
+			continue;
+		}
+
+		//Si la distance est inférieure au seuil + distance_max, on recherche à l'intérieur
+		if ((dist_to_node < mu + distance_max) && (son1 !=0 ))
+		{
+			nodes_to_search.push_back(son1);
+			cout << "Recherche dans le sous-arbre gauche" << endl;
+		}
+		//Si la distance est supérieure au seuil - distance_max, on recherche à l'extérieur
+		if ((dist_to_node > mu - distance_max) && (son2 != 0))
+		{
+			nodes_to_search.push_back(son2);
+			cout << "Recherche dans le sous-arbre droit" << endl;
+		}
+		cout << endl;
+	}
+
+	cout << noeuds_parcourus << " / " << this->count_elems(-1, 0, 0) << " noeuds parcourus!" << endl;
+	cout << "Le BOF le plus proche est le " << nearest << endl;
+	cout << "La distance minimale est: " << distance_max << endl;
+
+	return nearest;
+}
+
+
+
+

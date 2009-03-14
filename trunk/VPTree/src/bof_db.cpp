@@ -660,6 +660,8 @@ void Bof_db::get_bof_number(int index, Vector &res, double &mu, double &son1, do
 	res.resize(this->nb_k_centers);
 
 	row = mysql_fetch_row(result);
+	if (!row)
+		cout << "Pas de bof ayant le numéro " << index << endl;
 
 	mu = strtodouble(row[0]);
 	son1 = strtodouble(row[1]);

@@ -40,6 +40,11 @@ public:
 
 	Feature_db *fdb;
 
+	unsigned int find_nearest_leaf(Bof_Region &bof);
+
+	//En public pour les tests
+	void get_bof_number(int index, Bof_Region &res, double &mu, double &son1, double &son2);
+
 
 
 private:
@@ -69,11 +74,13 @@ private:
 
 	void set_parent_direction(int index, int index_parent, int direction);
 
+	unsigned int get_root_node();
+
 
 };
 
 
 
 
-#endif /*  bod_db.h */
+#endif /*  bod_db_region.h */
 
