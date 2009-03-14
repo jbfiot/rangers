@@ -146,7 +146,7 @@ void Bof_db::add_bof(Bof bag) {
 
 
 	if (!mysql_query(db_connection, add_bof_query.c_str())) {
-		cout << "Add-bof-query: OK"<<endl;
+		//cout << "Add-bof-query: OK"<<endl;
 	}
 	else {
 		error_and_exit();
@@ -181,25 +181,25 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction,
 	MYSQL_ROW row = NULL;
 
 	//2- Sélectionner un random set sur la liste des indexes
-    sample_set.resize(min(RANDOM_SET_MAX_LENGTH,nb));
-    random_indexes.resize(min(RANDOM_SET_MAX_LENGTH,nb));
+	sample_set.resize(min(RANDOM_SET_MAX_LENGTH,nb));
+	random_indexes.resize(min(RANDOM_SET_MAX_LENGTH,nb));
 
-    string random_query = "SELECT Bof_ID, ";
+	string random_query = "SELECT Bof_ID, ";
 
-    for (unsigned int k=1; k<=nb_k_centers;k++)
-    {
-        random_query+="Coeff";
-        random_query+=to_string(k);
-        if (k!= nb_k_centers)
-            random_query+=" ,";
-    }
+	for (unsigned int k=1; k<=nb_k_centers;k++)
+	{
+		random_query+="Coeff";
+		random_query+=to_string(k);
+		if (k!= nb_k_centers)
+			random_query+=" ,";
+	}
 
-    random_query+=" FROM ";
-    random_query+=table_name;
-    random_query+=" WHERE Parent = ";
-    random_query+=to_string(index_parent);
-    random_query+=" and Direction = ";
-    random_query+=to_string(direction);
+	random_query+=" FROM ";
+	random_query+=table_name;
+	random_query+=" WHERE Parent = ";
+	random_query+=to_string(index_parent);
+	random_query+=" and Direction = ";
+	random_query+=to_string(direction);
 
 	if (not_this_one != 0)
 	{
@@ -208,39 +208,39 @@ void Bof_db::select_random_set_indexes(int index_parent, int direction,
 	}
 
 
-    random_query+=" ORDER BY RAND() LIMIT ";
-    random_query+=to_string(RANDOM_SET_MAX_LENGTH);
+	random_query+=" ORDER BY RAND() LIMIT ";
+	random_query+=to_string(RANDOM_SET_MAX_LENGTH);
 
 
-    if (!mysql_query(db_connection, random_query.c_str()))
-    {
-        //cout << "Random query (Random) : OK"<<endl;
-    }
-    else
-        error_and_exit();
+	if (!mysql_query(db_connection, random_query.c_str()))
+	{
+		//cout << "Random query (Random) : OK"<<endl;
+	}
+	else
+		error_and_exit();
 
-    result = mysql_use_result(db_connection);
+	result = mysql_use_result(db_connection);
 
-    int i=0;
-    Vector res;
-    res.resize(nb_k_centers);
+	int i=0;
+	Vector res;
+	res.resize(nb_k_centers);
 
-    while(row = mysql_fetch_row(result)){
-        //Primary key of random result
-        random_indexes[i] = strtodouble(row[0]);
+	while(row = mysql_fetch_row(result)){
+		//Primary key of random result
+		random_indexes[i] = strtodouble(row[0]);
 
-        //Random BOF
-        for (int j=0; j<nb_k_centers;j++)
-        {
-            res[j] = strtodouble(row[j+1]);
-        }
+		//Random BOF
+		for (int j=0; j<nb_k_centers;j++)
+		{
+			res[j] = strtodouble(row[j+1]);
+		}
 
-        sample_set[i] = res;
-        i++;
-    }
+		sample_set[i] = res;
+		i++;
+	}
 
-    //Liberation du jeu de resultat
-    mysql_free_result(result);
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
 }
 
 
@@ -347,8 +347,7 @@ void Bof_db::make_one_step(int index_parent, int direction)
 		this->set_son_value(index_parent, direction, median_index);
 
 	//5- Mise à jour du Mu pour la racine trouvée
-	if (index_parent != 0)
-		this->set_mu_value(median_index, mu);
+	this->set_mu_value(median_index, mu);
 
 	//6- Mise à jour du parent de la racine
 	this->set_parent_direction(median_index, index_parent, direction);
@@ -431,6 +430,11 @@ void Bof_db::update_distances(int parent, int direction, Vector &root)
 		set_son_query += " - ";
 		set_son_query += to_string(root[i]);
 		set_son_query += ", 2)";
+		set_son_query += "/(Coeff";
+		set_son_query += to_string(i+1);
+		set_son_query += " + ";
+		set_son_query += to_string(root[i]);
+		set_son_query += ")";
 		if (i != root.size() - 1)
 			set_son_query += " + ";
 	}
@@ -551,10 +555,15 @@ int Bof_db::count_elems(int parent, int direction, unsigned int not_this_one)
 	string set_son_query = "SELECT COUNT(*) FROM ";
 	set_son_query += table_name;
 
-	set_son_query += " WHERE Parent=";
-	set_son_query += to_string(parent);
-	set_son_query += " AND Direction=";
-	set_son_query += to_string(direction);
+	if (parent != -1)
+	{
+		set_son_query += " WHERE Parent=";
+		set_son_query += to_string(parent);
+
+		set_son_query += " AND Direction=";
+		set_son_query += to_string(direction);
+	}
+
 
 	if (not_this_one != 0)
 	{
@@ -615,3 +624,152 @@ void Bof_db::set_parent_direction(int index, int index_parent, int direction)
 		error_and_exit();
 
 }
+
+
+void Bof_db::get_bof_number(int index, Vector &res, double &mu, double &son1, double &son2)
+{
+	//RECUPERATION DU CONTENU
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	string random_query = "SELECT Mu, Son1, Son2, ";
+
+	for (unsigned int k=1; k<=nb_k_centers;k++)
+	{
+		random_query+=" Coeff";
+		random_query+=to_string(k);
+		if (k!= this->nb_k_centers)
+			random_query+=" ,";
+	}
+
+	random_query += " FROM ";
+	random_query += table_name;
+	random_query+=" WHERE Bof_ID = ";
+	random_query+=to_string(index);
+
+	if (!mysql_query(db_connection, random_query.c_str()))
+	{
+		//cout << "Random query (Random) : OK"<<endl;
+	}
+	else
+		error_and_exit();
+
+	result = mysql_use_result(db_connection);
+
+	res.resize(this->nb_k_centers);
+
+	row = mysql_fetch_row(result);
+
+	mu = strtodouble(row[0]);
+	son1 = strtodouble(row[1]);
+	son2 = strtodouble(row[2]);
+
+	for (int j=0; j<nb_k_centers;j++)
+		res[j] = strtodouble(row[j+3]);
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+}
+
+
+
+unsigned int Bof_db::get_root_node()
+{
+	//RECUPERATION DU CONTENU
+	//Declaration des pointeurs de structure
+	MYSQL_RES *result = NULL;
+	MYSQL_ROW row = NULL;
+
+	string random_query = "SELECT Bof_ID FROM ";
+	random_query += table_name;
+	random_query+=" WHERE Parent = 0";
+
+	if (mysql_query(db_connection, random_query.c_str()))
+		error_and_exit();
+
+	result = mysql_use_result(db_connection);
+	row = mysql_fetch_row(result);
+
+	unsigned int root_index = strtodouble(row[0]);
+
+	//Liberation du jeu de resultat
+	mysql_free_result(result);
+
+	return root_index;
+}
+
+
+
+
+unsigned int Bof_db::find_nearest_leaf(Vector &bof)
+{
+	cout << endl << "Recherche dans le VP-Tree..." << endl;
+
+	//Déclaration des variables de la fonction
+	unsigned int root_index = this->get_root_node();
+	cout << "Le parent est le noeud " << root_index << endl;
+
+	std::vector<unsigned int> nodes_to_search;
+	nodes_to_search.push_back(root_index);
+
+	bool first = true;
+	double distance_max = INT_MAX;
+	unsigned int nearest = 0;
+	int noeuds_parcourus = 0;
+
+	//Tant qu'il y a des noeuds dans lesquels rechercher...
+	while (!nodes_to_search.empty())
+	{
+		noeuds_parcourus++;
+
+		unsigned int search_node = nodes_to_search.back();
+		nodes_to_search.pop_back();
+		cout << "Recherche dans le sous-arbre " << search_node << endl;
+
+		Vector root_bof;
+		double mu, son1, son2;
+		this->get_bof_number(search_node, root_bof, mu, son1, son2);
+		double dist_to_node = root_bof - bof;
+
+		if (dist_to_node < distance_max)
+		{
+			nearest = search_node;
+			cout << "dist_to_node " << dist_to_node << endl;
+			distance_max = dist_to_node;
+		}
+
+		//Si on est au tout en haut de l'arbre, on recherche dans les deux sous-arbres
+		if (first)
+		{
+			nodes_to_search.push_back(son1);
+			nodes_to_search.push_back(son2);
+			distance_max = dist_to_node;
+			first = false;
+			cout << endl;
+			continue;
+		}
+
+		//Si la distance est inférieure au seuil + distance_max, on recherche à l'intérieur
+		if ((dist_to_node < mu + distance_max) && (son1 !=0 ))
+		{
+			nodes_to_search.push_back(son1);
+			cout << "Recherche dans le sous-arbre gauche" << endl;
+		}
+		//Si la distance est supérieure au seuil - distance_max, on recherche à l'extérieur
+		if ((dist_to_node > mu - distance_max) && (son2 != 0))
+		{
+			nodes_to_search.push_back(son2);
+			cout << "Recherche dans le sous-arbre droit" << endl;
+		}
+		cout << endl;
+	}
+
+	cout << noeuds_parcourus << " / " << this->count_elems(-1, 0, 0) << " noeuds parcourus!" << endl;
+	cout << "Le BOF le plus proche est le " << nearest << endl;
+	cout << "La distance minimale est: " << distance_max << endl;
+
+	return nearest;
+}
+

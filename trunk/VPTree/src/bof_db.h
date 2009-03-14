@@ -42,8 +42,11 @@ public:
 	void add_bof_region(Bof bag);
 
 	void build_tree();
-	void error_and_exit();
 
+	unsigned int find_nearest_leaf(Vector &bof);
+	
+	//En public pour les tests
+	void get_bof_number(int index, Vector &res, double &mu, double &son1, double &son2);
 
 
 
@@ -59,6 +62,8 @@ private:
 
 	MYSQL* db_connection;
 	unsigned int nrows;
+
+	void error_and_exit();
 
 	unsigned int select_vp(int index_parent, int direction, Vector &root);
 	void select_random_set_indexes(int index_parent, int direction,
@@ -76,6 +81,8 @@ private:
 
 	void set_parent_direction(int index, int index_parent, int direction);
 
+	unsigned int get_root_node();
+	
 
 };
 
