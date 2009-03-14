@@ -336,8 +336,7 @@ void Bof_db_Region::make_one_step(int index_parent, int direction)
 		this->set_son_value(index_parent, direction, median_index);
 
 	//5- Mise à jour du Mu pour la racine trouvée
-	if (index_parent != 0)
-		this->set_mu_value(median_index, mu);
+	this->set_mu_value(median_index, mu);
 
 	//6- Mise à jour du parent de la racine
 	this->set_parent_direction(median_index, index_parent, direction);
