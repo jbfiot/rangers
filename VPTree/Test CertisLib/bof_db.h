@@ -38,7 +38,7 @@ public:
 
 	~Bof_db();
 
-	void add_bof(Bof bag);
+	void add_bof(Bof &bag);
 	void add_bof_region(Bof bag);
 
 	void build_tree();
@@ -47,6 +47,8 @@ public:
 	
 	//En public pour les tests
 	void get_bof_number(int index, Vector &res, double &mu, double &son1, double &son2);
+
+	void erase();
 
 
 

@@ -154,10 +154,10 @@ int main()
 	Pic_db pdb("./Images");
 
 	//Remplissage de la base de données de chemins
-	pdb.fill_db();
-	unsigned int nb_images = pdb.get_nbimages();
-	std::vector<std::string> filenames;
-	pdb.get_all_image_paths(filenames);
+	//pdb.fill_db();
+	//unsigned int nb_images = pdb.get_nbimages();
+	//std::vector<std::string> filenames;
+	//pdb.get_all_image_paths(filenames);
 
 	cout << endl << "============================================================"
 		<< endl << "   Etape 0: Instanciation de la BDD de Features"
@@ -167,83 +167,90 @@ int main()
 	cout << endl << "============================================================"
 		<< endl << "   Etape 1: Remplissage de la base de données de Features"
 		<< endl << "============================================================" <<endl;
-	fdb.fill(filenames, nb_images);
+	//fdb.fill(filenames, nb_images);
 
 
 
-//
-//	cout << endl << "============================================================"
-//		<< endl << "   Etape 2: K-Means  "
-//		<< endl << "============================================================" <<endl;
-//	int K = 5;
-//	std::vector<Vector> centers;
-//	Vector sigmas;
-//	fdb.do_k_means(K, centers, sigmas,true);
-//
-//
-//
-//	cout << endl << "============================================================"
-//		<< endl << "   Etape3:Initialisation de la base de données de BOFs   "
-//		<< endl << "============================================================" <<endl;
-//#ifdef USE_REGION
-//	Bof_db_Region bof_db(&fdb, centers.size());
-//#else
-//	Bof_db bof_db(centers, sigmas);
-//#endif
-//
-//
-//	cout << endl << "========================================================================"
-//		<< endl << "   Etape4: Extraction des régions des images et insertion dans la base"
-//		<< endl << "========================================================================" <<endl;
-//	for (int i=1; i<1+1; ++i)
-//	{
-//		cout << "Image number " << i << endl;
-//
-//		//Tous les SIFTs dans l'image i
-//		std::vector<Feature> res;
-//		fdb.get_all_features_in_image(i, res);
-//		int nb_pixels = 200;
-//
-//		// Calcul des régions
-//#ifdef USE_REGION
-//		std::vector<Bof_Region> all_regions_in_image;
-//
-//		get_all_regions_subsets(res, all_regions_in_image, nb_pixels, &fdb, &centers);
-//
-//#else
-//		std::vector<Bof> all_regions_in_image;
-//		get_all_regions_subsets( res, all_regions_in_image, nb_pixels );
-//#endif
-//
-//		cout << all_regions_in_image.size() << " bofs will be added to the database..." << endl;
-//
-//		//Ajout de la BOF à  la database
-//		for (int j=0; j<all_regions_in_image.size(); ++j)
-//			bof_db.add_bof( all_regions_in_image[j] );
-//
-//		cout << "Done." << endl << endl;
-//
-//	}
-//
+
+	cout << endl << "============================================================"
+		<< endl << "   Etape 2: K-Means  "
+		<< endl << "============================================================" <<endl;
+	int K = 10;
+	std::vector<Vector> centers;
+	Vector sigmas;
+	fdb.do_k_means(K, centers, sigmas);
+
+
+
+	cout << endl << "============================================================"
+		<< endl << "   Etape3:Initialisation de la base de données de BOFs   "
+		<< endl << "============================================================" <<endl;
+#ifdef USE_REGION
+	Bof_db_Region bof_db(&fdb, centers.size());
+#else
+	Bof_db bof_db(centers, sigmas);
+#endif
+
+	cout << endl << "========================================================================"
+		<< endl << "   Etape4: Extraction des régions des images et insertion dans la base"
+		<< endl << "========================================================================" <<endl;
+	bof_db.erase();
+	for (int i=1; i<fdb.get_nbimages()+1; ++i)
+	{
+		cout << "Image number " << i << endl;
+
+		//Tous les SIFTs dans l'image i
+		std::vector<Feature> res;
+		fdb.get_all_features_in_image(i, res);
+		int nb_pixels = 300;
+
+		// Calcul des régions
+#ifdef USE_REGION
+		std::vector<Bof_Region> all_regions_in_image;
+
+		get_all_regions_subsets(res, all_regions_in_image, nb_pixels, &fdb, &centers);
+
+#else
+		std::vector<Bof> all_regions_in_image;
+		get_all_regions_subsets( res, all_regions_in_image, nb_pixels, i);
+#endif
+
+		cout << all_regions_in_image.size() << " bofs will be added to the database..." << endl;
+
+		//Ajout de la BOF à  la database
+		for (int j=0; j<all_regions_in_image.size(); ++j)
+			bof_db.add_bof( all_regions_in_image[j] );
+
+		cout << "Done." << endl << endl;
+
+	}
+
 //
 //	cout << endl << "==============================================================="
 //		<< endl << "   Etape5: Construction de l'arbre et sauvegarde dans la bdd"
 //		<< endl << "===============================================================" <<endl;
 //	bof_db.build_tree();
-//
-//
-//	cout << endl << endl << "==============================================================="
-//		<< endl << "   Etape6: Recherche dans l'arbre"
-//		<< endl << "===============================================================" <<endl;
-//#ifdef USE_REGION
-//	Bof_Region bof;
-//#else
-//	Vector bof;
-//#endif
-//
-//	double mu, son1, son2;
-//	bof_db.get_bof_number(2, bof, mu, son1, son2);
-//	bof_db.find_nearest_leaf(bof);
+
+
+	cout << endl << endl << "==============================================================="
+		<< endl << "   Etape6: Recherche dans l'arbre"
+		<< endl << "===============================================================" <<endl;
+#ifdef USE_REGION
+	Bof_Region bof;
+#else
+	Vector bof;
+#endif
+
+	double mu, son1, son2;
+	bof_db.get_bof_number(220, bof, mu, son1, son2);
+
+	//Vector lol;
+	//process_sifts_in_image("AHAH.jpg", lol);
+
+
+	bof_db.find_nearest_leaf(bof);
+
+
 
 	system("pause");
 	return 0;

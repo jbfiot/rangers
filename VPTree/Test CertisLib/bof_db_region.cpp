@@ -96,7 +96,7 @@ void Bof_db_Region::error_and_exit()
 /**
  *   Add-Bag of Features function (add a line to the table).
  **/
-void Bof_db_Region::add_bof(Bof_Region bag)
+void Bof_db_Region::add_bof(Bof_Region &bag)
 {
 	Vector histogram;
 	bag.get_histogram(histogram);

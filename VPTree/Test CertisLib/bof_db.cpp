@@ -18,6 +18,7 @@ Bof_db::Bof_db (std::vector<Vector> centers, Vector sigmas, string db_host, stri
 	this->table_name = table_name;
 	this->centers = centers;
 	this->nb_k_centers = centers.size();
+	cout << nb_k_centers << endl;
 	this->sigmas = sigmas;
 
 	/**
@@ -71,7 +72,7 @@ Bof_db::Bof_db (std::vector<Vector> centers, Vector sigmas, string db_host, stri
 	*/
 	string table_creation_query = "CREATE TABLE IF NOT EXISTS ";
 	table_creation_query+=table_name;
-	table_creation_query+=" (Bof_ID int NOT NULL auto_increment,";
+	table_creation_query+=" (Bof_ID int NOT NULL auto_increment, Img_ID int DEFAULT 0, ";
 
 	for (unsigned int i=1; i<=nb_k_centers;i++){
 		table_creation_query+="Coeff";
@@ -119,10 +120,13 @@ void Bof_db::error_and_exit()
 *   Add-feature function (add a line to the table).
 */
 
-void Bof_db::add_bof(Bof bag) {
+void Bof_db::add_bof(Bof &bag)
+{
 	string add_bof_query = "INSERT INTO ";
 	add_bof_query+=table_name;
 	add_bof_query+=" (";
+	add_bof_query+="Img_ID, ";
+
 	Vector proba;
 	bag.get_kmeans_proba(centers, this->sigmas, proba);
 
@@ -135,6 +139,8 @@ void Bof_db::add_bof(Bof bag) {
 	}
 
 	add_bof_query+=") VALUES (";
+	add_bof_query+=to_string(bag.index_image);;
+	add_bof_query+=", ";
 
 	for (unsigned int i=0; i<proba.size(); i++){
 		add_bof_query+=to_string(proba[i]);
@@ -775,3 +781,14 @@ unsigned int Bof_db::find_nearest_leaf(Vector &bof)
 	return nearest;
 }
 
+void Bof_db::erase()
+{
+	//Deletes data
+	string drop_query= "TRUNCATE ";
+	drop_query+=table_name;
+
+	if (!mysql_query(db_connection, drop_query.c_str()))
+		cout << "-> Table " <<table_name<< " videe."<<endl;
+	else
+		error_and_exit();
+}

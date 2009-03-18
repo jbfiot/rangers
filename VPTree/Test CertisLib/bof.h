@@ -20,10 +20,10 @@ class Bof
 
 		Bof(){}
 
-		Bof(const std::vector<Feature> &feats) {init_Bof(feats);}
+		Bof(const std::vector<Feature> &feats, int index) {init_Bof(feats, index);}
 
 		// méthode permettant d'initialiser le contenu du Bof
-		void init_Bof(const std::vector<Feature> &feats) {features = feats;}
+		void init_Bof(const std::vector<Feature> &feats, int index) {features = feats; index_image = index;}
 
         // Méthode pour obtenir la repartition dans les k classes du k-means.
         void get_kmeans_proba(std::vector<Vector> &k_centers, Vector &sigmas, Vector &proba /* Conteneur resultat */) ;
@@ -41,6 +41,8 @@ class Bof
 
     //private:
        std::vector<Feature> features;
+
+	   int index_image;
 
 
 

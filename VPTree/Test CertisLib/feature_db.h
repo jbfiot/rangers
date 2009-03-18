@@ -22,7 +22,7 @@
 #include "process_sift.h"
 
 
-#define SAMPLE_LENGTH_FOR_K_MEANS 100
+#define SAMPLE_LENGTH_FOR_K_MEANS 1000
 
 
 
@@ -42,6 +42,7 @@ public:
 
 	~Feature_db();
 	void insert_feature(Feature &feature);
+	void insert_features(std::vector<Feature> &features);
     void fill_with_random(int nb_images, int nb_features);
 
 	void do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
