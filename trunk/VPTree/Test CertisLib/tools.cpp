@@ -57,7 +57,7 @@ double strtodouble(const string& what)
  ** calcul des regions : une région est formée d'un ou plusieurs carres de taille nb_pixels
 **/
 
-void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regions_in_image, int nb_pixels )
+void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regions_in_image, int nb_pixels, int index)
 {
 	int maxX=0, maxY=0;	
 	int i=0, j=0, k=0, u=0, v=0, w=0;
@@ -98,7 +98,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 			itY++;
 			if (!feats.empty()) 
 				all_regions_in_image.push_back(Bof());
-				all_regions_in_image.back().init_Bof(feats);
+				all_regions_in_image.back().init_Bof(feats, index);
 			feats.clear();
 		}
 		itX++;
@@ -119,7 +119,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 					feats.push_back(all_regions_in_image[j].features[k]);
 				if (j>(i*itY)+u)
 					all_regions_in_image.push_back(Bof());
-					all_regions_in_image.back().init_Bof(feats);
+					all_regions_in_image.back().init_Bof(feats, index);
 			}
 			feats.clear();
 		}
@@ -138,7 +138,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 					feats.push_back(all_regions_in_image[j+(i+u)*itX].features[k]);
 				if (i>0)
 					all_regions_in_image.push_back(Bof());
-					all_regions_in_image.back().init_Bof(feats);
+					all_regions_in_image.back().init_Bof(feats, index);
 			}
 			feats.clear();
 		}
@@ -164,7 +164,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 							feats.push_back(all_regions_in_image[w+v*itX].features[k]);
 					}
 					all_regions_in_image.push_back(Bof());
-					all_regions_in_image.back().init_Bof(feats);
+					all_regions_in_image.back().init_Bof(feats, index);
 				}
 				feats.clear();
 			}

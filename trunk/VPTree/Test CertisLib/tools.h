@@ -21,6 +21,7 @@ inline std::string to_string (const T& t)
 
 double strtodouble(const std::string &what);
 
-void get_all_regions_subsets( const std::vector<Feature>& res, std::vector<Bof>& all_regions_in_image, int nb_pixels );
+void get_all_regions_subsets( const std::vector<Feature>& res, std::vector<Bof>& all_regions_in_image, int nb_pixels,
+							 int index);
 
 #endif

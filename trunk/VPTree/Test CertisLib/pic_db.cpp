@@ -77,6 +77,7 @@ Pic_db::Pic_db(path data_folder, string db_host, string db_username,string db_pa
 	else {
 		error_and_exit();
 	}
+
 }
 
 
@@ -191,8 +192,19 @@ void Pic_db::process_folder(path folder,std::vector<string> &files) {
 	cout << "Done." << endl;
 }
 
+
 void Pic_db::fill_db()
 {
+	//Deletes data
+    string drop_query= "TRUNCATE ";
+    drop_query+=table_name;
+
+    if (!mysql_query(db_connection, drop_query.c_str()))
+        cout << "-> Table " <<table_name<< " videe."<<endl;
+    else
+        error_and_exit();
+
+
 	std::vector<string> files;
 	process_folder(data_folder,files);
 	add_files_to_db(files);

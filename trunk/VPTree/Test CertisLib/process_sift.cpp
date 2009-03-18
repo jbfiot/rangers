@@ -29,7 +29,7 @@ using namespace CL::Feat;
 
 void process_sifts_in_image(string buffer_image, std::vector<Feature> &feats)
 {
-	static int index = 0;
+	static int index = 1;
 	cout << "Processing SIFTs in image " << index << " (" << buffer_image << ")" << endl;
 
 	Image<RGB<byte>,2> I1;
@@ -45,8 +45,6 @@ void process_sifts_in_image(string buffer_image, std::vector<Feature> &feats)
 	int size = feats1.size();
 	cout << "On a détecté " << size << " points SIFT dans l'image de référence." << endl;
 	feats.resize(size);
-	
-	//feats1 est un tableau de structures SIFTs : en attribut, t'as le descripteur, la position dans l'img, le scale...
 	
 	for (int i=0; i<size; ++i)
 	{

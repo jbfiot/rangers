@@ -34,7 +34,7 @@ public:
 
 	~Bof_db_Region();
 
-	void add_bof(Bof_Region bag);
+	void add_bof(Bof_Region &bag);
 	void build_tree();
 	void error_and_exit();
 

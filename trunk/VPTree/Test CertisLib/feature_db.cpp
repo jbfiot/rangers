@@ -91,7 +91,6 @@ Feature_db::Feature_db (string db_host, string db_username,
 	}
 
 
-
 }
 
 
@@ -183,6 +182,71 @@ void Feature_db::insert_feature(Feature &feature) {// Est-ce que feature ne sera
 	}
 
 }
+
+
+/**
+*   Fill the table with random
+**/
+void Feature_db::insert_features(std::vector<Feature> &features) {// Est-ce que feature ne serait pas const ?
+
+	string fill_with_random_query = "INSERT INTO ";
+	fill_with_random_query+=table_name;
+	fill_with_random_query+=" (";
+	fill_with_random_query+="X,Y,Img_ID,";
+
+	for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
+		fill_with_random_query+="Coeff";
+		fill_with_random_query+=to_string(i);
+		if (i!=NB_COEFF_FEATURES) {
+			fill_with_random_query+=",";
+		}
+	}
+
+	fill_with_random_query+=") VALUES (";
+
+	Feature feature;
+	for (int i=0; i<features.size(); ++i)
+	{
+		feature= features[i];
+
+		fill_with_random_query+=to_string(feature.position[0]);
+		fill_with_random_query+=",";
+		fill_with_random_query+=to_string(feature.position[1]);
+		fill_with_random_query+=",";
+		fill_with_random_query+=to_string(feature.index_image);
+		fill_with_random_query+=",";
+
+		for (unsigned int i=1; i<=NB_COEFF_FEATURES; i++){
+			fill_with_random_query+=to_string(feature.coeffs[i-1]);
+			if (i!=NB_COEFF_FEATURES) {
+				fill_with_random_query+=", ";
+			}
+		}
+
+		if (i!=features.size()-1)
+			fill_with_random_query+="), (";
+
+	}
+
+	fill_with_random_query+=")";
+
+
+
+	if (!mysql_query(db_connection, fill_with_random_query.c_str())) {
+		//cout << "Fill-with-random-query: OK"<<endl;
+	}
+	else {
+		error_and_exit();
+	}
+
+}
+
+
+
+
+
+
+
 
 
 void Feature_db::get_feature_number(int index, Vector &vec)
@@ -338,15 +402,15 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
         */
         cout << endl<< "Computing the k-centers..." << endl;
 
-        //Initialisation des centres au pif
-        for (int i=0; i<k; ++i)
-        {
-            for (int j=0; j<NB_COEFF_FEATURES; ++j)
-            {
-                //Coords des SIFTs entre 0 et 1000?
-                centers[i].push_back( rand()*1000./RAND_MAX );
-            }
-        }
+        ////Initialisation des centres au pif
+        //for (int i=0; i<k; ++i)
+        //{
+        //    for (int j=0; j<NB_COEFF_FEATURES; ++j)
+        //    {
+        //        //Coords des SIFTs entre 0 et 128?
+        //        centers[i].push_back( rand()*128./RAND_MAX );
+        //    }
+        //}
 
         //Selection des indexes des points SIFTs au pif
         int indexes[SAMPLE_LENGTH_FOR_K_MEANS];
@@ -372,6 +436,24 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
             this->get_feature_number(indexes[i]+1, sifts_list[i]);
         }
 
+
+        //Initialisation des centres au pif
+		int centers_indexes[SAMPLE_LENGTH_FOR_K_MEANS];
+        for (int i=0; i<k; ++i)
+        {
+            int index;
+            while (1)
+            {
+                index = rand()%SAMPLE_LENGTH_FOR_K_MEANS;
+
+                int *p = find(centers_indexes,centers_indexes+i,index);
+                if (p == centers_indexes+i)
+                    break;
+            }
+			centers_indexes[i] = index;
+			centers[i] = sifts_list[index];
+        }
+
         //K-MEANS...
         int nb_iters = 1;
         int appartenances[SAMPLE_LENGTH_FOR_K_MEANS];
@@ -389,7 +471,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
                 double best_dist = INT_MAX;
                 for (int j=0; j<k; ++j)
                 {
-                    double dist = centers[j] - sift;
+					double dist = centers[j].get_distance_with( sift );
                     if (dist<best_dist)
                     {
                         best_dist = dist;
@@ -753,6 +835,15 @@ unsigned int Feature_db::get_nbimages()
 
 void Feature_db::fill(std::vector<std::string> &res, unsigned int nb_images)
 {
+	//Deletes data
+    string drop_query= "TRUNCATE ";
+    drop_query+=table_name;
+
+    if (!mysql_query(db_connection, drop_query.c_str()))
+        cout << "-> Table " <<table_name<< " videe."<<endl;
+    else
+        error_and_exit();
+
 	for (unsigned int i=0; i<nb_images; ++i)
 	{
 		string filename = res[i];
@@ -760,7 +851,8 @@ void Feature_db::fill(std::vector<std::string> &res, unsigned int nb_images)
 		process_sifts_in_image(filename, feats);
 
 		cout << "Insertion of " << feats.size() << " features in database" << endl;
-		for (int j=0; j<feats.size(); ++j)
-			this->insert_feature(feats[j]);
+		this->insert_features(feats);
+		//for (int j=0; j<feats.size(); ++j)
+		//	this->insert_feature(feats[j]);
 	}
 }
