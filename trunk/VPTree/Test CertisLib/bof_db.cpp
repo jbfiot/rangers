@@ -122,6 +122,7 @@ void Bof_db::error_and_exit()
 
 void Bof_db::add_bof(Bof &bag)
 {
+    bool no_nan = true;
 	string add_bof_query = "INSERT INTO ";
 	add_bof_query+=table_name;
 	add_bof_query+=" (";
@@ -143,20 +144,32 @@ void Bof_db::add_bof(Bof &bag)
 	add_bof_query+=", ";
 
 	for (unsigned int i=0; i<proba.size(); i++){
-		add_bof_query+=to_string(proba[i]);
+		if (to_string(proba[i])!="nan") {
+            add_bof_query+=to_string(proba[i]);
+		}
+		else {
+		    no_nan = false;
+		    break;
+		}
 		if (i!=proba.size() - 1) {
 			add_bof_query+=",";
 		}
 	}
 	add_bof_query+=")";
 
+    //cout << endl << add_bof_query <<endl;
 
-	if (!mysql_query(db_connection, add_bof_query.c_str())) {
-		//cout << "Add-bof-query: OK"<<endl;
-	}
-	else {
-		error_and_exit();
-	}
+    if (no_nan) {
+        if (!mysql_query(db_connection, add_bof_query.c_str())) {
+            //cout << "Add-bof-query: OK"<<endl;
+        }
+        else {
+            error_and_exit();
+        }
+    }
+    else {
+        cout << "Info: Bof containing nan => not added!"<<endl;
+    }
 
 }
 

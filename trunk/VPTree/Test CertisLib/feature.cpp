@@ -31,10 +31,10 @@ void Feature::get_kmeans_proba( std::vector<Vector> &k_centers, Vector &sigmas, 
     proba.resize(k_centers.size());
     for (int i=0; i<k_centers.size(); i++){
 		double dist = this->coeffs.get_distance_with_chi2(k_centers[i]);
-		proba[i] = exp(-1 * dist / sigmas[i]);
+		proba[i] = exp(- dist / sigmas[i]);
         sum+=proba[i];
     }
-	
+
     for (unsigned int i=0; i<k_centers.size(); i++){
         proba[i] = proba[i]/sum;
     }

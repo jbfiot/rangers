@@ -2,7 +2,7 @@
 
 
 /**
- * Calcule la distance entre deux features
+ * Calcule la distance L2 entre deux features
  **/
 double Vector::get_distance_with (Vector &other) const
 {
@@ -80,7 +80,7 @@ void Vector::reset()
 
 
 double Vector::compute_median () const
-{  
+{
 	Vector tmp = (*this);
 	unsigned int size = tmp.size();
 	sort(tmp.begin(), tmp.end());

@@ -22,7 +22,7 @@
 #include "process_sift.h"
 
 
-#define SAMPLE_LENGTH_FOR_K_MEANS 1000
+#define SAMPLE_LENGTH_FOR_K_MEANS 35000
 
 
 
