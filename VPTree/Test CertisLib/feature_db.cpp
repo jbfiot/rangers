@@ -382,7 +382,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
 			{
                 mysql_free_result(result);
                 cout << "-> Wrong number of the centers in the database: "<<num_rows << " instead of " << k <<endl;
-            			
+
 			}
 
 
@@ -520,7 +520,7 @@ void Feature_db::do_k_means(int k, std::vector<Vector> &centers, Vector &sigmas,
 			Vector center = centers[i];
 
 			for (int j=0; j< SAMPLE_LENGTH_FOR_K_MEANS; ++j)
-				sigma += center.get_distance_with_chi2(sifts_list[j]);	
+				sigma += center.get_distance_with_chi2(sifts_list[j]);
 
 			//Sigma = demi-moyenne des distance des sifts au centre considéré
 			sigmas[i] = sigma/(2*SAMPLE_LENGTH_FOR_K_MEANS);
@@ -833,7 +833,7 @@ unsigned int Feature_db::get_nbimages()
 
 
 
-void Feature_db::fill(std::vector<std::string> &res, unsigned int nb_images)
+/*void Feature_db::fill(std::vector<std::string> &res, unsigned int nb_images)
 {
 	//Deletes data
     string drop_query= "TRUNCATE ";
@@ -855,4 +855,4 @@ void Feature_db::fill(std::vector<std::string> &res, unsigned int nb_images)
 		//for (int j=0; j<feats.size(); ++j)
 		//	this->insert_feature(feats[j]);
 	}
-}
+}*/

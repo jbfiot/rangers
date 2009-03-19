@@ -1,3 +1,6 @@
+#ifndef CUSTOM_VECTOR
+#define CUSTOM_VECTOR
+
 #pragma once
 
 #include <iostream>
@@ -53,3 +56,5 @@ private:
 	int type;
 
 };
+
+#endif

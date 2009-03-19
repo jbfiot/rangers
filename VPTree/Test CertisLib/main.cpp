@@ -26,14 +26,14 @@ using namespace std;
 void get_all_regions_subsets( const vector<Feature>& res, vector<Bof_Region>& all_regions_in_image, int nb_pixels,
 							 Feature_db *fdb, std::vector<Vector> *k_centers)
 {
-	int maxX=0, maxY=0;	
+	int maxX=0, maxY=0;
 	int i=0, j=0, k=0, u=0, v=0, w=0;
 	int itX=0, itY=0;
 	vector<Feature> feats;
-	
+
 	for (i=0; i<res.size(); i++)
 	{
-		if (maxX<res[i].position[0]) 
+		if (maxX<res[i].position[0])
 			maxX=res[i].position[0];
 		if (maxY<res[i].position[1])
 			maxY=res[i].position[1];
@@ -63,7 +63,7 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof_Region>& al
 				}
 			}
 			itY++;
-			if (!feats.empty()) 
+			if (!feats.empty())
 				all_regions_in_image.push_back(Bof_Region());
 				all_regions_in_image.back().init_Bof_Region(feats, fdb, k_centers);
 			feats.clear();
@@ -150,8 +150,8 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof_Region>& al
 int main()
 {
 	srand ( time(NULL) );
-	
-	Pic_db pdb("./Images");
+
+	//Pic_db pdb("./Images");
 
 	//Remplissage de la base de données de chemins
 	//pdb.fill_db();
@@ -191,6 +191,8 @@ int main()
 	Bof_db bof_db(centers, sigmas);
 #endif
 
+/*
+
 	cout << endl << "========================================================================"
 		<< endl << "   Etape4: Extraction des régions des images et insertion dans la base"
 		<< endl << "========================================================================" <<endl;
@@ -198,6 +200,10 @@ int main()
 	for (int i=1; i<fdb.get_nbimages()+1; ++i)
 	{
 		cout << "Image number " << i << endl;
+
+		if (i==17) {
+                cout << "screwed";
+		}
 
 		//Tous les SIFTs dans l'image i
 		std::vector<Feature> res;
@@ -225,12 +231,14 @@ int main()
 
 	}
 
-//
-//	cout << endl << "==============================================================="
-//		<< endl << "   Etape5: Construction de l'arbre et sauvegarde dans la bdd"
-//		<< endl << "===============================================================" <<endl;
-//	bof_db.build_tree();
 
+
+	cout << endl << "==============================================================="
+		<< endl << "   Etape5: Construction de l'arbre et sauvegarde dans la bdd"
+		<< endl << "===============================================================" <<endl;
+	bof_db.build_tree();
+
+*/
 
 	cout << endl << endl << "==============================================================="
 		<< endl << "   Etape6: Recherche dans l'arbre"
@@ -241,8 +249,8 @@ int main()
 	Vector bof;
 #endif
 
-	double mu, son1, son2;
-	bof_db.get_bof_number(220, bof, mu, son1, son2);
+	double dummy_mu, dummy_son1, dummy_son2;
+	bof_db.get_bof_number(12, bof, dummy_mu, dummy_son1, dummy_son2);
 
 	//Vector lol;
 	//process_sifts_in_image("AHAH.jpg", lol);

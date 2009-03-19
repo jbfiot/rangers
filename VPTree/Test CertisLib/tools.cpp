@@ -59,14 +59,14 @@ double strtodouble(const string& what)
 
 void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regions_in_image, int nb_pixels, int index)
 {
-	int maxX=0, maxY=0;	
+	int maxX=0, maxY=0;
 	int i=0, j=0, k=0, u=0, v=0, w=0;
 	int itX=0, itY=0;
 	vector<Feature> feats;
-	
+
 	for (i=0; i<res.size(); i++)
 	{
-		if (maxX<res[i].position[0]) 
+		if (maxX<res[i].position[0])
 			maxX=res[i].position[0];
 		if (maxY<res[i].position[1])
 			maxY=res[i].position[1];
@@ -96,9 +96,10 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 				}
 			}
 			itY++;
-			if (!feats.empty()) 
+			if (!feats.empty()) {
 				all_regions_in_image.push_back(Bof());
 				all_regions_in_image.back().init_Bof(feats, index);
+			}
 			feats.clear();
 		}
 		itX++;
@@ -117,9 +118,10 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 			{
 				for (k=0; k<all_regions_in_image[j].features.size(); k++)
 					feats.push_back(all_regions_in_image[j].features[k]);
-				if (j>(i*itY)+u)
+				if (j>(i*itY)+u) {
 					all_regions_in_image.push_back(Bof());
 					all_regions_in_image.back().init_Bof(feats, index);
+				}
 			}
 			feats.clear();
 		}
@@ -136,9 +138,10 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 			{
 				for (k=0; k<all_regions_in_image[j+(i+u)*itX].features.size(); k++)
 					feats.push_back(all_regions_in_image[j+(i+u)*itX].features[k]);
-				if (i>0)
+				if (i>0) {
 					all_regions_in_image.push_back(Bof());
 					all_regions_in_image.back().init_Bof(feats, index);
+				}
 			}
 			feats.clear();
 		}
@@ -157,9 +160,10 @@ void get_all_regions_subsets( const vector<Feature>& res, vector<Bof>& all_regio
 				{
 					for (w=i*itX+u; w<j+1; w++)
 					{
-						if (v==1)
+						if (v==1) {
 							for (k=0; k<all_regions_in_image[w].features.size(); k++)
 								feats.push_back(all_regions_in_image[w].features[k]);
+						}
 						for (k=0; k<all_regions_in_image[w+v*itX].features.size(); k++)
 							feats.push_back(all_regions_in_image[w+v*itX].features[k]);
 					}

@@ -11,7 +11,7 @@ void Bof_Region::compute_nearest_neighbours()
 
     // Initialisation
 	this->nearest_centers.reset();
-    
+
     // Ajout des proba pour chaque feature du bag of feature. Le tout est divisé par le nombre de features.
 	for (unsigned int j=0; j<this->features.size(); j++)
 	{

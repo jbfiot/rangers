@@ -1,3 +1,6 @@
+#ifndef FEATURE_H
+#define FEATURE_H
+
 #pragma once
 
 #include <string>
@@ -54,3 +57,4 @@ public:
 
 
 
+#endif

@@ -69,7 +69,7 @@ public:
 
 	double get_distance_region(Bof_Region &other);
 
-	
+
 
 	Vector nearest_centers;
 
@@ -80,10 +80,10 @@ public:
 
 private:
 	Feature_db *fdb;
-	
+
 
 	std::vector<Vector> *centers;
-	
+
 };
 
 
