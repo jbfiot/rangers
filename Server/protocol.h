@@ -10,6 +10,7 @@
 
 using namespace std;
 
+	
 
 	class Image {
 
@@ -18,6 +19,7 @@ using namespace std;
 		int **data;
 		int x_size;
 		int y_size;
+		int score;
 		Image();
 		Image(const Image &image);
 		Image(const int x, const int y);
@@ -47,7 +49,13 @@ using namespace std;
 
 	};
 	
-	
+	class Result {
+	public:
+		int n_images;
+		Image *image_list;
+		Result(int n);
+		~Result();
+	};
 
 
 #endif

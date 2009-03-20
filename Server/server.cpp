@@ -7,9 +7,10 @@ Code gérant la partie serveur du programme
 
 #include "server.h"
 #include "protocol.h"
+#include "CImg.h"
 
 using namespace std;
-using namespace dataprotocol;
+
 
 
 
@@ -140,6 +141,17 @@ DWORD Server::ClientThread(SOCKET soc)
 	{
 		Client.GetImage(image2);
 	}
+	/* Transformation de l'image **int en CImg<float> */
+
+	CImg<float> img(image2.x_size, image2.y_size, 1);
+	CImg<float>::iterator it = img.begin();
+	for(int i = 0; i <image2.x_size;i++ ){
+		for(int j = 0; j < image.y_size;j++) {
+			*it = image2.data[i][j];
+			it++;
+		}
+	}
+	/* Appel à la fonction qui transforme l'image en descripteurs SIFT */
 
 	return 0;   
 }
