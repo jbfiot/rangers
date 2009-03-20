@@ -8,10 +8,12 @@ Code gérant la partie serveur du programme
 #include "server.h"
 #include "protocol.h"
 #include "CImg.h"
-
+using namespace cimg_library;
+#include <vector>
 using namespace std;
-
-
+#include "fonction_sift.h"
+#include "class_descripteur.h"
+typedef CImg<float>
 
 
 Server::Server(int p) 
@@ -151,7 +153,15 @@ DWORD Server::ClientThread(SOCKET soc)
 			it++;
 		}
 	}
+
+
 	/* Appel à la fonction qui transforme l'image en descripteurs SIFT */
+	
+	//Creer le tableau de points
+	tableau_descripteur R_Keypoints;
+	//Effectuer le sift avec les donnees de reference pour le sift (
+	R_Keypoints = effectuer_sift (img);
+
 
 	return 0;   
 }
